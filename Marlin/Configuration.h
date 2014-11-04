@@ -159,9 +159,9 @@
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
-#define HEATER_0_MAXTEMP 235
-#define HEATER_1_MAXTEMP 235
-#define HEATER_2_MAXTEMP 235
+#define HEATER_0_MAXTEMP 500
+#define HEATER_1_MAXTEMP 500
+#define HEATER_2_MAXTEMP 500
 #define BED_MAXTEMP 500
 
 // If your bed has low resistance e.g. .6 ohm and throws the fuse you can duty cycle it to reduce the
@@ -188,10 +188,10 @@
   #define PID_dT ((OVERSAMPLENR * 8.0)/(F_CPU / 64.0 / 256.0)) //sampling period of the temperature routine
 
 // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
-//Lewis group gantry
-    #define  DEFAULT_Kp 49.69
-    #define  DEFAULT_Ki 7.51
-    #define  DEFAULT_Kd 82.22
+//V8 Gen2 w/pico
+    #define  DEFAULT_Kp 20.98
+    #define  DEFAULT_Ki 1.28
+    #define  DEFAULT_Kd 86.29
 
 // MakerGear
 //    #define  DEFAULT_Kp 7.0
