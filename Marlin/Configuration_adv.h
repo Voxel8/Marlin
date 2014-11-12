@@ -268,7 +268,7 @@
 #define MICROSTEP16 HIGH,HIGH
 
 // Microstep setting (Only functional when stepper driver microstep pins are connected to MCU.
-#define MICROSTEP_MODES {16,16,16,16,16} // [1,2,4,8,16]
+#define MICROSTEP_MODES {16,16,1,16,16} // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
 #define DIGIPOT_MOTOR_CURRENT {135,135,65,160,160} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A) //x and y tighter so more friction, Z motor and E motor need a lot of torque
