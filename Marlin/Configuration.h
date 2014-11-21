@@ -134,7 +134,7 @@
 // 110 is Pt100 with 1k pullup (non standard)
 // 70 is 500C thermistor for Pico hot end
 
-#define TEMP_SENSOR_0 70
+#define TEMP_SENSOR_0 1
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_BED 1000 //we are treating the pressure sensor as a bed temp sensor.
@@ -189,9 +189,14 @@
 
 // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
 //V8 Gen2 w/pico
-    #define  DEFAULT_Kp 20.98
-    #define  DEFAULT_Ki 1.28
-    #define  DEFAULT_Kd 86.29
+//    #define  DEFAULT_Kp 20.98
+//    #define  DEFAULT_Ki 1.28
+//    #define  DEFAULT_Kd 86.29
+
+//V8 Gen2 w/makergear
+    #define  DEFAULT_Kp 27.92
+    #define  DEFAULT_Ki 1.89
+    #define  DEFAULT_Kd 102.91      
 
 // MakerGear
 //    #define  DEFAULT_Kp 7.0
@@ -359,7 +364,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 //    Probe 3 arbitrary points on the bed (that aren't colinear)
 //    You must specify the X & Y coordinates of all 3 points
 
-  #define AUTO_BED_LEVELING_GRID
+  //#define AUTO_BED_LEVELING_GRID
   // with AUTO_BED_LEVELING_GRID, the bed is sampled in a
   // AUTO_BED_LEVELING_GRID_POINTSxAUTO_BED_LEVELING_GRID_POINTS grid
   // and least squares solution is calculated
@@ -381,27 +386,27 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
     // with no grid, just probe 3 arbitrary points.  A simple cross-product
     // is used to esimate the plane of the print bed
 
-      #define ABL_PROBE_PT_1_X 30
-      #define ABL_PROBE_PT_1_Y 60
-      #define ABL_PROBE_PT_2_X 30
-      #define ABL_PROBE_PT_2_Y 20
-      #define ABL_PROBE_PT_3_X 100
-      #define ABL_PROBE_PT_3_Y 20
+      #define ABL_PROBE_PT_1_X X_MIN_POS
+      #define ABL_PROBE_PT_1_Y Y_MIN_POS
+      #define ABL_PROBE_PT_2_X X_MAX_POS/2
+      #define ABL_PROBE_PT_2_Y Y_MAX_POS
+      #define ABL_PROBE_PT_3_X X_MAX_POS
+      #define ABL_PROBE_PT_3_Y Y_MIN_POS
 
   #endif // AUTO_BED_LEVELING_GRID
 
 
   // these are the offsets to the probe relative to the extruder tip (Hotend - Probe)
   #define X_PROBE_OFFSET_FROM_EXTRUDER 25
-  #define Y_PROBE_OFFSET_FROM_EXTRUDER 2
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER 0
   #define Z_PROBE_OFFSET_FROM_EXTRUDER 0
 
   #define Z_RAISE_BEFORE_HOMING 3       // (in mm) Raise Z before homing (G28) for Probe Clearance.
                                         // Be sure you have this distance over your Z_MAX_POS in case
 
-  #define XY_TRAVEL_SPEED 8000         // X and Y axis travel speed between probes, in mm/min
+  #define XY_TRAVEL_SPEED 15000         // X and Y axis travel speed between probes, in mm/min
 
-  #define Z_RAISE_BEFORE_PROBING 3    //How much the extruder will be raised before traveling to the first probing point.
+  #define Z_RAISE_BEFORE_PROBING 2    //How much the extruder will be raised before traveling to the first probing point.
   #define Z_RAISE_BETWEEN_PROBINGS 3  //How much the extruder will be raised when traveling from between next probing points
 
 
@@ -424,8 +429,8 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 
   #ifdef Z_SAFE_HOMING
 
-    #define Z_SAFE_HOMING_X_POINT (0)    // X point for Z homing when homing all axis (G28)
-    #define Z_SAFE_HOMING_Y_POINT (0)    // Y point for Z homing when homing all axis (G28)
+    #define Z_SAFE_HOMING_X_POINT 0    // X point for Z homing when homing all axis (G28)
+    #define Z_SAFE_HOMING_Y_POINT 0    // Y point for Z homing when homing all axis (G28)
 
   #endif
 
