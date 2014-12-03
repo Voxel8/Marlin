@@ -193,10 +193,10 @@
 //    #define  DEFAULT_Ki 1.28
 //    #define  DEFAULT_Kd 86.29
 
-//V8 Gen2 w/makergear
-    #define  DEFAULT_Kp 27.92
-    #define  DEFAULT_Ki 1.89
-    #define  DEFAULT_Kd 102.91      
+//V8 Gen2 w/orion and 2x 12V 40W heaters
+    #define  DEFAULT_Kp 15.81
+    #define  DEFAULT_Ki 0.95
+    #define  DEFAULT_Kd 65.54     
 
 // MakerGear
 //    #define  DEFAULT_Kp 7.0
