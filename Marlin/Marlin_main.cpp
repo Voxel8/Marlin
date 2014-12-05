@@ -3121,12 +3121,10 @@ Sigma_Exit:
       {
         extruder_offset[Y_AXIS][tmp_extruder] = code_value();
       }
-      #ifdef DUAL_X_CARRIAGE
       if(code_seen('Z'))
       {
         extruder_offset[Z_AXIS][tmp_extruder] = code_value();
       }
-      #endif
       SERIAL_ECHO_START;
       SERIAL_ECHOPGM(MSG_HOTEND_OFFSET);
       for(tmp_extruder = 0; tmp_extruder < EXTRUDERS; tmp_extruder++)
@@ -3135,10 +3133,8 @@ Sigma_Exit:
          SERIAL_ECHO(extruder_offset[X_AXIS][tmp_extruder]);
          SERIAL_ECHO(",");
          SERIAL_ECHO(extruder_offset[Y_AXIS][tmp_extruder]);
-      #ifdef DUAL_X_CARRIAGE
          SERIAL_ECHO(",");
          SERIAL_ECHO(extruder_offset[Z_AXIS][tmp_extruder]);
-      #endif
       }
       SERIAL_ECHOLN("");
     }break;
@@ -4009,7 +4005,7 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
       #else
         // Offset extruder (only by XY)
         int i;
-        for(i = 0; i < 2; i++) {
+        for(i = 0; i < 3; i++) {
            current_position[i] = current_position[i] -
                                  extruder_offset[i][active_extruder] +
                                  extruder_offset[i][tmp_extruder];
