@@ -1578,6 +1578,14 @@ void process_commands()
             apply_rotation_xyz(plan_bed_level_matrix, x_tmp, y_tmp, z_tmp);         //Apply the correction sending the probe offset
             current_position[Z_AXIS] = z_tmp - real_z + current_position[Z_AXIS];   //The difference is added to current position and sent to planner.
             plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+
+            SERIAL_PROTOCOLPGM(" 1: ");
+            SERIAL_PROTOCOL(z_at_pt_1);
+            SERIAL_PROTOCOLPGM(" 2: ");
+            SERIAL_PROTOCOL(z_at_pt_2);
+            SERIAL_PROTOCOLPGM(" 3: ");
+            SERIAL_PROTOCOL(z_at_pt_3);
+            SERIAL_PROTOCOLPGM("\n");
         }
         break;
 
@@ -1606,7 +1614,78 @@ void process_commands()
             retract_z_probe(); // Retract Z Servo endstop if available
         }
         break;
+
+
+
+    case 31: // G31 Apply previously sensed three-point zprobe values.
+        {
+            #if Z_MIN_PIN == -1
+            #error "You must have a Z_MIN endstop in order to enable Auto Bed Leveling feature!!! Z_MIN_PIN must point to a valid hardware pin."
+            #endif
+
+            // Prevent user from running a G29 without first homing in X and Y
+            if (! (axis_known_position[X_AXIS] && axis_known_position[Y_AXIS]) )
+            {
+                LCD_MESSAGEPGM(MSG_POSITION_UNKNOWN);
+                SERIAL_ECHO_START;
+                SERIAL_ECHOLNPGM(MSG_POSITION_UNKNOWN);
+                break; // abort G29, since we don't know where we are
+            }
+
+            st_synchronize();
+            // make sure the bed_level_rotation_matrix is identity or the planner will get it incorectly
+            //vector_3 corrected_position = plan_get_position_mm();
+            //corrected_position.debug("position before G29");
+            plan_bed_level_matrix.set_to_identity();
+            vector_3 uncorrected_position = plan_get_position();
+            //uncorrected_position.debug("position durring G29");
+            current_position[X_AXIS] = uncorrected_position.x;
+            current_position[Y_AXIS] = uncorrected_position.y;
+            current_position[Z_AXIS] = uncorrected_position.z;
+            plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+            setup_for_endstop_move();
+
+            feedrate = homing_feedrate[Z_AXIS];
+
+            if (code_seen('P')) {
+                float z_at_pt_1 = code_value();
+                if (code_seen('Q') {
+                    float z_at_pt_2 = code_value();
+                    if (code_seen('R') {
+                        float z_at_pt_3 = code_value();
+
+
+                        clean_up_after_endstop_move();
+
+                        set_bed_level_equation_3pts(z_at_pt_1, z_at_pt_2, z_at_pt_3);
+
+
+                        st_synchronize();
+
+                        // The following code correct the Z height difference from z-probe position and hotend tip position.
+                        // The Z height on homing is measured by Z-Probe, but the probe is quite far from the hotend.
+                        // When the bed is uneven, this height must be corrected.
+
+                        //get the real Z (since the auto bed leveling is already correcting the plane)
+                        real_z = float(st_get_position(Z_AXIS))/axis_steps_per_unit[Z_AXIS];
+                        x_tmp = current_position[X_AXIS] + X_PROBE_OFFSET_FROM_EXTRUDER;
+                        y_tmp = current_position[Y_AXIS] + Y_PROBE_OFFSET_FROM_EXTRUDER;
+                        z_tmp = current_position[Z_AXIS];
+
+                        //Apply the correction sending the probe offset
+                        apply_rotation_xyz(plan_bed_level_matrix, x_tmp, y_tmp, z_tmp);
+                        //The difference is added to current position and sent to planner.
+                        current_position[Z_AXIS] = z_tmp - real_z + current_position[Z_AXIS];
+                        plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+
+                    }
+                }
+            }
+        }
+        break;
+
 #endif // ENABLE_AUTO_BED_LEVELING
+
     case 90: // G90
       relative_mode = false;
       break;
