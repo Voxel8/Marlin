@@ -1649,9 +1649,9 @@ void process_commands()
 
             if (code_seen('P')) {
                 float z_at_pt_1 = code_value();
-                if (code_seen('Q') {
+                if (code_seen('Q')) {
                     float z_at_pt_2 = code_value();
-                    if (code_seen('R') {
+                    if (code_seen('R')) {
                         float z_at_pt_3 = code_value();
 
 
