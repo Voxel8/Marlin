@@ -388,9 +388,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 
       #define ABL_PROBE_PT_1_X X_MIN_POS
       #define ABL_PROBE_PT_1_Y Y_MIN_POS
-      #define ABL_PROBE_PT_2_X X_MAX_POS/2
-      #define ABL_PROBE_PT_2_Y Y_MAX_POS
-      #define ABL_PROBE_PT_3_X X_MAX_POS
+      #define ABL_PROBE_PT_2_X 150/2
+      #define ABL_PROBE_PT_2_Y 115
+      #define ABL_PROBE_PT_3_X 150
       #define ABL_PROBE_PT_3_Y Y_MIN_POS
 
   #endif // AUTO_BED_LEVELING_GRID
@@ -450,7 +450,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 
 //// MOVEMENT SETTINGS
 #define NUM_AXIS 4 // The axis order in all axis related arrays is X, Y, Z, E
-#define HOMING_FEEDRATE {50*60, 50*60, 150, 0}  // set the homing speeds (mm/min)
+#define HOMING_FEEDRATE {50*60, 50*60, 350, 0}  // set the homing speeds (mm/min)
 
 // default settings
 // Syncromesh (400*16)/(3.81*15)
