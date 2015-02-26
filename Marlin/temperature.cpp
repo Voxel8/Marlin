@@ -840,7 +840,7 @@ static float analog2valPneumatic(int raw) {
     float celsius = 0;
     byte i;
 
-    for (i=1; i<PNEUMATICTEMPTABLE_LEN; i++)
+    for (i=1; i<PRESSURETABLE_LEN; i++)
     {
       if (PGM_RD_W(PRESSURETABLE[i][0]) > raw)
       {
@@ -853,7 +853,7 @@ static float analog2valPneumatic(int raw) {
     }
 
     // Overflow: Set to last value in the table
-    if (i == PNEUMATICTEMPTABLE_LEN) celsius = PGM_RD_W(PRESSURETABLE[i-1][1]);
+    if (i == PRESSURETABLE_LEN) celsius = PGM_RD_W(PRESSURETABLE[i-1][1]);
 
     return celsius;
 }
@@ -1347,7 +1347,7 @@ void bed_max_temp_error(void) {
   #endif
 }
 
-#if PNEUMATICS
+#ifdef PNEUMATICS
 void pneumatic_value_error(void) {
 #if PNEUMATIC_PUMP_PIN > -1
   WRITE(PNEUMATIC_PUMP_PIN, 0);
@@ -1491,8 +1491,8 @@ ISR(TIMER0_COMPB_vect)
       WRITE(HEATER_1_PIN,1);
 #endif
     } else WRITE(HEATER_0_PIN,0);
-
-#if EXTRUDERS > 1
+	
+#if (EXTRUDERS > 1 && HEATER_1_PIN > -1)
     soft_pwm_1 = soft_pwm[1];
     if(soft_pwm_1 > 0) WRITE(HEATER_1_PIN,1); else WRITE(HEATER_1_PIN,0);
 #endif
@@ -1517,15 +1517,14 @@ ISR(TIMER0_COMPB_vect)
     soft_pwm_fan = fanSpeedSoftPwm / 2;
     if(soft_pwm_fan > 0) WRITE(FAN_PIN,1); else WRITE(FAN_PIN,0);
 #endif
-  }
+    }
   if(soft_pwm_0 < pwm_count) { 
-    WRITE(HEATER_0_PIN,0);
-#ifdef HEATERS_PARALLEL
-    WRITE(HEATER_1_PIN,0);
-#endif
-  }
-
-#if EXTRUDERS > 1
+      WRITE(HEATER_0_PIN,0);
+      #ifdef HEATERS_PARALLEL
+      WRITE(HEATER_1_PIN,0);
+      #endif
+    }
+#if (EXTRUDERS > 1 && HEATER_1_PIN > -1)
   if(soft_pwm_1 < pwm_count) WRITE(HEATER_1_PIN,0);
 #endif
 #if EXTRUDERS > 2
@@ -2088,7 +2087,7 @@ ISR(TIMER0_COMPB_vect)
 #endif
   }
 
-#if PNEUMATICS
+#ifdef PNEUMATICS
     if(current_temperature_raw[2] >= maxttemp_raw[2]) {
         target_value_pneumatic = 0;
         pneumatic_value_error();
