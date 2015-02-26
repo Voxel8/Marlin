@@ -1114,12 +1114,69 @@ const short temptable_1047[][2] PROGMEM = {
   const short temptable_998[][2] PROGMEM = {
     {1*OVERSAMPLENR, DUMMY_THERMISTOR_998_VALUE},
     {1023*OVERSAMPLENR, DUMMY_THERMISTOR_998_VALUE}
+ };
+#endif
+
+#if (PNEUMATIC_SENSOR == 1) //pneumatic sensor LUT for P255-50G-D1A
+// Lookup table to convert analog values to pressure values.
+// Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
+const short pressuretable_1[][2] PROGMEM = {
+   {1*OVERSAMPLENR,    0},
+   {103*OVERSAMPLENR,  0},
+   {115*OVERSAMPLENR,  6},
+   {160*OVERSAMPLENR,  34},
+   {180*OVERSAMPLENR,  47},
+   {200*OVERSAMPLENR,  58},
+   {240*OVERSAMPLENR,  83},
+   {260*OVERSAMPLENR,  96},
+   {300*OVERSAMPLENR,  120},        /* THESE VALUES NEED TO BE CHECKED */
+   {350*OVERSAMPLENR,  150},
+   {400*OVERSAMPLENR,  181},
+   {450*OVERSAMPLENR,  211},
+   {500*OVERSAMPLENR,  242},
+   {550*OVERSAMPLENR,  273},
+   {600*OVERSAMPLENR,  304},
+   {650*OVERSAMPLENR,  332},
+   {700*OVERSAMPLENR,  364},
+   {750*OVERSAMPLENR,  394},
+   {800*OVERSAMPLENR,  425},
+   {830*OVERSAMPLENR,  443},
+};
+#endif
+
+#if (PNEUMATIC_SENSOR == 2) //pneumatic sensor LUT for American Sensor Tech 4100 Series
+// Lookup table to convert analog values to pressure values.
+// Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
+const short pressuretable_2[][2] PROGMEM = {
+   {1*OVERSAMPLENR,    0},
+   {103*OVERSAMPLENR,  0},
+   {115*OVERSAMPLENR,  6},
+   {160*OVERSAMPLENR,  34},
+   {180*OVERSAMPLENR,  47}, 
+   {200*OVERSAMPLENR,  58},
+   {240*OVERSAMPLENR,  83},
+   {260*OVERSAMPLENR,  96},
+   {300*OVERSAMPLENR,  120},        /* THESE VALUES NEED TO BE CHECKED */
+   {350*OVERSAMPLENR,  150},
+   {400*OVERSAMPLENR,  181},
+   {450*OVERSAMPLENR,  211},
+   {500*OVERSAMPLENR,  242},
+   {550*OVERSAMPLENR,  273},
+   {600*OVERSAMPLENR,  304},
+   {650*OVERSAMPLENR,  332},
+   {700*OVERSAMPLENR,  364},
+   {750*OVERSAMPLENR,  394},
+   {800*OVERSAMPLENR,  425},
+   {830*OVERSAMPLENR,  443},
 };
 #endif
 
 
 #define _TT_NAME(_N) temptable_ ## _N
 #define TT_NAME(_N) _TT_NAME(_N)
+
+#define _PT_NAME(_N) pressuretable_ ## _N
+#define PT_NAME(_N) _PT_NAME(_N)
 
 #ifdef THERMISTORHEATER_0
 # define HEATER_0_TEMPTABLE TT_NAME(THERMISTORHEATER_0)
@@ -1231,6 +1288,13 @@ const short temptable_1047[][2] PROGMEM = {
 #  define HEATER_BED_RAW_HI_TEMP 16383
 #  define HEATER_BED_RAW_LO_TEMP 0
 # endif
+#endif
+
+#ifdef PNEUMATICS
+  #define PRESSURETABLE PT_NAME(PRESSURE_SENSOR)
+  #define PRESSURETABLE_LEN (sizeof(PRESSURETABLE) / sizeof(*PRESSURETABLE))
+  #define PNEUMATIC_RAW_HI 16383
+  #define PNEUMATIC_RAW_LO 0
 #endif
 
 #endif //THERMISTORTABLES_H_
