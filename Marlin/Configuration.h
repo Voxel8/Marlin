@@ -127,7 +127,7 @@ Here are some standard links for getting your machine calibrated:
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
-#define TEMP_SENSOR_BED 0
+#define TEMP_SENSOR_BED 0 // Same as TEMP_SENSOR_3 ?
 
 // This makes temp sensor 1 a redundant sensor for sensor 0. If the temperatures difference between these sensors is to high the print will be aborted.
 //#define TEMP_SENSOR_1_AS_REDUNDANT
@@ -292,7 +292,34 @@ your extruder heater takes 2 minutes to hit the target on heating.
 
 
 //===========================================================================
-//============================= Mechanical Settings =========================
+//=============================Pneumatics Settings===========================
+//===========================================================================
+
+// Define this if you are using pneumatic direct write on the RAMBo AND you are not
+// using HEAT_1 output
+#define PNEUMATICS
+
+#ifdef PNEUMATICS
+
+// Set Pressure Sensor Type HERE:
+// -----------------------------
+// 0 - No Pressure Sensor
+// 1 - Kavlico P255-50G-D1A
+// 2 - American Sensor Tech. 4100 Series (1-5V output)
+//
+
+  #define PNEUMATIC_SENSOR 1
+  
+  // 0 is a valid pressure reading
+  #define PNEUMATIC_MIN -1
+  
+  // If the pressure goes above this value the pump will be turned off. This prevents
+  // the tank from being overpressurized.
+  #define PNEUMATIC_MAX 500
+#endif
+
+//===========================================================================
+//=============================Mechanical Settings===========================
 //===========================================================================
 
 // Uncomment the following line to enable CoreXY kinematics
