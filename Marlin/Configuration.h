@@ -82,6 +82,17 @@ Here are some standard links for getting your machine calibrated:
 // #define PS_DEFAULT_OFF
 
 //===========================================================================
+//============================== External ADC ===============================
+//===========================================================================
+// This feature allows for the use of an external ADC *in addition* to the on-board 10-bit ADC
+//
+//// Select the appropriate ADC according to the number associated with the chip you are using
+// 1 = Texas Instruments ADS1115
+//
+// Define this to allow the use of an external ADC 
+#define EXT_ADC 1
+
+//===========================================================================
 //============================= Thermal Settings ============================
 //===========================================================================
 //
