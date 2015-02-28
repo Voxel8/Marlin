@@ -48,6 +48,13 @@
 #include "pins_arduino.h"
 #include "math.h"
 
+#ifdef EXT_ADC
+  #if EXT_ADC == 1
+    #include "ADS1115.h"
+    #include <Wire.h>
+  #endif
+#endif
+
 #ifdef BLINKM
   #include "BlinkM.h"
   #include "Wire.h"
@@ -124,6 +131,7 @@
 // M115 - Capabilities string
 // M117 - display message
 // M119 - Output Endstop status to serial port
+// M125 - Output processed ADC value (currently laser sensor) along with current position
 // M126 - Solenoid Air Valve Open (BariCUDA support by jmil)
 // M127 - Solenoid Air Valve Closed (BariCUDA vent to atmospheric pressure by jmil)
 // M128 - EtoP Open (BariCUDA EtoP = electricity to air pressure transducer by jmil)
@@ -2883,6 +2891,22 @@ Sigma_Exit:
     case 121: // M121
       enable_endstops(true) ;
       break;
+
+
+#ifdef EXT_ADC
+    case 125:
+        SERIAL_PROTOCOLLN(MSG_M125_REPORT);
+        SERIAL_PROTOCOLPGM(MSG_EXT_ADC_REPORT);
+        SERIAL_PROTOCOLLN(EXT_ADC_READ);
+        SERIAL_PROTOCOLPGM("X: ");
+        SERIAL_PROTOCOLLN(current_position[X_AXIS]);
+        SERIAL_PROTOCOLPGM("Y: ");
+        SERIAL_PROTOCOLLN(current_position[Y_AXIS]);
+        SERIAL_PROTOCOLPGM("Z: ");
+        SERIAL_PROTOCOLLN(current_position[Z_AXIS]);
+    break;
+#endif
+
     case 119: // M119
     SERIAL_PROTOCOLLN(MSG_M119_REPORT);
       #if defined(X_MIN_PIN) && X_MIN_PIN > -1
