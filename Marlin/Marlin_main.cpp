@@ -1588,6 +1588,10 @@ void process_commands()
       }
       #endif
 
+      if((home_all_axis) || (code_seen(axis_codes[Y_AXIS]))) {
+        HOMEAXIS(Y);
+      }
+
       if((home_all_axis) || (code_seen(axis_codes[X_AXIS])))
       {
       #ifdef DUAL_X_CARRIAGE
@@ -1605,10 +1609,6 @@ void process_commands()
       #else
         HOMEAXIS(X);
       #endif
-      }
-
-      if((home_all_axis) || (code_seen(axis_codes[Y_AXIS]))) {
-        HOMEAXIS(Y);
       }
 
       if(code_seen(axis_codes[X_AXIS]))
