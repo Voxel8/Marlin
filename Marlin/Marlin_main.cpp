@@ -49,10 +49,7 @@
 #include "math.h"
 
 #ifdef EXT_ADC
-  #if EXT_ADC == 1
-    #include "ADS1115.h"
-    #include <Wire.h>
-  #endif
+  #include "ADC.h"
 #endif
 
 #ifdef BLINKM

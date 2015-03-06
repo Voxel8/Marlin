@@ -87,7 +87,8 @@ Here are some standard links for getting your machine calibrated:
 // This feature allows for the use of an external ADC *in addition* to the on-board 10-bit ADC
 //
 //// Select the appropriate ADC according to the number associated with the chip you are using
-// 1 = Texas Instruments ADS1115
+// 1 = Texas Instruments ADS1115 (16-bit)
+// 2 = Texas Instruments ADS1015 (12-bit)
 //
 // Define this to allow the use of an external ADC 
 #define EXT_ADC 1
