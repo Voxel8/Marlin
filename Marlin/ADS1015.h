@@ -57,7 +57,7 @@
 #define ADS1015_DR_920          0x0060 // Data Rate = 920 SPS
 #define ADS1015_DR_1600         0x0080 // Data Rate = 1600 SPS (DEFAULT)
 #define ADS1015_DR_2400         0x00A0 // Data Rate = 2400 SPS
-#define ADS1015_DR_3300          0x00C0 // Data Rate = 3300 SPS
+#define ADS1015_DR_3300         0x00C0 // Data Rate = 3300 SPS
 // 0x00E0 is also 3300 SPS
 
 #define ADS1015_COMP_MODE_TRAD  0x0000 // Traditional Comparator w/ hysteresis (DEFAULT)
@@ -77,7 +77,7 @@
     
 /* Definition for M125 */
 /*---------------------*/
-#define EXT_ADC_READ readADC12_SingleEnded(0) // Reads channel 0 in single-ended mode
+#define EXT_ADC_READ readADC_SingleEnded(0) // Reads channel 0 in single-ended mode
 
 /* Definitions for calculations */
 /*------------------------------*/
