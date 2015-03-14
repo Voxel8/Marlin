@@ -93,6 +93,19 @@ Here are some standard links for getting your machine calibrated:
 // Define this to allow the use of an external ADC 
 #define EXT_ADC 1
 
+// Define ADC mode of operation (Single-ended or Differential) for the TI chips
+// ** This definition ONLY affects code that refers to EXT_ADC_RAW_x.
+// ** Even if a mode is defined here, both single-ended and differential readings
+// ** can be taken by using the functions defind in ADS1x15.cpp 
+
+// 1 = Single-Ended Mode
+// 2 = Differential Mode
+#if EXT_ADC == (1 || 2)
+
+  #define EXT_ADC_MODE 1 // Single-Ended Mode
+
+#endif
+
 //===========================================================================
 //============================= Thermal Settings ============================
 //===========================================================================

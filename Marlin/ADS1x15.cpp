@@ -1,5 +1,5 @@
 /***********************************************************************************
-* Contains all function definitions required to operate the ADS1115 ADC
+* Contains all function definitions required to operate the ADS1x15 ADC
 *
 * @author Ricky Rininger 02/11/2015
 *   
@@ -15,20 +15,17 @@
 uint16_t ADC_val = 0;
 float distance = 0;
 #if EXT_ADC == 1
-    float linear_offset = 5.757;    //linear coefficient of offset that was determined with empirical data
-    float const_offset  = 1.57; 
+    float linear_offset = 5.757;    // linear coefficient of offset that was determined with empirical data
+    float const_offset  = 1.57;     // constant term of offset
 #elif EXT_ADC == 2
-    float linear_offset;
-    float const_offset;
+    float linear_offset = 0;
+    float const_offset = 0;
 #endif
 
-
-
-
-         // constant term of offset
 /*================================================================================*/
-/*                   GET SINGLE READING FROM ADC (Single Ended)                   */
+/*                   GET SINGLE READING FROM ADC (Single-Ended)                   */
 /*================================================================================*/
+
 uint16_t readADC_SingleEnded(uint8_t channel) {
     Wire.begin();
     if(channel > 3) {
@@ -109,12 +106,22 @@ uint16_t readADC_SingleEnded(uint8_t channel) {
 
     #endif
 
-    // THEORETICALLY, the formula for distance should be distance = (ADC_val * CONV_FACTOR * VOLT_TO_DIST)
+    return ADC_val;
+}
+
+uint16_t get_dist(uint8_t channel) {
+
+    uint16_t val_raw = 0;
+
+    val_raw = readADC_SingleEnded(channel);
+
+    // THEORETICALLY, the formula for distance should be distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST)
     // HOWEVER, empirical data has shown that a linear offset exists such that ...
-    // distance = (ADC_val * CONV_FACTOR * VOLT_TO_DIST) - offset  , or
-    // distance = (ADC_val * CONV_FACTOR * VOLT_TO_DIST) - (mx + b)
-    // where m = linear_offset, x = (ADC_val * CONV_FACTOR), and b = const_offset
-    distance = (ADC_val * CONV_FACTOR * VOLT_TO_DIST) - ((linear_offset * ADC_val * CONV_FACTOR) - const_offset);
+    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - offset  , or
+    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - (mx + b)
+    // where m = linear_offset, x = (val_raw * CONV_FACTOR), and b = const_offset
+
+    distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - ((linear_offset * val_raw * CONV_FACTOR) - const_offset);
     
     return distance;
 }

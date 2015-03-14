@@ -83,9 +83,8 @@
 
 // Serial Console Messages (do not translate those!)
 
-#define MSG_M125_REPORT                     "Reporting Distance Measurement"
+#define MSG_M235_REPORT                     "Reporting Distance Measurement"
 #define MSG_EXT_ADC_REPORT                  "Current Measurement (um): "
-#define MSG_M125_POSITION                   "Current Position (mm): "
 
 #define MSG_Enqueing                        "enqueing \""
 #define MSG_POWERUP                         "PowerUp"

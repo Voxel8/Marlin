@@ -10,6 +10,7 @@
 
 #include "Arduino.h"
 #include <Wire.h>
+#include "Configuration.h"
 
 /* I2C ADDRESS */
 /*-------------*/
@@ -75,10 +76,31 @@
 #define ADS1015_COMP_DISABLE    0x0003 // Disable comparator (DEFAULT)
 /*--------------------------------------------------------------------------------*/
     
-/* Definition for M125 */
+/* M-Code Definitions  */
 /*---------------------*/
-#define EXT_ADC_READ readADC_SingleEnded(0) // Reads channel 0 in single-ended mode
+// M234 - Get raw data from ADC
 
+#if EXT_ADC_MODE == 1 // Single-Ended Mode
+
+#define EXT_ADC_RAW_0	readADC_SingleEnded(0) // read from channel 0
+#define EXT_ADC_RAW_1	readADC_SingleEnded(1) // read from channel 1
+#define EXT_ADC_RAW_2	readADC_SingleEnded(2) // read from channel 2
+#define EXT_ADC_RAW_3	readADC_SingleEnded(3) // read from channel 3
+
+#elif EXT_ADC_MODE == 2 // Differential Mode
+
+#define EXT_ADC_RAW_0	readADC_Differential(0, 1) // read from ch0 and ch1
+#define EXT_ADC_RAW_1	readADC_Differential(1, 3) // read from ch1 and ch3
+#define EXT_ADC_RAW_2	readADC_Differential(2, 3) // read from ch2 and ch3
+#define EXT_ADC_RAW_3	readADC_Differential(0, 3) // read from ch0 and ch3
+
+#endif
+
+// M235 All Single Ended
+#define EXT_ADC_READ_0	get_dist(0)	// M234 - Processes raw ADC value and returns distance
+#define EXT_ADC_READ_1	get_dist(1)	// M234 - Processes raw ADC value and returns distance
+#define EXT_ADC_READ_2	get_dist(2)	// M234 - Processes raw ADC value and returns distance
+#define EXT_ADC_READ_3	get_dist(3)	// M234 - Processes raw ADC value and returns distance
 /* Definitions for calculations */
 /*------------------------------*/
 
@@ -98,5 +120,7 @@ uint16_t readADC_Differential(uint8_t first_channel, uint8_t second_channel);
 void regWrite(uint8_t address, uint8_t reg, uint16_t value);
 
 uint16_t regRead(uint8_t address, uint8_t reg);
+
+uint16_t get_dist(uint8_t channel);
 
 #endif
