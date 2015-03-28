@@ -123,7 +123,7 @@ Here are some standard links for getting your machine calibrated:
 //     #define DUMMY_THERMISTOR_998_VALUE 25
 //     #define DUMMY_THERMISTOR_999_VALUE 100
 
-#define TEMP_SENSOR_0 0
+#define TEMP_SENSOR_0 5
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
@@ -513,8 +513,8 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 // XY motors: (steps * microsteps)/ (tooth-pitch * tooth-count) --> (200steps * 16) / (2mm * 15 teeth) = 106.66666666666667
 // Z motor: (steps * microsteps) / (leadscrew pitch) --> (200steps * 4) / 2mm = 800
 // E motor: 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667,106.6666666666667,400,760*1.1}  // default steps per unit for Voxel8 gen3
-#define DEFAULT_MAX_FEEDRATE          {500, 500, 5, 25}    // (mm/sec)
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667,106.6666666666667,400,452}  // default steps per unit for Voxel8 gen3
+#define DEFAULT_MAX_FEEDRATE          {500, 500, 20, 25}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {9000,9000,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
 
 #define DEFAULT_ACCELERATION          3000    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
