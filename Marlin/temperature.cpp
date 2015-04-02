@@ -1869,7 +1869,7 @@ ISR(TIMER0_COMPB_vect)
       temp_state = 5;
       break;
     case 5: // Measure PNEUMATIC
-      #if defined(TEMP_BED_PIN) && (TEMP_BED_PIN > -1)
+      #if defined(PNEUMATIC_PIN) && (PNEUMATIC_PIN > -1)
         raw_pneumatic_value += ADC;
       #endif
       temp_state = 6;
