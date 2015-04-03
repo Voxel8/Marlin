@@ -170,5 +170,3 @@
   //Filip added pin for Filament sensor analog input 
   #define FILWIDTH_PIN   3
 #endif
-
-#endif
