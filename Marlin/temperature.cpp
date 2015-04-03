@@ -837,14 +837,14 @@ static float analog2tempBed(int raw) {
 
 #ifdef PNEUMATICS
 static float analog2valPneumatic(int raw) {
-    float celsius = 0;
+    float psi = 0;
     byte i;
 
     for (i=1; i<PRESSURETABLE_LEN; i++)
     {
       if (PGM_RD_W(PRESSURETABLE[i][0]) > raw)
       {
-        celsius  = PGM_RD_W(PRESSURETABLE[i-1][1]) + 
+        psi  = PGM_RD_W(PRESSURETABLE[i-1][1]) + 
           (raw - PGM_RD_W(PRESSURETABLE[i-1][0])) * 
           (float)(PGM_RD_W(PRESSURETABLE[i][1]) - PGM_RD_W(PRESSURETABLE[i-1][1])) /
           (float)(PGM_RD_W(PRESSURETABLE[i][0]) - PGM_RD_W(PRESSURETABLE[i-1][0]));
@@ -853,9 +853,9 @@ static float analog2valPneumatic(int raw) {
     }
 
     // Overflow: Set to last value in the table
-    if (i == PRESSURETABLE_LEN) celsius = PGM_RD_W(PRESSURETABLE[i-1][1]);
+    if (i == PRESSURETABLE_LEN) psi = PGM_RD_W(PRESSURETABLE[i-1][1]);
 
-    return celsius;
+    return psi;
 }
 #endif
 
