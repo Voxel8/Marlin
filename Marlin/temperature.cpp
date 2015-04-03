@@ -2087,12 +2087,13 @@ ISR(TIMER0_COMPB_vect)
 #endif
   }
 
+// If pressure is out of defined range, set target to 0
 #ifdef PNEUMATICS
-    if(current_temperature_raw[2] >= maxttemp_raw[2]) {
+    if(current_pneumatic_raw >= pneumatic_max_raw) {
         target_value_pneumatic = 0;
         pneumatic_value_error();
     }
-    if(current_temperature_raw[2] <= minttemp_raw[2]) {
+    if(current_pneumatic_raw <= pneumatic_min_raw) {
         target_value_pneumatic = 0;
         pneumatic_value_error();
     }
