@@ -308,7 +308,7 @@ your extruder heater takes 2 minutes to hit the target on heating.
 // 2 - American Sensor Tech. 4100 Series (1-5V output)
 //
 
-  #define PNEUMATIC_SENSOR 1
+  #define PNEUMATIC_SENSOR 2
   
   // 0 is a valid pressure reading
   #define PNEUMATIC_MIN -1
@@ -389,9 +389,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define max_software_endstops true  // If true, axis won't move to coordinates greater than the defined lengths below.
 
 // Travel limits after homing (units are in mm)
-#define X_MAX_POS 205
+#define X_MAX_POS 190
 #define X_MIN_POS 0
-#define Y_MAX_POS 205
+#define Y_MAX_POS 185
 #define Y_MIN_POS 0
 #define Z_MAX_POS 200
 #define Z_MIN_POS 0
