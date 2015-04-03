@@ -1130,7 +1130,7 @@ const short pressuretable_1[][2] PROGMEM = {
 // Lookup table to convert analog values to pressure values.
 // Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
 const short pressuretable_2[][2] PROGMEM = {
-   {205*OVERSAMPLENR      0},
+   {205*OVERSAMPLENR,     0},
    {1024*OVERSAMPLENR, 1000},       // CHECK THESE VALUES!!!
 };
 #endif
