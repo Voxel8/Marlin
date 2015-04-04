@@ -182,6 +182,8 @@ static int bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
   static uint8_t heater_ttbllen_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_TEMPTABLE_LEN, HEATER_1_TEMPTABLE_LEN, HEATER_2_TEMPTABLE_LEN, HEATER_3_TEMPTABLE_LEN );
 #endif
 
+// Function Prototypes
+// -------------------
 static float analog2temp(int raw, uint8_t e);
 static float analog2tempBed(int raw);
 static float analog2valPneumatic(int raw);
