@@ -49,7 +49,7 @@
 
 int target_temperature[EXTRUDERS] = { 0 };
 int target_temperature_bed = 0;
-int target_value_pneumatic = 0;
+int target_value_pneumatic = PNEUMATIC_TARGET;
 int current_temperature_raw[EXTRUDERS] = { 0 };
 float current_temperature[EXTRUDERS] = { 0.0 };
 int current_temperature_bed_raw = 0;
@@ -72,7 +72,6 @@ float current_pneumatic = 0.0;
 #endif
 
 unsigned char soft_pwm_bed;
-unsigned char soft_pwm_pneumatic;
   
 #ifdef BABYSTEPPING
   volatile int babystepsTodo[3]={0,0,0};
@@ -628,23 +627,24 @@ void manage_heater()
 
           previous_millis_pneumatic_value = millis();
 
+          // TODO: Hysteresis needs to be multiplied by 10 or no?
+
           // Check if value is within the correct band
           if((current_pneumatic > PNEUMATIC_MIN) && (current_pneumatic < PNEUMATIC_MAX))
-          {
-            if(current_pneumatic > target_value_pneumatic + PNEUMATIC_HYSTERESIS)
             {
-              soft_pwm_pneumatic = 0;
+              if(current_pneumatic > target_value_pneumatic + PNEUMATIC_HYSTERESIS)
+                {
+                  WRITE(PNEUMATIC_PUMP_PIN,LOW);
+                }
+              else if(current_pneumatic <= target_value_pneumatic - PNEUMATIC_HYSTERESIS)
+                {
+                  WRITE(PNEUMATIC_PUMP_PIN,HIGH);
+                }
             }
-            else if(current_pneumatic <= target_value_pneumatic - PNEUMATIC_HYSTERESIS)
-            {
-              soft_pwm_pneumatic = 255>>1;
-            }
-          }
           else
-          {
-            soft_pwm_pneumatic = 0;
-            WRITE(PNEUMATIC_PUMP_PIN,LOW);
-          }
+            {
+              WRITE(PNEUMATIC_PUMP_PIN,LOW);
+            }
   }
   #endif //if PNEUMATICS
   
@@ -1302,8 +1302,7 @@ void disable_heater()
 
   #if defined(PNEUMATIC_PIN) && PNEUMATIC_PIN > -1
     target_value_pneumatic=0;
-    soft_pwm_pneumatic=0;
-    #if defined(PNEUMATIC_PUMP_PIN) && PNEUMATIC_PUMP_PIN > -1  
+    #if defined(PNEUMATIC_PUMP_PIN) && PNEUMATIC_PUMP_PIN > -1
       WRITE(PNEUMATIC_PUMP_PIN,LOW);
     #endif
   #endif 
@@ -1473,10 +1472,6 @@ ISR(TIMER0_COMPB_vect)
   #endif 
 #endif
 
-#if PNEUMATIC_PUMP_PIN > -1
-  static unsigned char soft_pwm_p;
-#endif
-  
 #if defined(FILWIDTH_PIN) &&(FILWIDTH_PIN > -1)
   static unsigned long raw_filwidth_value = 0;  //added for filament width sensor
 #endif
@@ -1511,10 +1506,7 @@ ISR(TIMER0_COMPB_vect)
     soft_pwm_b = soft_pwm_bed;
     if(soft_pwm_b > 0) WRITE(HEATER_BED_PIN,1); else WRITE(HEATER_BED_PIN,0);
 #endif
-#if defined(PNEUMATIC_PUMP_PIN) && PNEUMATIC_PUMP_PIN > -1
-    soft_pwm_p = soft_pwm_pneumatic;
-    if(soft_pwm_p > 0) WRITE(PNEUMATIC_PUMP_PIN,1); else WRITE(PNEUMATIC_PUMP_PIN,0);
-#endif
+
 #ifdef FAN_SOFT_PWM
     soft_pwm_fan = fanSpeedSoftPwm / 2;
     if(soft_pwm_fan > 0) WRITE(FAN_PIN,1); else WRITE(FAN_PIN,0);
@@ -1539,9 +1531,7 @@ ISR(TIMER0_COMPB_vect)
 #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1
   if(soft_pwm_b < pwm_count) WRITE(HEATER_BED_PIN,0);
 #endif
-#if defined(PNEUMATIC_PUMP_PIN) && PNEUMATIC_PUMP_PIN > -1
-  if(soft_pwm_p < pwm_count) WRITE(PNEUMATIC_PUMP_PIN,0);
-#endif
+
 #ifdef FAN_SOFT_PWM
   if(soft_pwm_fan < pwm_count) WRITE(FAN_PIN,0);
 #endif
