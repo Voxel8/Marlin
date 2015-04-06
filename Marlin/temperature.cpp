@@ -1956,7 +1956,7 @@ ISR(TIMER0_COMPB_vect)
         raw_filwidth_value= raw_filwidth_value + ((unsigned long)ADC<<7);  //add new ADC reading 
         }
      #endif 
-     temp_state = 14;   
+     temp_state = 0;   
      temp_count++;
      break;      
     case 14: //Startup, delay initial temp reading a tiny bit so the hardware can settle.
