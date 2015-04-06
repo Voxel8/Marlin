@@ -316,6 +316,8 @@ your extruder heater takes 2 minutes to hit the target on heating.
   // If the pressure goes above this value the pump will be turned off. This prevents
   // the tank from being overpressurized.
   #define PNEUMATIC_MAX 500
+
+  #define PNEUMATIC_TARGET 300 // 30 psi * 10
 #endif
 
 //===========================================================================
