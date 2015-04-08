@@ -49,7 +49,7 @@
 
 int target_temperature[EXTRUDERS] = { 0 };
 int target_temperature_bed = 0;
-int target_value_pneumatic = PNEUMATIC_TARGET;
+int target_value_pneumatic = 0;
 int current_temperature_raw[EXTRUDERS] = { 0 };
 float current_temperature[EXTRUDERS] = { 0.0 };
 int current_temperature_bed_raw = 0;
@@ -627,16 +627,14 @@ void manage_heater()
 
           previous_millis_pneumatic_value = millis();
 
-          // TODO: Hysteresis needs to be multiplied by 10 or no?
-
           // Check if value is within the correct band
           if((current_pneumatic > PNEUMATIC_MIN) && (current_pneumatic < PNEUMATIC_MAX))
             {
-              if(current_pneumatic > target_value_pneumatic + PNEUMATIC_HYSTERESIS)
+              if(current_pneumatic >= target_value_pneumatic + PNEUMATIC_HYSTERESIS)
                 {
                   WRITE(PNEUMATIC_PUMP_PIN,LOW);
                 }
-              else if(current_pneumatic <= target_value_pneumatic - PNEUMATIC_HYSTERESIS)
+              else if(current_pneumatic < target_value_pneumatic - PNEUMATIC_HYSTERESIS)
                 {
                   WRITE(PNEUMATIC_PUMP_PIN,HIGH);
                 }
@@ -1167,12 +1165,14 @@ void tp_init()
 
 #ifdef PNEUMATIC_MIN
   while(analog2valPneumatic(pneumatic_min_raw) < PNEUMATIC_MIN) {
+
     pneumatic_min_raw += OVERSAMPLENR;
   }
 #endif //PNEUMATIC_MIN
 
 #ifdef PNEUMATIC_MAX
   while(analog2valPneumatic(pneumatic_max_raw) > PNEUMATIC_MAX) {
+
     pneumatic_max_raw -= OVERSAMPLENR;
   }
 #endif //PNEUMATIC_MAX
@@ -2085,7 +2085,7 @@ ISR(TIMER0_COMPB_vect)
         target_value_pneumatic = 0;
         pneumatic_value_error();
     }
-    if(current_pneumatic_raw <= pneumatic_min_raw) {
+    if(current_pneumatic_raw < pneumatic_min_raw) {
         target_value_pneumatic = 0;
         pneumatic_value_error();
     }
