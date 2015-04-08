@@ -317,7 +317,6 @@ your extruder heater takes 2 minutes to hit the target on heating.
   // the tank from being overpressurized.
   #define PNEUMATIC_MAX 500
 
-  #define PNEUMATIC_TARGET 300 // 30 psi * 10
 #endif
 
 //===========================================================================
