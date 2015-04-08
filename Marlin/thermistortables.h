@@ -1121,17 +1121,33 @@ const short temptable_1047[][2] PROGMEM = {
 // Lookup table to convert analog values to pressure values.
 // Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
 const short pressuretable_1[][2] PROGMEM = {
+   {0*OVERSAMPLENR,     0},
    {102*OVERSAMPLENR,   0},
    {921*OVERSAMPLENR, 500},         // CHECK THESE VALUES
 };
 #endif
 
-#if (PNEUMATIC_SENSOR == 2) //pneumatic sensor LUT for American Sensor Tech 4100 Series
+#if (PNEUMATIC_SENSOR == 2) //pneumatic sensor LUT for American Sensor Tech 4100B00100P3A0000
 // Lookup table to convert analog values to pressure values.
+// Should be ~25 psi/V, but empirical data shows ~40 psi/V
+// Supply voltage MUST BE STABLE!
+
 // Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
 const short pressuretable_2[][2] PROGMEM = {
-   {205*OVERSAMPLENR,     0},
-   {1024*OVERSAMPLENR, 1000},       // CHECK THESE VALUES!!!
+   {0*OVERSAMPLENR,       0},
+   {129*OVERSAMPLENR,     0},
+   {154*OVERSAMPLENR,    50},
+   {181*OVERSAMPLENR,   100},
+   {206*OVERSAMPLENR,   150},
+   {231*OVERSAMPLENR,   200},
+   {259*OVERSAMPLENR,   250},
+   {284*OVERSAMPLENR,   300},
+   {308*OVERSAMPLENR,   350},
+   {333*OVERSAMPLENR,   400},
+   {359*OVERSAMPLENR,   450},
+   {385*OVERSAMPLENR,   500},
+   {640*OVERSAMPLENR,  1000},
+   {1023*OVERSAMPLENR, 1000},
 };
 #endif
 
