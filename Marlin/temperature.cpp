@@ -1165,14 +1165,12 @@ void tp_init()
 
 #ifdef PNEUMATIC_MIN
   while(analog2valPneumatic(pneumatic_min_raw) < PNEUMATIC_MIN) {
-
     pneumatic_min_raw += OVERSAMPLENR;
   }
 #endif //PNEUMATIC_MIN
 
 #ifdef PNEUMATIC_MAX
   while(analog2valPneumatic(pneumatic_max_raw) > PNEUMATIC_MAX) {
-
     pneumatic_max_raw -= OVERSAMPLENR;
   }
 #endif //PNEUMATIC_MAX
