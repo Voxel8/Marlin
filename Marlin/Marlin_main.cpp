@@ -1734,16 +1734,16 @@ void process_commands()
                 SERIAL_ECHOLNPGM(MSG_POSITION_UNKNOWN);
                 break; // abort G29, since we don't know where we are
             }
-            // int left_probe_bed_position=LEFT_PROBE_BED_POSITION;
-            // int right_probe_bed_position=RIGHT_PROBE_BED_POSITION;
-            // int back_probe_bed_position=BACK_PROBE_BED_POSITION;
-            // int front_probe_bed_position=FRONT_PROBE_BED_POSITION;
-            // int auto_bed_leveling_grid_points=AUTO_BED_LEVELING_GRID_POINTS;
-            // if (code_seen('L')) left_probe_bed_position=(int)code_value();
-            // if (code_seen('R')) right_probe_bed_position=(int)code_value();
-            // if (code_seen('B')) back_probe_bed_position=(int)code_value();
-            // if (code_seen('F')) front_probe_bed_position=(int)code_value();
-            // if (code_seen('P')) auto_bed_leveling_grid_points=(int)code_value();
+            int left_probe_bed_position=LEFT_PROBE_BED_POSITION;
+            int right_probe_bed_position=RIGHT_PROBE_BED_POSITION;
+            int back_probe_bed_position=BACK_PROBE_BED_POSITION;
+            int front_probe_bed_position=FRONT_PROBE_BED_POSITION;
+            int auto_bed_leveling_grid_points=AUTO_BED_LEVELING_GRID_POINTS;
+            if (code_seen('L')) left_probe_bed_position=(int)code_value();
+            if (code_seen('R')) right_probe_bed_position=(int)code_value();
+            if (code_seen('B')) back_probe_bed_position=(int)code_value();
+            if (code_seen('F')) front_probe_bed_position=(int)code_value();
+            if (code_seen('P')) auto_bed_leveling_grid_points=(int)code_value();
 
 #ifdef Z_PROBE_SLED
             dock_sled(false);
