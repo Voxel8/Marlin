@@ -127,7 +127,7 @@ Here are some standard links for getting your machine calibrated:
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
-#define TEMP_SENSOR_BED 0 // Same as TEMP_SENSOR_2 or TEMP_SENSOR_3 ?
+#define TEMP_SENSOR_BED 0
 
 // This makes temp sensor 1 a redundant sensor for sensor 0. If the temperatures difference between these sensors is to high the print will be aborted.
 //#define TEMP_SENSOR_1_AS_REDUNDANT
@@ -314,7 +314,8 @@ your extruder heater takes 2 minutes to hit the target on heating.
   #define PNEUMATIC_MIN -1
   
   // If the pressure goes above this value the pump will be turned off. This prevents
-  // the tank from being overpressurized.
+  // the tank from being overpressurized. This value has units of PSI * 10 (to eliminate
+  // floating point numbers in the lookup table).
   #define PNEUMATIC_MAX 500
 
 #endif
@@ -390,9 +391,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define max_software_endstops true  // If true, axis won't move to coordinates greater than the defined lengths below.
 
 // Travel limits after homing (units are in mm)
-#define X_MAX_POS 190
+#define X_MAX_POS 205
 #define X_MIN_POS 0
-#define Y_MAX_POS 185
+#define Y_MAX_POS 205
 #define Y_MIN_POS 0
 #define Z_MAX_POS 200
 #define Z_MIN_POS 0
