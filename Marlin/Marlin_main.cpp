@@ -3226,8 +3226,8 @@ Sigma_Exit:
       SERIAL_PROTOCOLLN(EXT_ADC_RAW_0);
     break;
   case 235: // M235 - Report laser distance sensor reading
-      SERIAL_PROTOCOLLN(MSG_M235_REPORT);
-      SERIAL_PROTOCOLPGM(MSG_EXT_ADC_REPORT);
+      //SERIAL_PROTOCOLLN(MSG_M235_REPORT);         Commented out so only number is returned
+      //SERIAL_PROTOCOLPGM(MSG_EXT_ADC_REPORT);
       SERIAL_PROTOCOLLN(EXT_ADC_READ_0);
     break;
 
