@@ -48,6 +48,10 @@
 #include "pins_arduino.h"
 #include "math.h"
 
+#ifdef EXT_ADC
+  #include "ADC.h"
+#endif
+
 #ifdef BLINKM
   #include "BlinkM.h"
   #include "Wire.h"
@@ -147,6 +151,8 @@
 // M220 S<factor in percent>- set speed factor override percentage
 // M221 S<factor in percent>- set extrude factor override percentage
 // M226 P<pin number> S<pin state>- Wait until the specified pin reaches the state required
+// M234 - Output raw external ADC value
+// M235 - Output processed external ADC data
 // M240 - Trigger a camera to take a photograph
 // M250 - Set LCD contrast C<contrast value> (value 0..63)
 // M280 - Set servo position absolute. P: servo index, S: angle or microseconds
@@ -2477,11 +2483,13 @@ Sigma_Exit:
 #endif
       setWatch();
       break;
-    case 125: // M125 - Set pneumatics pressure
-      if (code_seen('S')) {
-        setTargetPressure(code_value());
-      }
-      break;
+    #ifdef PNEUMATICS
+      case 125: // M125 - Set pneumatics pressure
+        if (code_seen('S')) {
+          setTargetPressure(code_value());
+        }
+        break;
+    #endif
     case 112: //  M112 -Emergency Stop
       kill();
       break;
@@ -3213,6 +3221,14 @@ Sigma_Exit:
         }
       }
     }
+    break;
+  case 234: // M234 - Return raw ADC value
+      SERIAL_PROTOCOLLN(EXT_ADC_RAW_0);
+    break;
+  case 235: // M235 - Report laser distance sensor reading
+      SERIAL_PROTOCOLLN(MSG_M235_REPORT);
+      SERIAL_PROTOCOLPGM(MSG_EXT_ADC_REPORT);
+      SERIAL_PROTOCOLLN(EXT_ADC_READ_0);
     break;
 
     #if NUM_SERVOS > 0
