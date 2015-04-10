@@ -128,8 +128,7 @@
 // M115 - Capabilities string
 // M117 - display message
 // M119 - Output Endstop status to serial port
-// M234 - Output raw external ADC value
-// M235 - Output processed external ADC data
+// M125 - Set pneumatics target pressure
 // M126 - Solenoid Air Valve Open (BariCUDA support by jmil)
 // M127 - Solenoid Air Valve Closed (BariCUDA vent to atmospheric pressure by jmil)
 // M128 - EtoP Open (BariCUDA EtoP = electricity to air pressure transducer by jmil)
@@ -152,6 +151,8 @@
 // M220 S<factor in percent>- set speed factor override percentage
 // M221 S<factor in percent>- set extrude factor override percentage
 // M226 P<pin number> S<pin state>- Wait until the specified pin reaches the state required
+// M234 - Output raw external ADC value
+// M235 - Output processed external ADC data
 // M240 - Trigger a camera to take a photograph
 // M250 - Set LCD contrast C<contrast value> (value 0..63)
 // M280 - Set servo position absolute. P: servo index, S: angle or microseconds
@@ -2481,6 +2482,11 @@ Sigma_Exit:
 #endif
       setWatch();
       break;
+    case 125: // M125 - Set pneumatics pressure
+      if (code_seen('S')) {
+        setTargetPressure(code_value());
+      }
+      break;
     case 112: //  M112 -Emergency Stop
       kill();
       break;
@@ -2513,6 +2519,13 @@ Sigma_Exit:
       #else
         SERIAL_ERROR_START;
         SERIAL_ERRORLNPGM(MSG_ERR_NO_THERMISTORS);
+      #endif
+
+      #ifdef PNEUMATICS
+        SERIAL_PROTOCOLPGM(" P:");
+        SERIAL_PROTOCOL_F(pressurePneumatic(), 1);
+        SERIAL_PROTOCOLPGM(" /");
+        SERIAL_PROTOCOL_F(targetPneumatic(), 1);
       #endif
 
         SERIAL_PROTOCOLPGM(" @:");
@@ -4720,7 +4733,6 @@ bool setTargetedHotend(int code){
   }
   return false;
 }
-
 
 float calculate_volumetric_multiplier(float diameter) {
   if (!volumetric_enabled || diameter == 0) return 1.0;

@@ -47,13 +47,20 @@
 #define Z_MS2_PIN 67
 
 #define HEATER_BED_PIN 3
-#define TEMP_BED_PIN 2
+#define TEMP_BED_PIN 2              // A2 (Analog Pin Numbering)
 
 #define HEATER_0_PIN  9
-#define TEMP_0_PIN 0
+#define TEMP_0_PIN 0                // A0 (Analog Pin Numbering)
 
-#define HEATER_1_PIN 7
-#define TEMP_1_PIN 1
+#ifdef PNEUMATICS
+    #define PNEUMATIC_PUMP_PIN 7
+    #define PNEUMATIC_PIN 3         // A3 (Analog Pin Numbering)
+    #define HEATER_1_PIN -1         // Heat_1 Output Used for Pneumatics
+    #define TEMP_1_PIN -1           // (Analog Pin Numbering)
+#else
+    #define HEATER_1_PIN 7
+    #define TEMP_1_PIN 1            // A1 (Analog Pin Numbering)
+#endif
 
 #ifdef BARICUDA
   #define HEATER_2_PIN 6
@@ -61,7 +68,7 @@
   #define HEATER_2_PIN -1
 #endif
 
-#define TEMP_2_PIN -1
+#define TEMP_2_PIN -1               // (Analog Pin Numbering)
 
 #define E0_STEP_PIN         34
 #define E0_DIR_PIN          43

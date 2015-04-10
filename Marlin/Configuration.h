@@ -148,7 +148,7 @@ Here are some standard links for getting your machine calibrated:
 //     #define DUMMY_THERMISTOR_998_VALUE 25
 //     #define DUMMY_THERMISTOR_999_VALUE 100
 
-#define TEMP_SENSOR_0 0
+#define TEMP_SENSOR_0 5
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
@@ -213,9 +213,9 @@ Here are some standard links for getting your machine calibrated:
 
 // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
 // Ultimaker
-    #define  DEFAULT_Kp 22.2
-    #define  DEFAULT_Ki 1.08
-    #define  DEFAULT_Kd 114
+    #define  DEFAULT_Kp 39.07
+    #define  DEFAULT_Ki 4.37
+    #define  DEFAULT_Kd 87.38
 
 // MakerGear
 //    #define  DEFAULT_Kp 7.0
@@ -317,7 +317,36 @@ your extruder heater takes 2 minutes to hit the target on heating.
 
 
 //===========================================================================
-//============================= Mechanical Settings =========================
+//=============================Pneumatics Settings===========================
+//===========================================================================
+
+// Define this if you are using pneumatic direct write on the RAMBo AND you are not
+// using HEAT_1 output
+#define PNEUMATICS
+
+#ifdef PNEUMATICS
+
+// Set Pressure Sensor Type HERE:
+// -----------------------------
+// 0 - No Pressure Sensor
+// 1 - Kavlico P255-50G-D1A
+// 2 - American Sensor Tech. 4100 Series (1-5V output)
+//
+
+  #define PNEUMATIC_SENSOR 2
+  
+  // 0 is a valid pressure reading
+  #define PNEUMATIC_MIN -1
+  
+  // If the pressure goes above this value the pump will be turned off. This prevents
+  // the tank from being overpressurized. This value has units of PSI * 10 (to eliminate
+  // floating point numbers in the lookup table).
+  #define PNEUMATIC_MAX 500
+
+#endif
+
+//===========================================================================
+//=============================Mechanical Settings===========================
 //===========================================================================
 
 // Uncomment the following line to enable CoreXY kinematics
@@ -387,9 +416,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define max_software_endstops true  // If true, axis won't move to coordinates greater than the defined lengths below.
 
 // Travel limits after homing (units are in mm)
-#define X_MAX_POS 205
+#define X_MAX_POS 190
 #define X_MIN_POS 0
-#define Y_MAX_POS 205
+#define Y_MAX_POS 185
 #define Y_MIN_POS 0
 #define Z_MAX_POS 200
 #define Z_MIN_POS 0
@@ -535,9 +564,11 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define HOMING_FEEDRATE {50*60, 50*60, 4*60, 0}  // set the homing speeds (mm/min)
 
 // default settings
-
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667,106.6666666666667,200.0*8/3,760*1.1}  // default steps per unit for Voxel8 gen3
-#define DEFAULT_MAX_FEEDRATE          {500, 500, 5, 25}    // (mm/sec)
+// XY motors: (steps * microsteps)/ (tooth-pitch * tooth-count) --> (200steps * 16) / (2mm * 15 teeth) = 106.66666666666667
+// Z motor: (steps * microsteps) / (leadscrew pitch) --> (200steps * 4) / 2mm = 800
+// E motor: 
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667,106.6666666666667,400,452}  // default steps per unit for Voxel8 gen3
+#define DEFAULT_MAX_FEEDRATE          {500, 500, 20, 25}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {9000,9000,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
 
 #define DEFAULT_ACCELERATION          3000    // X, Y, Z and E max acceleration in mm/s^2 for printing moves

@@ -43,6 +43,11 @@ void manage_heater(); //it is critical that this is called periodically.
 // do not use these routines and variables outside of temperature.cpp
 extern int target_temperature[EXTRUDERS];  
 extern float current_temperature[EXTRUDERS];
+#ifdef PNEUMATICS
+  extern int current_pneumatic_raw;
+  extern int target_value_pneumatic;
+  extern float current_pneumatic;
+#endif
 #ifdef SHOW_TEMP_ADC_VALUES
   extern int current_temperature_raw[EXTRUDERS];
   extern int current_temperature_bed_raw;
@@ -110,6 +115,24 @@ FORCE_INLINE float degTargetHotend(uint8_t extruder) {
 FORCE_INLINE float degTargetBed() {   
   return target_temperature_bed;
 };
+
+#ifdef PNEUMATICS
+  FORCE_INLINE int rawPneumatic() {
+  	return current_pneumatic_raw;
+  };
+
+  FORCE_INLINE float pressurePneumatic() {
+  	return current_pneumatic / 10.0;
+  };
+
+  FORCE_INLINE float targetPneumatic() {
+  	return target_value_pneumatic / 10.0;
+  };
+
+  FORCE_INLINE void setTargetPressure(const float &psi) {
+    target_value_pneumatic = psi * 10; // multiply by 10 to eliminate floating point #s
+  };
+#endif
 
 FORCE_INLINE void setTargetHotend(const float &celsius, uint8_t extruder) {  
   target_temperature[extruder] = celsius;

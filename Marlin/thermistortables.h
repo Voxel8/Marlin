@@ -1114,12 +1114,49 @@ const short temptable_1047[][2] PROGMEM = {
   const short temptable_998[][2] PROGMEM = {
     {1*OVERSAMPLENR, DUMMY_THERMISTOR_998_VALUE},
     {1023*OVERSAMPLENR, DUMMY_THERMISTOR_998_VALUE}
+ };
+#endif
+
+#if (PNEUMATIC_SENSOR == 1) //pneumatic sensor LUT for P255-50G-D1A
+// Lookup table to convert analog values to pressure values.
+// Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
+const short pressuretable_1[][2] PROGMEM = {
+   {0*OVERSAMPLENR,     0},
+   {102*OVERSAMPLENR,   0},
+   {921*OVERSAMPLENR, 500},         // CHECK THESE VALUES
+};
+#endif
+
+#if (PNEUMATIC_SENSOR == 2) //pneumatic sensor LUT for American Sensor Tech 4100B00100P3A0000
+// Lookup table to convert analog values to pressure values.
+// Should be ~25 psi/V, but empirical data shows ~40 psi/V
+// Supply voltage MUST BE STABLE!
+
+// Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
+const short pressuretable_2[][2] PROGMEM = {
+   {0*OVERSAMPLENR,       0},
+   {129*OVERSAMPLENR,     0},
+   {154*OVERSAMPLENR,    50},
+   {181*OVERSAMPLENR,   100},
+   {206*OVERSAMPLENR,   150},
+   {231*OVERSAMPLENR,   200},
+   {259*OVERSAMPLENR,   250},
+   {284*OVERSAMPLENR,   300},
+   {308*OVERSAMPLENR,   350},
+   {333*OVERSAMPLENR,   400},
+   {359*OVERSAMPLENR,   450},
+   {385*OVERSAMPLENR,   500},
+   {640*OVERSAMPLENR,  1000},
+   {1023*OVERSAMPLENR, 1000},
 };
 #endif
 
 
 #define _TT_NAME(_N) temptable_ ## _N
 #define TT_NAME(_N) _TT_NAME(_N)
+
+#define _PT_NAME(_N) pressuretable_ ## _N
+#define PT_NAME(_N) _PT_NAME(_N)
 
 #ifdef THERMISTORHEATER_0
 # define HEATER_0_TEMPTABLE TT_NAME(THERMISTORHEATER_0)
@@ -1231,6 +1268,13 @@ const short temptable_1047[][2] PROGMEM = {
 #  define HEATER_BED_RAW_HI_TEMP 16383
 #  define HEATER_BED_RAW_LO_TEMP 0
 # endif
+#endif
+
+#ifdef PNEUMATICS
+  #define PRESSURETABLE PT_NAME(PNEUMATIC_SENSOR)
+  #define PRESSURETABLE_LEN (sizeof(PRESSURETABLE) / sizeof(*PRESSURETABLE))
+  #define PNEUMATIC_RAW_HI 16383
+  #define PNEUMATIC_RAW_LO 0
 #endif
 
 #endif //THERMISTORTABLES_H_
