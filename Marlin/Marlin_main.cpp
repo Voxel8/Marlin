@@ -2476,11 +2476,13 @@ Sigma_Exit:
 #endif
       setWatch();
       break;
-    case 125: // M125 - Set pneumatics pressure
-      if (code_seen('S')) {
-        setTargetPressure(code_value());
-      }
-      break;
+    #ifdef PNEUMATICS
+      case 125: // M125 - Set pneumatics pressure
+        if (code_seen('S')) {
+          setTargetPressure(code_value());
+        }
+        break;
+    #endif
     case 112: //  M112 -Emergency Stop
       kill();
       break;
