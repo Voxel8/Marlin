@@ -6,6 +6,8 @@
 ***********************************************************************************/
 #include "Configuration.h"
 
+#ifdef EXT_ADC
+
 #if EXT_ADC == 1
     #include "ADS1115.h"
 #elif EXT_ADC ==2
@@ -246,3 +248,4 @@ uint16_t regRead(uint8_t address, uint8_t reg) {
 
     return ADC_raw;
 }
+#endif
