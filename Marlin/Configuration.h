@@ -265,9 +265,9 @@ Here are some standard links for getting your machine calibrated:
 
 //24V PCB heater 4 ohm
 //from PID autotune
-    #define  DEFAULT_bedKp 87.62
-    #define  DEFAULT_bedKi 15.59
-    #define  DEFAULT_bedKd 123.10
+    #define  DEFAULT_bedKp 107.41
+    #define  DEFAULT_bedKi 21.29
+    #define  DEFAULT_bedKd 135.50
 
 // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
 #endif // PIDTEMPBED
