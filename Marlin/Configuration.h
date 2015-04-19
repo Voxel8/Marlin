@@ -70,7 +70,7 @@ Here are some standard links for getting your machine calibrated:
 // #define MACHINE_UUID "00000000-0000-0000-0000-000000000000"
 
 // This defines the number of extruders
-#define EXTRUDERS 1
+#define EXTRUDERS 2
 
 //// The following define selects which power supply you have. Please choose the one that matches your setup
 // 1 = ATX
@@ -167,7 +167,7 @@ Here are some standard links for getting your machine calibrated:
 // to check that the wiring to the thermistor is not broken.
 // Otherwise this would lead to the heater being powered on all the time.
 #define HEATER_0_MINTEMP 5
-#define HEATER_1_MINTEMP 5
+#define HEATER_1_MINTEMP 0
 #define HEATER_2_MINTEMP 5
 #define HEATER_3_MINTEMP 5
 #define BED_MINTEMP 5
@@ -477,11 +477,11 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
     // with no grid, just probe 3 arbitrary points.  A simple cross-product
     // is used to esimate the plane of the print bed
 
-      #define ABL_PROBE_PT_1_X 25
-      #define ABL_PROBE_PT_1_Y 25
+      #define ABL_PROBE_PT_1_X 150
+      #define ABL_PROBE_PT_1_Y 45
       #define ABL_PROBE_PT_2_X 95
       #define ABL_PROBE_PT_2_Y 175
-      #define ABL_PROBE_PT_3_X 175
+      #define ABL_PROBE_PT_3_X 25
       #define ABL_PROBE_PT_3_Y 25
 
   #endif // AUTO_BED_LEVELING_GRID
