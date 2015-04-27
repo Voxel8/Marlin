@@ -455,6 +455,12 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 //    Probe 3 arbitrary points on the bed (that aren't colinear)
 //    You must specify the X & Y coordinates of all 3 points
 
+  // these are the offsets to the probe relative to the extruder tip (Hotend - Probe)
+  // X and Y offsets must be integers
+  #define X_PROBE_OFFSET_FROM_EXTRUDER 18
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER -46
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER -1
+
   //#define AUTO_BED_LEVELING_GRID
   // with AUTO_BED_LEVELING_GRID, the bed is sampled in a
   // AUTO_BED_LEVELING_GRID_POINTSxAUTO_BED_LEVELING_GRID_POINTS grid
@@ -477,21 +483,14 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
     // with no grid, just probe 3 arbitrary points.  A simple cross-product
     // is used to esimate the plane of the print bed
 
-      #define ABL_PROBE_PT_1_X 150
-      #define ABL_PROBE_PT_1_Y 45
-      #define ABL_PROBE_PT_2_X 95
-      #define ABL_PROBE_PT_2_Y 175
-      #define ABL_PROBE_PT_3_X 25
-      #define ABL_PROBE_PT_3_Y 25
+      #define ABL_PROBE_PT_1_X 0+20+X_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_1_Y 60+Y_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_2_X X_MAX_POS/2+X_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_2_Y Y_MAX_POS+Y_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_3_X X_MAX_POS-20+X_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_3_Y 60+Y_PROBE_OFFSET_FROM_EXTRUDER
 
   #endif // AUTO_BED_LEVELING_GRID
-
-
-  // these are the offsets to the probe relative to the extruder tip (Hotend - Probe)
-  // X and Y offsets must be integers
-  #define X_PROBE_OFFSET_FROM_EXTRUDER 0
-  #define Y_PROBE_OFFSET_FROM_EXTRUDER 0
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0
 
   #define Z_RAISE_BEFORE_HOMING 3       // (in mm) Raise Z before homing (G28) for Probe Clearance.
                                         // Be sure you have this distance over your Z_MAX_POS in case
@@ -523,8 +522,8 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
   #ifdef Z_SAFE_HOMING
 
-    #define Z_SAFE_HOMING_X_POINT (3)    // X point for Z homing when homing all axis (G28)
-    #define Z_SAFE_HOMING_Y_POINT (103)    // Y point for Z homing when homing all axis (G28)
+    #define Z_SAFE_HOMING_X_POINT (3+X_PROBE_OFFSET_FROM_EXTRUDER)    // X point for Z homing when homing all axis (G28)
+    #define Z_SAFE_HOMING_Y_POINT (103+Y_PROBE_OFFSET_FROM_EXTRUDER)    // Y point for Z homing when homing all axis (G28)
 
   #endif
 
