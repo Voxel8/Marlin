@@ -661,6 +661,9 @@ void Config_PrintSettings(bool forReplay) {
     SERIAL_ECHOPAIR(" Z", -zprobe_zoffset);
     SERIAL_EOL;
   #endif
+
+  SERIAL_ECHO_START;
+  SERIAL_ECHOLNPGM("Ready");
 }
 
 #endif // !DISABLE_M503
