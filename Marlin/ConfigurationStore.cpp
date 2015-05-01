@@ -662,8 +662,7 @@ void Config_PrintSettings(bool forReplay) {
     SERIAL_EOL;
   #endif
 
-  SERIAL_ECHO_START;
-  SERIAL_ECHOLNPGM("Ready");
+  SERIAL_PROTOCOLLN("ok");
 }
 
 #endif // !DISABLE_M503
