@@ -183,5 +183,6 @@
                         _E0_PINS _E1_PINS _E2_PINS _E3_PINS \
                         analogInputToDigitalPin(TEMP_BED_PIN) \
                        }
+#define RESUME_PIN         24
 
 #endif //__PINS_H
