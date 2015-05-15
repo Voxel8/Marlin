@@ -148,7 +148,7 @@ Here are some standard links for getting your machine calibrated:
 //     #define DUMMY_THERMISTOR_998_VALUE 25
 //     #define DUMMY_THERMISTOR_999_VALUE 100
 
-#define TEMP_SENSOR_0 147
+#define TEMP_SENSOR_0 1 //55 //147 //Michael Perrone edit: switched back to 100k thermistor 
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
@@ -212,15 +212,20 @@ Here are some standard links for getting your machine calibrated:
   #define PID_dT ((OVERSAMPLENR * 10.0)/(F_CPU / 64.0 / 256.0)) //sampling period of the temperature routine
 
 // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
-// E3D V6
+// E3D V6 12v
 //    #define  DEFAULT_Kp 47.31
 //    #define  DEFAULT_Ki 5.43
 //    #define  DEFAULT_Kd 103.09
+
+// E3D V6 24v
+    #define  DEFAULT_Kp 20.23
+    #define  DEFAULT_Ki 0.91
+    #define  DEFAULT_Kd 112.51
     
 // E3D V6 with PT100
-    #define  DEFAULT_Kp 5.8
-    #define  DEFAULT_Ki 0.25
-    #define  DEFAULT_Kd 33.26
+//    #define  DEFAULT_Kp 5.8
+//    #define  DEFAULT_Ki 0.25
+//    #define  DEFAULT_Kd 33.26
 
 // MakerGear
 //    #define  DEFAULT_Kp 7.0
@@ -431,7 +436,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define X_MIN_POS 0
 #define Y_MAX_POS 185
 #define Y_MIN_POS 0
-#define Z_MAX_POS 150
+#define Z_MAX_POS 120
 #define Z_MIN_POS 0
 
 #define X_MAX_LENGTH (X_MAX_POS - X_MIN_POS)
