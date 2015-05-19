@@ -432,9 +432,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define max_software_endstops true  // If true, axis won't move to coordinates greater than the defined lengths below.
 
 // Travel limits after homing (units are in mm)
-#define X_MAX_POS 190
+#define X_MAX_POS 300
 #define X_MIN_POS 0
-#define Y_MAX_POS 185
+#define Y_MAX_POS 300
 #define Y_MIN_POS 0
 #define Z_MAX_POS 120
 #define Z_MIN_POS 0
@@ -495,9 +495,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
       #define ABL_PROBE_PT_1_X 0+25+X_PROBE_OFFSET_FROM_EXTRUDER
       #define ABL_PROBE_PT_1_Y 60+Y_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_2_X X_MAX_POS/2+X_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_2_Y Y_MAX_POS+Y_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_3_X X_MAX_POS-25+X_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_2_X 190/2+X_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_2_Y 185+Y_PROBE_OFFSET_FROM_EXTRUDER   // you can't use x_max or y_max as variables because we made the bed size larger than it actually i
+      #define ABL_PROBE_PT_3_X 190-25+X_PROBE_OFFSET_FROM_EXTRUDER
       #define ABL_PROBE_PT_3_Y 60+Y_PROBE_OFFSET_FROM_EXTRUDER
 
   #endif // AUTO_BED_LEVELING_GRID
@@ -583,8 +583,8 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 // Z motor: (steps * microsteps) / (leadscrew pitch) --> (200steps * 4) / 2mm = 800
 // E motor: 
 #define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667,106.6666666666667,400,443}  // default steps per unit for Voxel8 gen3
-#define DEFAULT_MAX_FEEDRATE          {500, 500, 20, 25}    // (mm/sec)
-#define DEFAULT_MAX_ACCELERATION      {9000,9000,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
+#define DEFAULT_MAX_FEEDRATE          {500, 500, 20, 600}    // (mm/sec)
+#define DEFAULT_MAX_ACCELERATION      {5000,5000,100,9000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
 
 #define DEFAULT_ACCELERATION          3000    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  3000   // X, Y, Z and E max acceleration in mm/s^2 for retracts
@@ -596,7 +596,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 // #define EXTRUDER_OFFSET_Y {0.0, 5.00}  // (in mm) for each extruder, offset of the hotend on the Y axis
 
 // The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
-#define DEFAULT_XYJERK                20.0    // (mm/sec)
+#define DEFAULT_XYJERK                8.0    // (mm/sec)
 #define DEFAULT_ZJERK                 0.4     // (mm/sec)
 #define DEFAULT_EJERK                 5.0    // (mm/sec)
 
