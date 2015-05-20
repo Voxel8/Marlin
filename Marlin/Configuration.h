@@ -148,7 +148,7 @@ Here are some standard links for getting your machine calibrated:
 //     #define DUMMY_THERMISTOR_998_VALUE 25
 //     #define DUMMY_THERMISTOR_999_VALUE 100
 
-#define TEMP_SENSOR_0 1 //55 //147 //Michael Perrone edit: switched back to 100k thermistor 
+#define TEMP_SENSOR_0 5 
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
@@ -218,14 +218,19 @@ Here are some standard links for getting your machine calibrated:
 //    #define  DEFAULT_Kd 103.09
 
 // E3D V6 24v
-    #define  DEFAULT_Kp 20.23
-    #define  DEFAULT_Ki 0.91
-    #define  DEFAULT_Kd 112.51
+    #define  DEFAULT_Kp 22.66
+    #define  DEFAULT_Ki 1.92
+    #define  DEFAULT_Kd 66.91
     
 // E3D V6 with PT100
 //    #define  DEFAULT_Kp 5.8
 //    #define  DEFAULT_Ki 0.25
 //    #define  DEFAULT_Kd 33.26
+
+// D3D 24V New Heat Block
+//    #define  DEFAULT_Kp 9.83
+//    #define  DEFAULT_Ki 0.37
+//    #define  DEFAULT_Kd 65.41
 
 // MakerGear
 //    #define  DEFAULT_Kp 7.0
@@ -496,7 +501,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
       #define ABL_PROBE_PT_1_X 0+25+X_PROBE_OFFSET_FROM_EXTRUDER
       #define ABL_PROBE_PT_1_Y 60+Y_PROBE_OFFSET_FROM_EXTRUDER
       #define ABL_PROBE_PT_2_X 190/2+X_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_2_Y 185+Y_PROBE_OFFSET_FROM_EXTRUDER   // you can't use x_max or y_max as variables because we made the bed size larger than it actually i
+      #define ABL_PROBE_PT_2_Y 175+Y_PROBE_OFFSET_FROM_EXTRUDER   // you can't use x_max or y_max as variables because we made the bed size larger than it actually i
       #define ABL_PROBE_PT_3_X 190-25+X_PROBE_OFFSET_FROM_EXTRUDER
       #define ABL_PROBE_PT_3_Y 60+Y_PROBE_OFFSET_FROM_EXTRUDER
 
@@ -596,9 +601,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 // #define EXTRUDER_OFFSET_Y {0.0, 5.00}  // (in mm) for each extruder, offset of the hotend on the Y axis
 
 // The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
-#define DEFAULT_XYJERK                8.0    // (mm/sec)
+#define DEFAULT_XYJERK                20.0    // (mm/sec)
 #define DEFAULT_ZJERK                 0.4     // (mm/sec)
-#define DEFAULT_EJERK                 5.0    // (mm/sec)
+#define DEFAULT_EJERK                 20.0    // (mm/sec)
 
 
 //=============================================================================
