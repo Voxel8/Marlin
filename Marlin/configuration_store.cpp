@@ -874,8 +874,11 @@ void Config_PrintSettings(bool forReplay) {
         SERIAL_ECHOPAIR("Z-Probe Offset (mm):", -zprobe_zoffset);
       }
     #endif
+
     SERIAL_EOL;
   #endif
+
+  SERIAL_ECHOLN("ok");
 }
 
 #endif // !DISABLE_M503
