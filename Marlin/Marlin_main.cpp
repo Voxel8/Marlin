@@ -178,6 +178,7 @@
  * M304 - Set bed PID parameters P I and D
  * M380 - Activate solenoid on active extruder
  * M381 - Disable all solenoids
+ * M399 - Pause command
  * M400 - Finish all moves
  * M401 - Lower Z probe if present
  * M402 - Raise Z probe if present
@@ -5046,6 +5047,20 @@ inline void gcode_M303() {
 #endif // EXT_SOLENOID
 
 /**
+  M399: Pause command
+**/
+inline void gcode_M399() {
+  st_synchronize();
+  pinMode(RESUME_PIN, INPUT);
+  digitalWrite(RESUME_PIN, HIGH);
+  while (digitalRead(RESUME_PIN)) {
+    manage_heater();
+    manage_inactivity();
+    lcd_update();
+  }
+}
+  
+/**
  * M400: Finish all moves
  */
 inline void gcode_M400() { st_synchronize(); }
@@ -6111,6 +6126,10 @@ void process_next_command() {
           break;
       #endif // SCARA
 
+	  case 399:
+		gcode_M399();
+		break;
+		  
       case 400: // M400 finish all moves
         gcode_M400();
         break;

@@ -253,5 +253,7 @@
 
 #define HAS_DIGIPOTSS (DIGIPOTSS_PIN >= 0)
 
+#define RESUME_PIN           24
+
 #endif //__PINS_H
 
