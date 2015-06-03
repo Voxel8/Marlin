@@ -6126,9 +6126,9 @@ void process_next_command() {
           break;
       #endif // SCARA
 
-	  case 399:
-		gcode_M399();
-		break;
+      case 399:
+        gcode_M399();
+        break;
 		  
       case 400: // M400 finish all moves
         gcode_M400();
