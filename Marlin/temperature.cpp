@@ -1424,7 +1424,7 @@ ISR(TIMER0_COMPB_vect) {
     }
 
     if (soft_pwm_0 < pwm_count) { WRITE_HEATER_0(0); }
-    #if EXTRUDERS > 1
+    #if EXTRUDERS > 1 && HAS_HEATER_1
       if (soft_pwm_1 < pwm_count) WRITE_HEATER_1(0);
       #if EXTRUDERS > 2
         if (soft_pwm_2 < pwm_count) WRITE_HEATER_2(0);
