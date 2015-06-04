@@ -149,6 +149,7 @@
  * M119 - Output Endstop status to serial port
  * M120 - Enable endstop detection
  * M121 - Disable endstop detection
+ * M125 - Set pneumatics target pressure
  * M126 - Solenoid Air Valve Open (BariCUDA support by jmil)
  * M127 - Solenoid Air Valve Closed (BariCUDA vent to atmospheric pressure by jmil)
  * M128 - EtoP Open (BariCUDA EtoP = electricity to air pressure transducer by jmil)
@@ -3848,6 +3849,13 @@ inline void gcode_M105() {
     SERIAL_ERRORLNPGM(MSG_ERR_NO_THERMISTORS);
   #endif
 
+  #ifdef PNEUMATICS
+    SERIAL_PROTOCOLPGM(" P:");
+    SERIAL_PROTOCOL_F(pressurePneumatic(), 1);
+    SERIAL_PROTOCOLPGM(" /");
+    SERIAL_PROTOCOL_F(targetPneumatic(), 1);
+  #endif
+    
   SERIAL_PROTOCOLPGM(" @:");
   #ifdef EXTRUDER_WATTS
     SERIAL_PROTOCOL((EXTRUDER_WATTS * getHeaterPower(target_extruder))/127);
@@ -4368,6 +4376,17 @@ inline void gcode_M120() { enable_endstops(true); }
  * M121: Disable endstops
  */
 inline void gcode_M121() { enable_endstops(false); }
+
+#ifdef PNEUMATICS
+  /**
+   * M125 - Set pneumatics pressure
+   */
+  inline void gcode_M125() {
+    if (code_seen('S')) {
+      setTargetPressure(code_value());
+    }
+  }
+#endif //PNEUMATICS
 
 #if ENABLED(BLINKM)
 
@@ -6004,6 +6023,12 @@ void process_next_command() {
         gcode_M119();
         break;
 
+      #ifdef PNEUMATICS
+        case 125: // M125: Set pneumatics target pressure
+          gcode_M125();
+          break;
+      #endif
+        
       #if ENABLED(ULTIPANEL)
 
         case 145: // M145: Set material heatup parameters
