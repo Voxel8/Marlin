@@ -152,7 +152,8 @@ Here are some standard links for getting your machine calibrated:
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
-#define TEMP_SENSOR_BED 1
+#define TEMP_SENSOR_BED 8 //we actually use the vishay 0805, different form factor but should be the same. Makibox calibrated their print bed thermistor
+//to a different table maybe we will have to o the same
 
 // This makes temp sensor 1 a redundant sensor for sensor 0. If the temperatures difference between these sensors is to high the print will be aborted.
 //#define TEMP_SENSOR_1_AS_REDUNDANT
@@ -587,12 +588,12 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 // XY motors: (steps * microsteps)/ (tooth-pitch * tooth-count) --> (200steps * 16) / (2mm * 15 teeth) = 106.66666666666667
 // Z motor: (steps * microsteps) / (leadscrew pitch) --> (200steps * 4) / 2mm = 800
 // E motor: 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667,106.6666666666667,400,443}  // default steps per unit for Voxel8 gen3
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667,106.6666666666667,400,555}  // default steps per unit for Voxel8 gen3
 #define DEFAULT_MAX_FEEDRATE          {500, 500, 20, 600}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {5000,5000,100,9000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
 
-#define DEFAULT_ACCELERATION          2000    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  2000   // X, Y, Z and E max acceleration in mm/s^2 for retracts
+#define DEFAULT_ACCELERATION          1500    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  1500   // X, Y, Z and E max acceleration in mm/s^2 for retracts
 
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
 // The offset has to be X=0, Y=0 for the extruder 0 hotend (default extruder).
