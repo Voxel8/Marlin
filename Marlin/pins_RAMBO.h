@@ -63,8 +63,15 @@
 #define HEATER_0_PIN  9
 #define TEMP_0_PIN 6
 
-#define HEATER_1_PIN 7
-#define TEMP_1_PIN 1
+#ifdef PNEUMATICS
+    #define PNEUMATIC_PUMP_PIN 7
+    #define PNEUMATIC_PIN 3         // A3 (Analog Pin Numbering)
+    #define HEATER_1_PIN -1         // Heat_1 Output Used for Pneumatics
+    #define TEMP_1_PIN -1           // (Analog Pin Numbering)
+#else
+    #define HEATER_1_PIN 7
+    #define TEMP_1_PIN 1            // A1 (Analog Pin Numbering)
+#endif
 
 #ifdef BARICUDA
   #define HEATER_2_PIN 6
