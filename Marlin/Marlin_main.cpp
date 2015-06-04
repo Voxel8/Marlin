@@ -55,6 +55,10 @@
 #include "pins_arduino.h"
 #include "math.h"
 
+#ifdef EXT_ADC
+  #include "ADC.h"
+#endif
+
 #ifdef BLINKM
   #include "blinkm.h"
   #include "Wire.h"
@@ -170,6 +174,8 @@
  * M220 - Set speed factor override percentage: S<factor in percent>
  * M221 - Set extrude factor override percentage: S<factor in percent>
  * M226 - Wait until the specified pin reaches the state required: P<pin number> S<pin state>
+ * M234 - Output raw external ADC value
+ * M235 - Output processed external ADC data
  * M240 - Trigger a camera to take a photograph
  * M250 - Set LCD contrast C<contrast value> (value 0..63)
  * M280 - Set servo position absolute. P: servo index, S: angle or microseconds
@@ -4072,6 +4078,27 @@ inline void gcode_M226() {
   } // code_seen('P')
 }
 
+#ifdef EXT_ADC
+  /**
+   * M234 - Return raw external ADC value
+   */
+  inline void gcode_M234() {
+    SERIAL_PROTOCOLPGM("ok ");
+    SERIAL_PROTOCOL(EXT_ADC_RAW_0);
+    SERIAL_PROTOCOLLN("");
+  }
+  /**
+   * M235 - Return processed external ADC value
+   */
+  inline void gcode_M235() {
+    //SERIAL_PROTOCOLLN(MSG_M235_REPORT);         Commented out so only number is returned
+    //SERIAL_PROTOCOLPGM(MSG_EXT_ADC_REPORT);
+    SERIAL_PROTOCOLPGM("ok ");
+    SERIAL_PROTOCOL(EXT_ADC_READ_0);
+    SERIAL_PROTOCOLLN("");
+  }
+#endif
+ 
 #if NUM_SERVOS > 0
 
   /**
@@ -5329,6 +5356,15 @@ void process_commands() {
         gcode_M226();
         break;
 
+      #ifdef EXT_ADC
+        case 234: // M234 Return raw external ADC value
+          gcode_M234();
+          break;
+        case 235: // M235 Return processed external ADC value
+          gcode_M235();
+          break;
+      #endif // EXT_ADC
+
       #if NUM_SERVOS > 0
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
           gcode_M280();
@@ -5396,7 +5432,7 @@ void process_commands() {
           break;
       #endif // SCARA
 
-      case 399:
+      case 399: // M399 Pause command
         gcode_M399();
         break;
 		  
