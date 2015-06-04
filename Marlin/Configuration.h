@@ -126,6 +126,31 @@ Here are some standard links for getting your machine calibrated:
 
 #endif
 
+//===========================================================================
+//============================== External ADC ===============================
+//===========================================================================
+// This feature allows for the use of an external ADC *in addition* to the on-board 10-bit ADC
+//
+//// Select the appropriate ADC according to the number associated with the chip you are using
+// 1 = Texas Instruments ADS1115 (16-bit)
+// 2 = Texas Instruments ADS1015 (12-bit)
+//
+// Define this to allow the use of an external ADC 
+#define EXT_ADC 1
+
+// Define ADC mode of operation (Single-ended or Differential) for the TI chips
+// ** This definition ONLY affects code that refers to EXT_ADC_RAW_x.
+// ** Even if a mode is defined here, both single-ended and differential readings
+// ** can be taken by using the functions defind in ADS1x15.cpp 
+
+// 1 = Single-Ended Mode
+// 2 = Differential Mode
+#if EXT_ADC == (1 || 2)
+
+  #define EXT_ADC_MODE 1 // Single-Ended Mode
+
+#endif
+
 // @section temperature
 
 //===========================================================================

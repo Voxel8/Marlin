@@ -4753,7 +4753,7 @@ inline void gcode_M226() {
     SERIAL_PROTOCOLLN("");
   }
 #endif
- 
+
 #if HAS_SERVOS
 
   /**
