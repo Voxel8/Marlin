@@ -148,7 +148,7 @@ Here are some standard links for getting your machine calibrated:
 //     #define DUMMY_THERMISTOR_998_VALUE 25
 //     #define DUMMY_THERMISTOR_999_VALUE 100
 
-#define TEMP_SENSOR_0 5 
+#define TEMP_SENSOR_0 20 
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
@@ -219,14 +219,14 @@ Here are some standard links for getting your machine calibrated:
 //    #define  DEFAULT_Kd 103.09
 
 // E3D V6 24v
-    #define  DEFAULT_Kp 22.66
-    #define  DEFAULT_Ki 1.92
-    #define  DEFAULT_Kd 66.91
+//    #define  DEFAULT_Kp 22.66
+//    #define  DEFAULT_Ki 1.92
+//    #define  DEFAULT_Kd 66.91
     
 // E3D V6 with PT100
-//    #define  DEFAULT_Kp 5.8
-//    #define  DEFAULT_Ki 0.25
-//    #define  DEFAULT_Kd 33.26
+    #define  DEFAULT_Kp 14.16
+    #define  DEFAULT_Ki 0.96
+    #define  DEFAULT_Kd 54.33
 
 // D3D 24V New Heat Block
 //    #define  DEFAULT_Kp 9.83

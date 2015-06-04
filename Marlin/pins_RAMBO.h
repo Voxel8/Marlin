@@ -50,7 +50,7 @@
 #define TEMP_BED_PIN 2              // A2 (Analog Pin Numbering)
 
 #define HEATER_0_PIN  9
-#define TEMP_0_PIN 0                // A0 (Analog Pin Numbering)
+#define TEMP_0_PIN 6                // A6 (Analog Pin Numbering)
 
 #ifdef PNEUMATICS
     #define PNEUMATIC_PUMP_PIN 7
