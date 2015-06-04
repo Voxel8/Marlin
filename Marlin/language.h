@@ -111,6 +111,9 @@
 
 // Serial Console Messages (do not translate those!)
 
+#define MSG_M235_REPORT                     "Reporting Distance Measurement"
+#define MSG_EXT_ADC_REPORT                  "Current Measurement (um): "
+
 #define MSG_Enqueueing                      "enqueueing \""
 #define MSG_POWERUP                         "PowerUp"
 #define MSG_EXTERNAL_RESET                  " External Reset"
