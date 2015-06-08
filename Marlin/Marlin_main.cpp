@@ -3983,10 +3983,7 @@ inline void gcode_M206() {
 
     if (code_seen('X')) extruder_offset[X_AXIS][target_extruder] = code_value();
     if (code_seen('Y')) extruder_offset[Y_AXIS][target_extruder] = code_value();
-
-    #ifdef DUAL_X_CARRIAGE
-      if (code_seen('Z')) extruder_offset[Z_AXIS][target_extruder] = code_value();
-    #endif
+    if (code_seen('Z')) extruder_offset[Z_AXIS][target_extruder] = code_value();
 
     SERIAL_ECHO_START;
     SERIAL_ECHOPGM(MSG_HOTEND_OFFSET);
@@ -3995,10 +3992,8 @@ inline void gcode_M206() {
       SERIAL_ECHO(extruder_offset[X_AXIS][e]);
       SERIAL_CHAR(',');
       SERIAL_ECHO(extruder_offset[Y_AXIS][e]);
-      #ifdef DUAL_X_CARRIAGE
-        SERIAL_CHAR(',');
-        SERIAL_ECHO(extruder_offset[Z_AXIS][e]);
-      #endif
+      SERIAL_CHAR(',');
+      SERIAL_ECHO(extruder_offset[Z_AXIS][e]);
     }
     SERIAL_EOL;
   }
@@ -4992,8 +4987,8 @@ inline void gcode_T() {
             delayed_move_time = 0;
           }
         #else // !DUAL_X_CARRIAGE
-          // Offset extruder (only by XY)
-          for (int i=X_AXIS; i<=Y_AXIS; i++)
+          // Offset extruder (only by XYZ)
+          for (int i=X_AXIS; i<=Z_AXIS; i++)
             current_position[i] += extruder_offset[i][tmp_extruder] - extruder_offset[i][active_extruder];
           // Set the new active extruder and position
           active_extruder = tmp_extruder;
