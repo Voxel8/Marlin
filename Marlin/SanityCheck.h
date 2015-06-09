@@ -297,7 +297,7 @@
     #if !HAS_HEATER_2
       #error HEATER_2_PIN not defined for this board
     #endif
-  #elif EXTRUDERS > 1 || defined(HEATERS_PARALLEL)
+ #elif (EXTRUDERS > 1 || defined(HEATERS_PARALLEL)) && !defined(PNEUMATICS)
     #if !HAS_HEATER_1
       #error HEATER_1_PIN not defined for this board
     #endif

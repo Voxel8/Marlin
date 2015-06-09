@@ -353,6 +353,34 @@ Here are some standard links for getting your machine calibrated:
 #define THERMAL_RUNAWAY_PROTECTION_BED_PERIOD 20 // in seconds
 #define THERMAL_RUNAWAY_PROTECTION_BED_HYSTERESIS 2 // in degree Celsius
 
+//===========================================================================
+//============================ Pneumatics Settings ==========================
+//===========================================================================
+
+// Define this if you are using pneumatic direct write on the RAMBo AND you are not
+// using HEAT_1 output
+#define PNEUMATICS
+
+#ifdef PNEUMATICS
+
+// Set Pressure Sensor Type HERE:
+// -----------------------------
+// 0 - No Pressure Sensor
+// 1 - Kavlico P255-50G-D1A
+// 2 - American Sensor Tech. 4100 Series (1-5V output)
+//
+
+  #define PNEUMATIC_SENSOR 2
+  
+  // 0 is a valid pressure reading
+  #define PNEUMATIC_MIN -1
+  
+  // If the pressure goes above this value the pump will be turned off. This prevents
+  // the tank from being overpressurized. This value has units of PSI * 10 (to eliminate
+  // floating point numbers in the lookup table).
+  #define PNEUMATIC_MAX 500
+
+#endif
 
 //===========================================================================
 //============================= Mechanical Settings =========================

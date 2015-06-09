@@ -92,6 +92,16 @@
 #define EXTRUDER_AUTO_FAN_TEMPERATURE 50
 #define EXTRUDER_AUTO_FAN_SPEED   255  // == full speed
 
+//===========================================================================
+//=============================Pneumatics Settings===========================
+//===========================================================================
+
+#ifdef PNEUMATICS
+  // Set pneumatics hysteresis to 20 (2 PSI * 10 = 20)
+  #define PNEUMATIC_HYSTERESIS 20
+  
+  #define PNEUMATIC_CHECK_INTERVAL 2500 // in ms
+#endif
 
 //===========================================================================
 //=============================Mechanical Settings===========================
