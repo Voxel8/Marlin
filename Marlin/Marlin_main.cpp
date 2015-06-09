@@ -313,9 +313,13 @@ bool target_direction;
   #ifndef EXTRUDER_OFFSET_Y
     #define EXTRUDER_OFFSET_Y { 0 }
   #endif
+  #ifndef EXTRUDER_OFFSET_Z
+    #define EXTRUDER_OFFSET_Z { 0 }
+  #endif
   float extruder_offset[][EXTRUDERS] = {
     EXTRUDER_OFFSET_X,
-    EXTRUDER_OFFSET_Y
+    EXTRUDER_OFFSET_Y,
+    EXTRUDER_OFFSET_Z
     #if ENABLED(DUAL_X_CARRIAGE)
       , { 0 } // supports offsets in XYZ plane
     #endif
