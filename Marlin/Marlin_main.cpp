@@ -4100,7 +4100,7 @@ inline void gcode_M226() {
   inline void gcode_M234() {
     SERIAL_PROTOCOLPGM("ok ");
     SERIAL_PROTOCOL(EXT_ADC_RAW_0);
-    SERIAL_PROTOCOLLN("");
+    SERIAL_EOL;
   }
   /**
    * M235 - Return processed external ADC value
@@ -4110,7 +4110,7 @@ inline void gcode_M226() {
     //SERIAL_PROTOCOLPGM(MSG_EXT_ADC_REPORT);
     SERIAL_PROTOCOLPGM("ok ");
     SERIAL_PROTOCOL(EXT_ADC_READ_0);
-    SERIAL_PROTOCOLLN("");
+    SERIAL_EOL;
   }
 #endif
  
@@ -5380,9 +5380,11 @@ void process_commands() {
       #ifdef EXT_ADC
         case 234: // M234 Return raw external ADC value
           gcode_M234();
+          return;
           break;
         case 235: // M235 Return processed external ADC value
           gcode_M235();
+          return;
           break;
       #endif // EXT_ADC
 
