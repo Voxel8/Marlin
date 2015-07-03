@@ -16,7 +16,7 @@
     #if NUM_SERVOS > 2
       #define SERVO2_PIN   24 //Motor header MX3
       #if NUM_SERVOS > 3
-        #define SERVO2_PIN  5 //pwm header pin 5
+        #define SERVO2_PIN  9 //pwm header pin 5
       #endif
     #endif
   #endif
@@ -57,11 +57,16 @@
 #define Z_MS1_PIN 68
 #define Z_MS2_PIN 67
 
+#define BED_AVAIL_PIN 82	// From key circuit
 #define HEATER_BED_PIN 4
 #define TEMP_BED_PIN 2
 
-#define HEATER_0_PIN  9
-#define TEMP_0_PIN 6
+#define CART1_SIG1 5    // PWM Capable
+#define CART1_SIG2 46   // PWM Capable
+#define CART2_SIG1 45   // PWM Capable
+
+#define HEATER_0_PIN  CART1_SIG1
+#define TEMP_0_PIN 7
 
 #ifdef PNEUMATICS
     #define PNEUMATIC_PUMP_PIN 7
@@ -101,6 +106,8 @@
 #define SDSS               53
 #define LED_PIN            13
 #define FAN_PIN            8  
+#define FAN_CHASSIS_TOP    13   // Shared with LED pin for now
+#define FAN_CHASSIS_BOT    44
 
 /**********************************************************
   Fan Pins
