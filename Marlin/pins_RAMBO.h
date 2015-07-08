@@ -67,6 +67,7 @@
 
 #define CART1_SIG1 5    // PWM Capable
 #define CART1_SIG2 46   // PWM Capable
+#define CART1_SIG3 74   // 
 #define CART2_SIG1 45   // PWM Capable
 
 #define HEATER_0_PIN  CART1_SIG1

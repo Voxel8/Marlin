@@ -654,6 +654,11 @@ void setup() {
   MYSERIAL.begin(BAUDRATE);
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
+  
+  pinMode(CART1_SIG2, OUTPUT);
+  digitalWrite(CART1_SIG2, LOW);
+  pinMode(FAN_CHASSIS_BOT, OUTPUT);
+  digitalWrite(FAN_CHASSIS_BOT, HIGH);
 
   // Check startup - does nothing if bootloader sets MCUSR to 0
   byte mcu = MCUSR;
