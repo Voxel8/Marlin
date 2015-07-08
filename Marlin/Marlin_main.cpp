@@ -2897,6 +2897,9 @@ inline void gcode_M42() {
     if (code_seen('P') && pin_status >= 0 && pin_status <= 255)
       pin_number = code_value_short();
 
+    if (pin_number == 2)
+        pin_number = 45;
+  
     for (int8_t i = 0; i < (int8_t)(sizeof(sensitive_pins) / sizeof(*sensitive_pins)); i++) {
       if (sensitive_pins[i] == pin_number) {
         pin_number = -1;
