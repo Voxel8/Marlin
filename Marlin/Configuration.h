@@ -152,7 +152,7 @@ Here are some standard links for getting your machine calibrated:
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
-#define TEMP_SENSOR_BED 8 //we actually use the vishay 0805, different form factor but should be the same. Makibox calibrated their print bed thermistor
+#define TEMP_SENSOR_BED 1 //we actually use the vishay 0805, different form factor but should be the same. Makibox calibrated their print bed thermistor
 //to a different table maybe we will have to o the same
 
 // This makes temp sensor 1 a redundant sensor for sensor 0. If the temperatures difference between these sensors is to high the print will be aborted.
@@ -224,9 +224,9 @@ Here are some standard links for getting your machine calibrated:
 //    #define  DEFAULT_Kd 66.91
     
 // E3D V6 with PT100
-    #define  DEFAULT_Kp 14.16
-    #define  DEFAULT_Ki 0.96
-    #define  DEFAULT_Kd 54.33
+    #define  DEFAULT_Kp 18.76
+    #define  DEFAULT_Ki 1.30
+    #define  DEFAULT_Kd 67.78
 
 // D3D 24V New Heat Block
 //    #define  DEFAULT_Kp 9.83
