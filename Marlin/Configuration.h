@@ -660,8 +660,8 @@ const bool Z_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic 
 // XY motors: (steps * microsteps)/ (tooth-pitch * tooth-count) --> (200steps * 16) / (2mm * 15 teeth) = 106.66666666666667
 // Z motor: (steps * microsteps) / (leadscrew pitch) --> (200steps * 4) / 2mm = 800
 // E motor: 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667*2,106.6666666666667*2,400,555}  // default steps per unit for Voxel8 gen3
-#define DEFAULT_MAX_FEEDRATE          {185/2, 185/2, 20, 600}    // (mm/sec)
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667/2,106.6666666666667/2,400,555}  // default steps per unit for Voxel8 gen3
+#define DEFAULT_MAX_FEEDRATE          {185*2, 185*2, 20, 600}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {5000,5000,100,9000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
 
 #define DEFAULT_ACCELERATION          1500    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
