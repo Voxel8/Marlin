@@ -279,9 +279,9 @@ Here are some standard links for getting your machine calibrated:
 //    #define  DEFAULT_Kd 103.09
 
 // E3D V6 24v
-    #define  DEFAULT_Kp 22.66
-    #define  DEFAULT_Ki 1.92
-    #define  DEFAULT_Kd 66.91
+//  #define  DEFAULT_Kp 22.66
+//  #define  DEFAULT_Ki 1.92
+//  #define  DEFAULT_Kd 66.91
     
 // E3D V6 with PT100
 //    #define  DEFAULT_Kp 5.8
@@ -292,6 +292,12 @@ Here are some standard links for getting your machine calibrated:
 //    #define  DEFAULT_Kp 9.83
 //    #define  DEFAULT_Ki 0.37
 //    #define  DEFAULT_Kd 65.41
+
+// D3D 24V New Heat Block
+    #define  DEFAULT_Kp 11.44
+    #define  DEFAULT_Ki 0.3
+    #define  DEFAULT_Kd 65.41
+
 #endif // PIDTEMP
 
 //===========================================================================
