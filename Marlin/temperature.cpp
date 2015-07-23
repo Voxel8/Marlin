@@ -1693,7 +1693,7 @@ ISR(TIMER0_COMPB_vect) {
       #endif
       if (current_temperature_raw[1] GE1 maxttemp_raw[1]) max_temp_error(1);
       else if (minttemp_raw[1] GE1 current_temperature_raw[1]) min_temp_error(1);
-      else time_since_last_err[0] = 0;
+      else time_since_last_err[1] = 0;
     #endif // TEMP_SENSOR_1
 
     #if HAS_TEMP_2
@@ -1704,7 +1704,7 @@ ISR(TIMER0_COMPB_vect) {
       #endif
       if (current_temperature_raw[2] GE2 maxttemp_raw[2]) max_temp_error(2);
       else if (minttemp_raw[2] GE2 current_temperature_raw[2]) min_temp_error(2);
-      else time_since_last_err[0] = 0;
+      else time_since_last_err[2] = 0;
     #endif // TEMP_SENSOR_2
 
     #if HAS_TEMP_3
@@ -1715,7 +1715,7 @@ ISR(TIMER0_COMPB_vect) {
       #endif
       if (current_temperature_raw[3] GE3 maxttemp_raw[3]) max_temp_error(3);
       else if (minttemp_raw[3] GE3 current_temperature_raw[3]) min_temp_error(3);
-      else time_since_last_err[0] = 0;
+      else time_since_last_err[3] = 0;
     #endif // TEMP_SENSOR_3
 
     #if HAS_TEMP_BED
@@ -1728,7 +1728,7 @@ ISR(TIMER0_COMPB_vect) {
         target_temperature_bed = 0;
         bed_max_temp_error();
       }
-      else time_since_last_err[0] = 0;
+      else time_since_last_err_bed = 0;
     #endif
 
     #if HAS_PNEUMATIC
