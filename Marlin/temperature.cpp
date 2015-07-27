@@ -51,6 +51,8 @@ int current_temperature_bed_raw = 0;
 int current_pneumatic_raw = 0;
 float current_temperature_bed = 0.0;
 float current_pneumatic = 0.0;
+millis_t time_since_last_err[4] = { 0 };
+millis_t time_since_last_err_bed = 0;
 #ifdef TEMP_SENSOR_1_AS_REDUNDANT
   int redundant_temperature_raw = 0;
   float redundant_temperature = 0.0;
@@ -476,18 +478,35 @@ inline void _temp_error(int e, const char *msg1, const char *msg2) {
 }
 
 void max_temp_error(uint8_t e) {
-  disable_all_heaters();
-  _temp_error(e, PSTR(MSG_MAXTEMP_EXTRUDER_OFF), PSTR(MSG_ERR_MAXTEMP));
+// Temp error has been reset
+  if (time_since_last_err[e] == 0) {
+    time_since_last_err[e] = millis();
+  }
+// There has been a recent error, if was more than a second ago, it is probably an error
+  else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
+    disable_all_heaters();
+    _temp_error(e, PSTR(MSG_MAXTEMP_EXTRUDER_OFF), PSTR(MSG_ERR_MAXTEMP));
+  }
 }
 void min_temp_error(uint8_t e) {
-  disable_all_heaters();
-  _temp_error(e, PSTR(MSG_MINTEMP_EXTRUDER_OFF), PSTR(MSG_ERR_MINTEMP));
+  if (time_since_last_err[e] == 0) {
+    time_since_last_err[e] = millis();
+  }
+  else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
+    disable_all_heaters();
+    _temp_error(e, PSTR(MSG_MINTEMP_EXTRUDER_OFF), PSTR(MSG_ERR_MINTEMP));
+  }
 }
 void bed_max_temp_error(void) {
-  #if HAS_HEATER_BED
-    WRITE_HEATER_BED(0);
-  #endif
-  _temp_error(-1, PSTR(MSG_MAXTEMP_BED_OFF), PSTR(MSG_ERR_MAXTEMP_BED));
+  if (time_since_last_err_bed == 0) {
+    time_since_last_err_bed = millis();
+  }
+  else if (millis() > time_since_last_err_bed + TEMP_BED_ERROR_INTERVAL) {
+    #if HAS_HEATER_BED
+      WRITE_HEATER_BED(0);
+    #endif
+    _temp_error(-1, PSTR(MSG_MAXTEMP_BED_OFF), PSTR(MSG_ERR_MAXTEMP_BED));
+  }
 }
 
 #ifdef PNEUMATICS
@@ -1662,7 +1681,8 @@ ISR(TIMER0_COMPB_vect) {
         #define GE0 >=
       #endif
       if (current_temperature_raw[0] GE0 maxttemp_raw[0]) max_temp_error(0);
-      if (minttemp_raw[0] GE0 current_temperature_raw[0]) min_temp_error(0);
+      else if (minttemp_raw[0] GE0 current_temperature_raw[0]) min_temp_error(0);
+      else time_since_last_err[0] = 0;
     #endif
 
     #if HAS_TEMP_1
@@ -1672,7 +1692,8 @@ ISR(TIMER0_COMPB_vect) {
         #define GE1 >=
       #endif
       if (current_temperature_raw[1] GE1 maxttemp_raw[1]) max_temp_error(1);
-      if (minttemp_raw[1] GE1 current_temperature_raw[1]) min_temp_error(1);
+      else if (minttemp_raw[1] GE1 current_temperature_raw[1]) min_temp_error(1);
+      else time_since_last_err[1] = 0;
     #endif // TEMP_SENSOR_1
 
     #if HAS_TEMP_2
@@ -1682,7 +1703,8 @@ ISR(TIMER0_COMPB_vect) {
         #define GE2 >=
       #endif
       if (current_temperature_raw[2] GE2 maxttemp_raw[2]) max_temp_error(2);
-      if (minttemp_raw[2] GE2 current_temperature_raw[2]) min_temp_error(2);
+      else if (minttemp_raw[2] GE2 current_temperature_raw[2]) min_temp_error(2);
+      else time_since_last_err[2] = 0;
     #endif // TEMP_SENSOR_2
 
     #if HAS_TEMP_3
@@ -1692,7 +1714,8 @@ ISR(TIMER0_COMPB_vect) {
         #define GE3 >=
       #endif
       if (current_temperature_raw[3] GE3 maxttemp_raw[3]) max_temp_error(3);
-      if (minttemp_raw[3] GE3 current_temperature_raw[3]) min_temp_error(3);
+      else if (minttemp_raw[3] GE3 current_temperature_raw[3]) min_temp_error(3);
+      else time_since_last_err[3] = 0;
     #endif // TEMP_SENSOR_3
 
     #if HAS_TEMP_BED
@@ -1705,6 +1728,7 @@ ISR(TIMER0_COMPB_vect) {
         target_temperature_bed = 0;
         bed_max_temp_error();
       }
+      else time_since_last_err_bed = 0;
     #endif
 
     #if HAS_PNEUMATIC
