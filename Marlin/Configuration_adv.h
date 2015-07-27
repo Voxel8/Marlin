@@ -22,6 +22,9 @@
 //#define WATCH_TEMP_PERIOD 40000 //40 seconds
 //#define WATCH_TEMP_INCREASE 10  //Heat up at least 10 degree in 20 seconds
 
+#define TEMP_ERROR_INTERVAL 1000 //ms between temp error checks
+#define TEMP_BED_ERROR_INTERVAL 1000
+
 #ifdef PIDTEMP
   // this adds an experimental additional term to the heating power, proportional to the extrusion speed.
   // if Kc is chosen well, the additional required power due to increased melting should be compensated.

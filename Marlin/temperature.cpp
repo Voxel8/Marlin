@@ -483,7 +483,7 @@ void max_temp_error(uint8_t e) {
     time_since_last_err[e] = millis();
   }
 // There has been a recent error, if was more than a second ago, it is probably an error
-  else if (millis() > time_since_last_err[e] + 1000UL) {
+  else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
     disable_all_heaters();
     _temp_error(e, PSTR(MSG_MAXTEMP_EXTRUDER_OFF), PSTR(MSG_ERR_MAXTEMP));
   }
@@ -492,7 +492,7 @@ void min_temp_error(uint8_t e) {
   if (time_since_last_err[e] == 0) {
     time_since_last_err[e] = millis();
   }
-  else if (millis() > time_since_last_err[e] + 1000UL) {
+  else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
     disable_all_heaters();
     _temp_error(e, PSTR(MSG_MINTEMP_EXTRUDER_OFF), PSTR(MSG_ERR_MINTEMP));
   }
@@ -501,7 +501,7 @@ void bed_max_temp_error(void) {
   if (time_since_last_err_bed == 0) {
     time_since_last_err_bed = millis();
   }
-  else if (millis() > time_since_last_err_bed + 1000UL) {
+  else if (millis() > time_since_last_err_bed + TEMP_BED_ERROR_INTERVAL) {
     #if HAS_HEATER_BED
       WRITE_HEATER_BED(0);
     #endif
