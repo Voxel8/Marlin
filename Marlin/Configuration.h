@@ -293,10 +293,15 @@ Here are some standard links for getting your machine calibrated:
 //    #define  DEFAULT_Ki 0.37
 //    #define  DEFAULT_Kd 65.41
 
-// D3D 24V New Heat Block
-    #define  DEFAULT_Kp 11.44
-    #define  DEFAULT_Ki 0.3
-    #define  DEFAULT_Kd 65.41
+    // D3D 24V New Heat Block 210
+//    #define  DEFAULT_Kp 10.95
+  //  #define  DEFAULT_Ki 0.45
+    //#define  DEFAULT_Kd 69.97
+    
+//D3D 7/28 ada prints
+#define  DEFAULT_Kp 12.06
+#define  DEFAULT_Ki 0.48
+#define  DEFAULT_Kd 75.71
 
 #endif // PIDTEMP
 
@@ -573,11 +578,11 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
   // Note: this feature generates 10KB extra code size.
   //#define AUTO_BED_LEVELING_GRID
 
-  // Offsets to the Z probe relative to the nozzle tip.
-  // X and Y offsets must be integers.
-  #define X_PROBE_OFFSET_FROM_EXTRUDER 18     // Z probe to nozzle X offset: -left  +right
-  #define Y_PROBE_OFFSET_FROM_EXTRUDER -46     // Z probe to nozzle Y offset: -front +behind
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER -1  // Z probe to nozzle Z offset: -below (always!)
+  // Offsets to the probe relative to the extruder tip (Hotend - Probe)
+  // X and Y offsets must be integers
+  #define X_PROBE_OFFSET_FROM_EXTRUDER 18     // Probe on: -left  +right
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER -46    // Probe on: -front +behind
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER -1.68  // -below (always!)
 
   #if ENABLED(AUTO_BED_LEVELING_GRID)
 

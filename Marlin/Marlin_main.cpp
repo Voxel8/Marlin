@@ -4770,7 +4770,7 @@ inline void gcode_M226() {
    */
   inline void gcode_M234() {
     SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_RAW_0);
+    SERIAL_PROTOCOL(EXT_ADC_RAW_1);
     SERIAL_EOL;
   }
   /**
@@ -4780,7 +4780,7 @@ inline void gcode_M226() {
     //SERIAL_PROTOCOLLN(MSG_M235_REPORT);         Commented out so only number is returned
     //SERIAL_PROTOCOLPGM(MSG_EXT_ADC_REPORT);
     SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_READ_0);
+    SERIAL_PROTOCOL(EXT_ADC_READ_1);
     SERIAL_EOL;
   }
 #endif
