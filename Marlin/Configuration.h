@@ -582,7 +582,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
   // X and Y offsets must be integers
   #define X_PROBE_OFFSET_FROM_EXTRUDER 18     // Probe on: -left  +right
   #define Y_PROBE_OFFSET_FROM_EXTRUDER -46    // Probe on: -front +behind
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER -1.68  // -below (always!)
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER -4.68  // -below (always!)
 
   #if ENABLED(AUTO_BED_LEVELING_GRID)
 
