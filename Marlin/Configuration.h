@@ -167,7 +167,7 @@ Here are some standard links for getting your machine calibrated:
 // The minimal temperature defines the temperature below which the heater will not be enabled It is used
 // to check that the wiring to the thermistor is not broken.
 // Otherwise this would lead to the heater being powered on all the time.
-#define HEATER_0_MINTEMP 5
+#define HEATER_0_MINTEMP -5
 #define HEATER_1_MINTEMP 0
 #define HEATER_2_MINTEMP 5
 #define HEATER_3_MINTEMP 5
@@ -397,8 +397,8 @@ your extruder heater takes 2 minutes to hit the target on heating.
 #endif
 
 // The pullups are needed if you directly connect a mechanical endswitch between the signal and ground pins.
-const bool X_MIN_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
-const bool Y_MIN_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
+const bool X_MIN_ENDSTOP_INVERTING = false; // set to true to invert the logic of the endstop.
+const bool Y_MIN_ENDSTOP_INVERTING = false; // set to true to invert the logic of the endstop.
 const bool Z_MIN_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
 const bool X_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
 const bool Y_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
@@ -473,8 +473,8 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
   // these are the offsets to the probe relative to the extruder tip (Hotend - Probe)
   // X and Y offsets must be integers
-  #define X_PROBE_OFFSET_FROM_EXTRUDER 18
-  #define Y_PROBE_OFFSET_FROM_EXTRUDER -46
+  #define X_PROBE_OFFSET_FROM_EXTRUDER 32
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER 13
   #define Z_PROBE_OFFSET_FROM_EXTRUDER -1
 
   //#define AUTO_BED_LEVELING_GRID
@@ -499,12 +499,12 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
     // with no grid, just probe 3 arbitrary points.  A simple cross-product
     // is used to esimate the plane of the print bed
 
-      #define ABL_PROBE_PT_1_X 0+25+X_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_1_Y 60+Y_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_2_X 190/2+X_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_2_Y 175+Y_PROBE_OFFSET_FROM_EXTRUDER   // you can't use x_max or y_max as variables because we made the bed size larger than it actually i
-      #define ABL_PROBE_PT_3_X 190-25+X_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_3_Y 60+Y_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_1_X 55
+      #define ABL_PROBE_PT_1_Y 0
+      #define ABL_PROBE_PT_2_X 100
+      #define ABL_PROBE_PT_2_Y 83
+      #define ABL_PROBE_PT_3_X 145
+      #define ABL_PROBE_PT_3_Y 0
 
   #endif // AUTO_BED_LEVELING_GRID
 
@@ -513,8 +513,8 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
   #define XY_TRAVEL_SPEED 8000         // X and Y axis travel speed between probes, in mm/min
 
-  #define Z_RAISE_BEFORE_PROBING 20    //How much the extruder will be raised before traveling to the first probing point.
-  #define Z_RAISE_BETWEEN_PROBINGS 10  //How much the extruder will be raised when traveling from between next probing points
+  #define Z_RAISE_BEFORE_PROBING 5    //How much the extruder will be raised before traveling to the first probing point.
+  #define Z_RAISE_BETWEEN_PROBINGS 3  //How much the extruder will be raised when traveling from between next probing points
 
   //#define Z_PROBE_SLED // turn on if you have a z-probe mounted on a sled like those designed by Charles Bell
   //#define SLED_DOCKING_OFFSET 5 // the extra distance the X axis must travel to pickup the sled. 0 should be fine but you can push it further if you'd like.
@@ -538,8 +538,8 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
   #ifdef Z_SAFE_HOMING
 
-    #define Z_SAFE_HOMING_X_POINT (100+X_PROBE_OFFSET_FROM_EXTRUDER)    // X point for Z homing when homing all axis (G28)
-    #define Z_SAFE_HOMING_Y_POINT (150+Y_PROBE_OFFSET_FROM_EXTRUDER)    // Y point for Z homing when homing all axis (G28)
+    #define Z_SAFE_HOMING_X_POINT (92)    // X point for Z homing when homing all axis (G28)
+    #define Z_SAFE_HOMING_Y_POINT (53)    // Y point for Z homing when homing all axis (G28)
 
   #endif
 
