@@ -40,9 +40,9 @@ Here are some standard links for getting your machine calibrated:
 // User-specified version info of this build to display in [Pronterface, etc] terminal window during
 // startup. Implementation of an idea by Prof Braino to inform user that any changes made to this
 // build by the user have been successfully uploaded into firmware.
-#define STRING_VERSION "1.0.3 int"
+#define STRING_VERSION "1.1.0 int"
 #define STRING_VERSION_CONFIG_H __DATE__ " " __TIME__ // build date and time
-#define STRING_CONFIG_H_AUTHOR "david@voxel8.co" // Who made the changes.
+#define STRING_CONFIG_H_AUTHOR "kyle@voxel8.co" // Who made the changes.
 #define STRING_SPLASH_LINE1 "v" STRING_VERSION // will be shown during bootup in line 1
 //#define STRING_SPLASH_LINE2 STRING_VERSION_CONFIG_H // will be shown during bootup in line2
 
@@ -64,7 +64,7 @@ Here are some standard links for getting your machine calibrated:
 // The following define selects which electronics board you have.
 // Please choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD BOARD_RAMBO
+  #define MOTHERBOARD BOARD_VOXEL8_GEN3B
 #endif
 
 // Optional custom name for your RepStrap or other custom machine
@@ -497,6 +497,7 @@ const bool Z_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic 
 //===========================================================================
 //========================= Filament Runout Sensor ==========================
 //===========================================================================
+#define FILAMENT_SENSOR   // Enables use of optical filament sensor
 //#define FILAMENT_RUNOUT_SENSOR // Uncomment for defining a filament runout sensor such as a mechanical or opto endstop to check the existence of filament
                                  // In RAMPS uses servo pin 2. Can be changed in pins file. For other boards pin definition should be made.
                                  // It is assumed that when logic high = filament available
@@ -557,7 +558,7 @@ const bool Z_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic 
   // X and Y offsets must be integers
   #define X_PROBE_OFFSET_FROM_EXTRUDER 18     // Probe on: -left  +right
   #define Y_PROBE_OFFSET_FROM_EXTRUDER -46     // Probe on: -front +behind
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER -4.68  // -below (always!)
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0  // -below (always!)
 
 //  #define AUTO_BED_LEVELING_GRID
 
@@ -671,7 +672,7 @@ const bool Z_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic 
 // XY motors: (steps * microsteps)/ (tooth-pitch * tooth-count) --> (200steps * 16) / (2mm * 15 teeth) = 106.66666666666667
 // Z motor: (steps * microsteps) / (leadscrew pitch) --> (200steps * 4) / 2mm = 800
 // E motor: 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667*2,106.6666666666667*2,400,555}  // default steps per unit for Voxel8 gen3
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667,106.6666666666667,400,555}  // default steps per unit for Voxel8 gen3
 #define DEFAULT_MAX_FEEDRATE          {185/2, 185/2, 20, 600}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {5000,5000,100,9000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
 

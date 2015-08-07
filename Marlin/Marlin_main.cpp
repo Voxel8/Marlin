@@ -604,10 +604,10 @@ void setup() {
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
   
-  pinMode(CART1_SIG2, OUTPUT);
-  digitalWrite(CART1_SIG2, LOW);
-  pinMode(FAN_CHASSIS_BOT, OUTPUT);
-  digitalWrite(FAN_CHASSIS_BOT, HIGH);
+  pinMode(CART1_SIG2_PIN, OUTPUT);
+  digitalWrite(CART1_SIG2_PIN, LOW);
+  pinMode(FAN_CHASSIS_BOT_PIN, OUTPUT);
+  digitalWrite(FAN_CHASSIS_BOT_PIN, HIGH);
 
   // Check startup - does nothing if bootloader sets MCUSR to 0
   byte mcu = MCUSR;
@@ -4115,7 +4115,7 @@ inline void gcode_M226() {
    */
   inline void gcode_M234() {
     SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_RAW_1);
+    SERIAL_PROTOCOL(EXT_ADC_RAW_0);
     SERIAL_EOL;
   }
   /**
@@ -4125,7 +4125,7 @@ inline void gcode_M226() {
     //SERIAL_PROTOCOLLN(MSG_M235_REPORT);         Commented out so only number is returned
     //SERIAL_PROTOCOLPGM(MSG_EXT_ADC_REPORT);
     SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_READ_1);
+    SERIAL_PROTOCOL(EXT_ADC_READ_0);
     SERIAL_EOL;
   }
 #endif
