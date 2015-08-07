@@ -70,7 +70,7 @@ Here are some standard links for getting your machine calibrated:
 // The following define selects which electronics board you have.
 // Please choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD BOARD_RAMBO
+  #define MOTHERBOARD BOARD_VOXEL8_GEN3B
 #endif
 
 // Optional custom name for your RepStrap or other custom machine
@@ -520,6 +520,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 //===========================================================================
 //========================= Filament Runout Sensor ==========================
 //===========================================================================
+#define FILAMENT_SENSOR   // Enables use of optical filament sensor
 //#define FILAMENT_RUNOUT_SENSOR // Uncomment for defining a filament runout sensor such as a mechanical or opto endstop to check the existence of filament
                                  // In RAMPS uses servo pin 2. Can be changed in pins file. For other boards pin definition should be made.
                                  // It is assumed that when logic high = filament available
@@ -582,7 +583,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
   // X and Y offsets must be integers
   #define X_PROBE_OFFSET_FROM_EXTRUDER 18     // Probe on: -left  +right
   #define Y_PROBE_OFFSET_FROM_EXTRUDER -46    // Probe on: -front +behind
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER -4.68  // -below (always!)
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0      // -below (always!)
 
   #if ENABLED(AUTO_BED_LEVELING_GRID)
 

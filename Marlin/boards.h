@@ -56,6 +56,7 @@
 #define BOARD_MKS_BASE          40   // MKS BASE 1.0
 #define BOARD_BAM_DICE          401  // 2PrintBeta BAM&DICE with STK drivers
 #define BOARD_BAM_DICE_DUE      402  // 2PrintBeta BAM&DICE Due with STK drivers
+#define BOARD_VOXEL8_GEN3B      801  // Voxel8 Gen3B Printer
 
 #define BOARD_99                99   // This is in pins.h but...?
 
