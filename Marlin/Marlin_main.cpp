@@ -130,7 +130,7 @@
  * M48  - Measure Z_Probe repeatability. M48 [P # of points] [X position] [Y position] [V_erboseness #] [E_ngage Probe] [L # of legs of travel]
  * M80  - Turn on Power Supply
  * M81  - Turn off Power Supply
- * M82  - Set E codes absolute (default)
+ * M82  - Set  codes absoElute (default)
  * M83  - Set E codes relative while in Absolute Coordinates (G90) mode
  * M84  - Disable steppers until next move,
  *        or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
@@ -4115,7 +4115,7 @@ inline void gcode_M226() {
    */
   inline void gcode_M234() {
     SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_RAW_0);
+    SERIAL_PROTOCOL(EXT_ADC_RAW_1);
     SERIAL_EOL;
   }
   /**
@@ -4125,7 +4125,7 @@ inline void gcode_M226() {
     //SERIAL_PROTOCOLLN(MSG_M235_REPORT);         Commented out so only number is returned
     //SERIAL_PROTOCOLPGM(MSG_EXT_ADC_REPORT);
     SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_READ_0);
+    SERIAL_PROTOCOL(EXT_ADC_READ_1);
     SERIAL_EOL;
   }
 #endif
