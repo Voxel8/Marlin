@@ -177,6 +177,7 @@ Here are some standard links for getting your machine calibrated:
 // 11 is 100k beta 3950 1% thermistor (4.7k pullup)
 // 12 is 100k 0603 SMD Vishay NTCS0603E3104FXT (4.7k pullup) (calibrated for Makibox hot bed)
 // 13 is 100k Hisens 3950  1% up to 300°C for hotend "Simple ONE " & "Hotend "All In ONE"
+// 14 is 100k US Sensor MM104J1F  1% up to 220°C surface mounted
 // 20 is the PT100 circuit found in the Ultimainboard V2.x
 // 60 is 100k Maker's Tool Works Kapton Bed Thermistor beta=3950
 //
@@ -199,7 +200,7 @@ Here are some standard links for getting your machine calibrated:
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
-#define TEMP_SENSOR_BED 8
+#define TEMP_SENSOR_BED 14
 
 // This makes temp sensor 1 a redundant sensor for sensor 0. If the temperatures difference between these sensors is to high the print will be aborted.
 //#define TEMP_SENSOR_1_AS_REDUNDANT
@@ -279,9 +280,9 @@ Here are some standard links for getting your machine calibrated:
 //    #define  DEFAULT_Kd 103.09
 
 // E3D V6 24v
-//  #define  DEFAULT_Kp 22.66
-//  #define  DEFAULT_Ki 1.92
-//  #define  DEFAULT_Kd 66.91
+  #define  DEFAULT_Kp 22.66
+  #define  DEFAULT_Ki 1.92
+  #define  DEFAULT_Kd 66.91
     
 // E3D V6 with PT100
 //    #define  DEFAULT_Kp 5.8
@@ -299,9 +300,9 @@ Here are some standard links for getting your machine calibrated:
     //#define  DEFAULT_Kd 69.97
     
 //D3D 7/28 ada prints
-#define  DEFAULT_Kp 12.06
-#define  DEFAULT_Ki 0.48
-#define  DEFAULT_Kd 75.71
+//#define  DEFAULT_Kp 12.06
+//#define  DEFAULT_Ki 0.48
+//#define  DEFAULT_Kd 75.71
 
 #endif // PIDTEMP
 
@@ -583,7 +584,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
   // X and Y offsets must be integers
   #define X_PROBE_OFFSET_FROM_EXTRUDER 18     // Probe on: -left  +right
   #define Y_PROBE_OFFSET_FROM_EXTRUDER -46    // Probe on: -front +behind
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0      // -below (always!)
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER -1     // -below (always!)
 
   #if ENABLED(AUTO_BED_LEVELING_GRID)
 

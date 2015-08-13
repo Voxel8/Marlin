@@ -279,6 +279,11 @@
 #define MICROSTEP_MODES {16,16,4,16,16} // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
+/*VRef = ITripMAX * 0.8
+Note the A4982 is set to be limited to 2A. This means the adjustable voltage range is 0 to 1.66 volts. The following formula will yield the 8-bit binary value,
+Wv, to be entered into firmware or directly over SPI.
+Wv = (VRef / 1.66) * 255
+*/
 #define DIGIPOT_MOTOR_CURRENT {135,135,191,102,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
 
 // uncomment to enable an I2C based DIGIPOT like on the Azteeg X3 Pro
