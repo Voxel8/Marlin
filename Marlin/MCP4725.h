@@ -50,7 +50,7 @@ void DAC_write_EEPROM(uint8_t address, uint16_t data_val);
 
 void DAC_read(uint8_t address);
 
-void dac_i2c_init(void);
+void DAC_i2c_init(void);
 
 
 

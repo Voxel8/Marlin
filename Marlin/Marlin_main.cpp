@@ -4144,9 +4144,10 @@ inline void gcode_M226() {
    */
   inline void gcode_M236() {
     if(code_seen('S')) {
-      DAC_write(code_value());
+      DAC_write(MCP4725_I2C_ADDRESS, code_value());
     }
   }
+#endif
 
 #if NUM_SERVOS > 0
 
