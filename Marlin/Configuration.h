@@ -374,6 +374,8 @@ Here are some standard links for getting your machine calibrated:
 #define PNEUMATICS
 
 #ifdef PNEUMATICS
+// Define this if you are using the electro-pneumatic regulator (Model #??)
+#define DAC_I2C
 
 // Set Pressure Sensor Type HERE:
 // -----------------------------

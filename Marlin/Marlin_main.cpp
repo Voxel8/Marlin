@@ -59,6 +59,10 @@
   #include "ADC.h"
 #endif
 
+#ifdef DAC_I2C
+  #include "MCP4725.h"
+#endif
+
 #ifdef BLINKM
   #include "blinkm.h"
   #include "Wire.h"
@@ -658,6 +662,10 @@ void setup() {
 
   #if HAS_CONTROLLERFAN
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
+  #endif
+
+  #ifdef DAC_I2C
+    DAC_i2c_init();
   #endif
 
   #ifdef DIGIPOT_I2C
@@ -4130,6 +4138,16 @@ inline void gcode_M226() {
   }
 #endif
  
+#ifdef DAC_I2C
+  /**
+   * M236 - Send Value to ADC w/ no EEPROM write *TESTING*
+   */
+  inline void gcode_M236() {
+    if(code_seen('S')) {
+      DAC_write(code_value());
+    }
+  }
+
 #if NUM_SERVOS > 0
 
   /**
@@ -5403,6 +5421,12 @@ void process_commands() {
           return;
           break;
       #endif // EXT_ADC
+
+      #ifdef DAC_I2C
+          case 236: // Send value to DAC
+          gcode_M236();
+          break;
+      #endif // DAC_I2C
 
       #if NUM_SERVOS > 0
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
