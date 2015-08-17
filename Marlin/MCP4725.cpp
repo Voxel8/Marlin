@@ -54,7 +54,7 @@ void DAC_read(uint8_t address) {
 /*================================================================================*/
 /* DAC I2C initialization */
 /*================================================================================*/
-void dac_i2c_init(void) {
+void DAC_i2c_init(void) {
 	Wire.begin();
 	// Maybe set some defined inital output?
 }
@@ -62,3 +62,5 @@ void dac_i2c_init(void) {
 // TO DO
 //----------
 // define initial output?
+// conversion function or something to convert pressure to voltage? (where?)
+// >	Mcode M236 should take pressure as an argument 
