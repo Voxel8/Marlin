@@ -1577,7 +1577,7 @@ ISR(TIMER0_COMPB_vect) {
 
     case PreparePneumatic:
       #if HAS_PNEUMATIC
-        START_ADC(PNEUMATIC_IN_PIN);
+        START_ADC(PNEUMATIC_PIN);
       #endif
       lcd_buttons_update();
       temp_state = MeasurePneumatic;
