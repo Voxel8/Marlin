@@ -390,11 +390,21 @@ Here are some standard links for getting your machine calibrated:
 //============================ Pneumatics Settings ==========================
 //===========================================================================
 
+// The pneumatics settings contain the settings for the tank pressure (i.e. when to
+// turn the pump on) as well as the settings for the output pressure (i.e. the
+// pressure that drives the material)
+
 // Define this if you are using pneumatic direct write on the RAMBo AND you are not
 // using HEAT_1 output
 //#define PNEUMATICS
 // Define this if you are using the electro-pneumatic regulator (Model #??)
 #define DAC_I2C
+#define REGULATOR
+
+#ifdef REGULATOR
+ #define OUTPUT_PSI_MAX     130
+ #define OUTPUT_PSI_MIN       5
+#endif
 
 #ifdef PNEUMATICS
 
