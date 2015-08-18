@@ -7,6 +7,9 @@
 #ifndef MCP4725_H
 #define MCP4725_H
 
+#include "Arduino.h"
+#include <Wire.h>
+
 /*================================================================================*/
 /* I2C ADDRESS */
 /*================================================================================*/
@@ -15,7 +18,7 @@
 // customer request. If no request, both A2 and A1 are 0. Only A0 is configurable.
 // Last bit is the read/~write bit
 
-#define MCP4725_I2C_ADDRESS         0xC0
+#define MCP4725_I2C_ADDRESS         0x60
 
 /*================================================================================*/
 /* READ/WRITE MODES */
@@ -52,6 +55,7 @@ void DAC_read(uint8_t address);
 
 void DAC_i2c_init(void);
 
+#endif
 
 
 /*      TO DO        */
