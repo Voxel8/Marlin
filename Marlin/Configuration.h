@@ -70,7 +70,7 @@ Here are some standard links for getting your machine calibrated:
 // The following define selects which electronics board you have.
 // Please choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD BOARD_VOXEL8_GEN3B
+  #define MOTHERBOARD BOARD_VOXEL8_GEN3C
 #endif
 
 // Optional custom name for your RepStrap or other custom machine
@@ -396,7 +396,7 @@ Here are some standard links for getting your machine calibrated:
 
 // Define this if you are using pneumatic direct write on the RAMBo AND you are not
 // using HEAT_1 output
-//#define PNEUMATICS
+#define PNEUMATICS
 // Define this if you are using the electro-pneumatic regulator (Model #??)
 #define DAC_I2C
 #define REGULATOR
@@ -414,9 +414,9 @@ Here are some standard links for getting your machine calibrated:
 // 0 - No Pressure Sensor
 // 1 - Kavlico P255-50G-D1A
 // 2 - American Sensor Tech. 4100 Series (1-5V output)
-//
+// 3 - Pressure Transmitter PT1200-1/4NPT (1-5V output)
 
-  #define PNEUMATIC_SENSOR 2
+  #define PNEUMATIC_SENSOR 3
   
   // 0 is a valid pressure reading
   #define PNEUMATIC_MIN -1

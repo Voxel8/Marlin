@@ -1178,6 +1178,17 @@ const short pressuretable_2[][2] PROGMEM = {
 };
 #endif
 
+#if (PNEUMATIC_SENSOR == 3) //pneumatic sensor LUT for Pressure Transmitter PT1200-1/4NPT
+// Lookup table to convert analog values to pressure values.
+
+// Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
+const short pressuretable_3[][2] PROGMEM = {
+   {0*OVERSAMPLENR,       0},
+   {205*OVERSAMPLENR,     0},
+   {1023*OVERSAMPLENR, 1000},
+};
+#endif
+
 
 #define _TT_NAME(_N) temptable_ ## _N
 #define TT_NAME(_N) _TT_NAME(_N)
