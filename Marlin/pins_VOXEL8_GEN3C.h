@@ -96,8 +96,8 @@
 *************************/
 #ifdef PNEUMATICS
     #define PNEUMATIC_PUMP_PIN  7   // Pump driver
-    #define PNEUMATIC_PIN       3   // A3 Input analog pressure reading
-    #define PNEUMATIC_CART1_PIN 5   // A5 Cartridge 1 analog pressure reading
+    #define PNEUMATIC_PIN       5   // A5 Input analog tank pressure reading
+    #define PNEUMATIC_CART1_PIN 3   // A3 Cartridge 1 analog pressure reading
     #define PNEUMATIC_CART2_PIN 4   // A4 Cartridge 2 analog pressure reading
     #define HEATER_1_PIN -1         // Heat_1 Output Used for Pneumatics
     #define TEMP_1_PIN -1           // (Analog Pin Numbering)
