@@ -124,6 +124,8 @@
   #include "pins_99.h"
 #elif MB(VOXEL8_GEN3B)
   #include "pins_VOXEL8_GEN3B.h"
+#elif MB(VOXEL8_GEN3C)
+  #include "pins_VOXEL8_GEN3C.h"
 #else
   #error Unknown MOTHERBOARD value set in Configuration.h
 #endif
