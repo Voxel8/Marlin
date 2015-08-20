@@ -14,3 +14,6 @@ void setOutputPressure(float pressure) {
 	// Write value to DAC
 	DAC_write(MCP4725_I2C_ADDRESS, digital_val);
 }
+// TO DO
+//-------
+// Add else if for M236, for the case when 'S' isn't provided. Perhaps return current output pressure?
