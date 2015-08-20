@@ -11,6 +11,6 @@
 /*================================================================================*/
 /* Function Prototypes */
 /*================================================================================*/
-void setOutputPressure(uint8_t pressure);
+void setOutputPressure(float pressure);
 
 #endif
