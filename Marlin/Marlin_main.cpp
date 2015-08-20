@@ -4804,7 +4804,7 @@ inline void gcode_M226() {
    */
   inline void gcode_M236() {
     if(code_seen('S')) {
-      float psi = code_value();
+      uint8_t psi = code_value();
       // Check that desired pressure is within range allowed
       if((psi <= OUTPUT_PSI_MAX) && (psi >= OUTPUT_PSI_MIN)) {
         setOutputPressure(psi);
