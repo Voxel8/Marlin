@@ -59,6 +59,14 @@
   #include "ADC.h"
 #endif
 
+#ifdef DAC_I2C
+  #include "MCP4725.h"
+#endif
+
+#ifdef REGULATOR
+  #include "Regulator.h"
+#endif
+
 #ifdef BLINKM
   #include "blinkm.h"
   #include "Wire.h"
@@ -152,7 +160,7 @@
  * M119 - Output Endstop status to serial port
  * M120 - Enable endstop detection
  * M121 - Disable endstop detection
- * M125 - Set pneumatics target pressure
+ * M125 - Set pneumatics target pressure (tank pressure)
  * M126 - Solenoid Air Valve Open (BariCUDA support by jmil)
  * M127 - Solenoid Air Valve Closed (BariCUDA vent to atmospheric pressure by jmil)
  * M128 - EtoP Open (BariCUDA EtoP = electricity to air pressure transducer by jmil)
@@ -178,6 +186,7 @@
  * M226 - Wait until the specified pin reaches the state required: P<pin number> S<pin state>
  * M234 - Output raw external ADC value
  * M235 - Output processed external ADC data
+ * M236 - Set output target pressure by writing to DAC
  * M240 - Trigger a camera to take a photograph
  * M250 - Set LCD contrast C<contrast value> (value 0..63)
  * M280 - Set servo position absolute. P: servo index, S: angle or microseconds
@@ -658,6 +667,10 @@ void setup() {
 
   #if HAS_CONTROLLERFAN
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
+  #endif
+
+  #ifdef DAC_I2C
+    DAC_i2c_init();
   #endif
 
   #ifdef DIGIPOT_I2C
@@ -4130,6 +4143,39 @@ inline void gcode_M226() {
   }
 #endif
  
+#ifdef DAC_I2C
+  /**
+   * M236 - Send Value to ADC w/ no EEPROM write *TESTING*
+   */
+  inline void gcode_M236() {
+    if(code_seen('S')) {
+      float psi = code_value();
+      // Check that desired pressure is within range allowed
+      if((psi <= OUTPUT_PSI_MAX) && (psi >= OUTPUT_PSI_MIN)) {
+        setOutputPressure(psi);
+      }
+      // If psi greater than max, reset psi to max
+      else if(psi > OUTPUT_PSI_MAX) {
+        psi = OUTPUT_PSI_MAX;
+        SERIAL_PROTOCOLLNPGM("WARNING: Desired Pressure Above Max Allowed Pressure");
+        SERIAL_PROTOCOLPGM("Output Pressure set to ");
+        SERIAL_PROTOCOLLN(OUTPUT_PSI_MAX);
+        setOutputPressure(psi);
+        SERIAL_EOL;
+      }
+      // If psi less than min, reset psi to min
+      else if(psi < OUTPUT_PSI_MIN) {
+        psi = OUTPUT_PSI_MIN;
+        SERIAL_PROTOCOLLNPGM("WARNING: Desired Pressure Below Min Allowed Pressure");
+        SERIAL_PROTOCOLPGM("Output Pressure set to ");
+        SERIAL_PROTOCOLLN(OUTPUT_PSI_MIN);
+        setOutputPressure(psi);
+        SERIAL_EOL;
+      }
+    }
+  }
+#endif
+
 #if NUM_SERVOS > 0
 
   /**
@@ -5403,6 +5449,12 @@ void process_commands() {
           return;
           break;
       #endif // EXT_ADC
+
+      #ifdef DAC_I2C
+          case 236: // Send value to DAC
+          gcode_M236();
+          break;
+      #endif // DAC_I2C
 
       #if NUM_SERVOS > 0
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
