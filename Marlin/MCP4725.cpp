@@ -58,9 +58,12 @@ void DAC_read(uint8_t address) {
 /*================================================================================*/
 void DAC_i2c_init(void) {
 	Wire.begin();
-	// Maybe set some defined inital output?
+	// Set inital output to 0
+	DAC_write(MCP4725_I2C_ADDRESS, 0);
 }
 
 // TO DO
-//----------
-// define initial output?
+//-------
+// Finish DAC_write_EEPROM
+// Finish DAC_read
+// Set initial output to 0 using DAC_write_EEPROM
