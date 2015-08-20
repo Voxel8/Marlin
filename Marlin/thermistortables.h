@@ -1221,7 +1221,7 @@ const short pressuretable_2[][2] PROGMEM = {
 // Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
 const short pressuretable_3[][2] PROGMEM = {
    {0*OVERSAMPLENR,       0},
-   {205*OVERSAMPLENR,     0},
+   {201*OVERSAMPLENR,     0},
    {1023*OVERSAMPLENR, 1000},
 };
 #endif
