@@ -402,8 +402,10 @@ Here are some standard links for getting your machine calibrated:
 #define REGULATOR
 
 #ifdef REGULATOR
- #define OUTPUT_PSI_MAX     130
- #define OUTPUT_PSI_MIN       5
+ // 130 psi is max settable pressure for e-regulator
+ #define OUTPUT_PSI_MAX     130.0
+ // 
+ #define OUTPUT_PSI_MIN       0.0
 #endif
 
 #ifdef PNEUMATICS
