@@ -21,25 +21,6 @@ void DAC_write(uint8_t address, uint16_t data_val) {
 	Wire.write(byte_a);
 	Wire.write(byte_b);
 	Wire.endTransmission();
-	// have this whole function return the value of endTransmission, then, depending
-	// on the return value, send an appropriate message to the serial console.
-	// Make this feature selectable so it can be disabled.
-	// result = Wire.endTransmission();
-	
-	// switch(result) {
-	// 	case 0:
-	// 		break;
-	// 	case 1:
-	// 		break;
-	// 	case 2:
-	// 		break;
-	// 	case 3:
-	// 		break;
-	// 	case 4:
-	// 		break;
-	// // Put this switch statement in Marlin main (FIX THIS SHIT 19/08/2015) TESTING
-	// }
-	// return result;
 }
 
 /*================================================================================*/
@@ -59,22 +40,6 @@ void DAC_write_EEPROM(uint8_t address, uint16_t data_val) {
 	Wire.write(byte_a);
 	Wire.write(byte_b);
 	Wire.endTransmission();
-	// result = Wire.endTransmission();
-
-	// switch(result) {
-	// 	case 0:
-	// 		break;
-	// 	case 1:
-	// 		break;
-	// 	case 2:
-	// 		break;
-	// 	case 3:
-	// 		break;
-	// 	case 4:
-	// 		break;
-	// 		// ALSO put THIS shit in a diff function. Holy Hell... TESTING
-	// }
-	// return result;
 }
 
 /*================================================================================*/
@@ -99,5 +64,3 @@ void DAC_i2c_init(void) {
 // TO DO
 //----------
 // define initial output?
-// conversion function or something to convert pressure to voltage? (where?)
-// >	Mcode M236 should take pressure as an argument 
