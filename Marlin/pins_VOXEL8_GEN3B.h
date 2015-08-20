@@ -89,7 +89,7 @@
 	  FFF PINS
 *************************/
 #define HEATER_0_PIN  CART1_SIG1_PIN
-#define TEMP_0_PIN 7
+#define TEMP_0_PIN 6  // A6 has no thermistor pullup
 
 /*************************
 	  PNEUMATIC PINS
