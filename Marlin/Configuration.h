@@ -122,7 +122,7 @@ Here are some standard links for getting your machine calibrated:
 // 2 = Differential Mode
 #if EXT_ADC == (1 || 2)
 
-  #define EXT_ADC_MODE 1 // Single-Ended Mode
+  #define EXT_ADC_MODE 2 // Single-Ended Mode
 
 #endif
 
