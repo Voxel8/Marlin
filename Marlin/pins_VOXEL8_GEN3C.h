@@ -127,7 +127,7 @@
   Fan_2 2
 ***********************************************************/
 #define LED_PIN             13
-#define FAN_PIN             8
+#define FAN_PIN             CART1_SIG3_PIN  // FFF fan toggle
 #define FAN_CHASSIS_TOP_PIN 13   // Shared with LED pin for now
 #define FAN_CHASSIS_BOT_PIN 44
 
