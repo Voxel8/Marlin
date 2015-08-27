@@ -559,16 +559,16 @@ const bool Z_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic 
   // X and Y offsets must be integers
   #define X_PROBE_OFFSET_FROM_EXTRUDER 18     // Probe on: -left  +right
   #define Y_PROBE_OFFSET_FROM_EXTRUDER -46     // Probe on: -front +behind
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER -1  // -below (always!)
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER -7  // -below (always!)
 
-//  #define AUTO_BED_LEVELING_GRID
+  #define AUTO_BED_LEVELING_GRID
 
   #ifdef AUTO_BED_LEVELING_GRID
 
-    #define LEFT_PROBE_BED_POSITION 15
+    #define LEFT_PROBE_BED_POSITION 55
     #define RIGHT_PROBE_BED_POSITION 170
     #define FRONT_PROBE_BED_POSITION 20
-    #define BACK_PROBE_BED_POSITION 170
+    #define BACK_PROBE_BED_POSITION 130
 
     #define MIN_PROBE_EDGE 10 // The probe square sides can be no smaller than this
 

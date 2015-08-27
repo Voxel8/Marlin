@@ -258,6 +258,7 @@ float volumetric_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS(1.0, 1.0, 1.0, 1.0);
 float home_offset[3] = { 0 };
 float min_pos[3] = { X_MIN_POS, Y_MIN_POS, Z_MIN_POS };
 float max_pos[3] = { X_MAX_POS, Y_MAX_POS, Z_MAX_POS };
+float probe_positions[4] = { LEFT_PROBE_BED_POSITION, RIGHT_PROBE_BED_POSITION, FRONT_PROBE_BED_POSITION, BACK_PROBE_BED_POSITION };
 
 uint8_t active_extruder = 0;
 int fanSpeed = 0;
@@ -2337,10 +2338,10 @@ inline void gcode_G28() {
 
       xy_travel_speed = code_seen('S') ? code_value_short() : XY_TRAVEL_SPEED;
 
-      int left_probe_bed_position = code_seen('L') ? code_value_short() : LEFT_PROBE_BED_POSITION,
-          right_probe_bed_position = code_seen('R') ? code_value_short() : RIGHT_PROBE_BED_POSITION,
-          front_probe_bed_position = code_seen('F') ? code_value_short() : FRONT_PROBE_BED_POSITION,
-          back_probe_bed_position = code_seen('B') ? code_value_short() : BACK_PROBE_BED_POSITION;
+      int left_probe_bed_position = code_seen('L') ? code_value_short() : probe_positions[0],
+          right_probe_bed_position = code_seen('R') ? code_value_short() : probe_positions[1],
+          front_probe_bed_position = code_seen('F') ? code_value_short() : probe_positions[2],
+          back_probe_bed_position = code_seen('B') ? code_value_short() : probe_positions[3];
 
       bool left_out_l = left_probe_bed_position < MIN_PROBE_X,
            left_out = left_out_l || left_probe_bed_position > right_probe_bed_position - MIN_PROBE_EDGE,
@@ -4447,6 +4448,26 @@ inline void gcode_M303() {
 
 #endif // EXT_SOLENOID
 
+
+
+inline void gcode_M390() {
+  if (code_seen('X')) {
+    min_pos[X_AXIS] = current_position[X_AXIS] + X_PROBE_OFFSET_FROM_EXTRUDER;// - extruder_offset[X_AXIS][1];
+  }
+  if (code_seen('Y')) {
+    min_pos[Y_AXIS] = current_position[Y_AXIS] + Y_PROBE_OFFSET_FROM_EXTRUDER;// - extruder_offset[Y_AXIS][1];
+  }
+}
+inline void gcode_M391() {
+  if (code_seen('X')) {
+    max_pos[X_AXIS] = current_position[X_AXIS] + X_PROBE_OFFSET_FROM_EXTRUDER;// - extruder_offset[X_AXIS][1];
+  }
+  if (code_seen('Y')) {
+    max_pos[Y_AXIS] = current_position[Y_AXIS] + Y_PROBE_OFFSET_FROM_EXTRUDER;// - extruder_offset[Y_AXIS][1];
+  }
+}
+
+
 /**
   M399: Pause command
 **/
@@ -5024,8 +5045,12 @@ inline void gcode_T() {
           }
         #else // !DUAL_X_CARRIAGE
           // Offset extruder (only by XYZ)
-          for (int i=X_AXIS; i<=Z_AXIS; i++)
+          for (int i=X_AXIS; i<=Z_AXIS; i++) {
+            SERIAL_PROTOCOL(current_position[i]);
+            SERIAL_PROTOCOLPGM(" -> ");
             current_position[i] += extruder_offset[i][tmp_extruder] - extruder_offset[i][active_extruder];
+            SERIAL_PROTOCOLLN(current_position[i]);
+          }
           // Set the new active extruder and position
           active_extruder = tmp_extruder;
         #endif // !DUAL_X_CARRIAGE
@@ -5470,6 +5495,15 @@ void process_commands() {
           gcode_M365();
           break;
       #endif // SCARA
+      
+      // Set minimum postions for motion and probing.
+      case 390:
+        gcode_M390();
+        break;
+      // Set maximum postions for motion and probing.
+      case 391:
+        gcode_M391();
+        break;
 
       case 399: // M399 Pause command
         gcode_M399();
