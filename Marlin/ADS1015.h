@@ -96,19 +96,24 @@
 
 #endif
 
-// M235 All Single Ended
-#define EXT_ADC_READ_0	get_dist(0)	// M234 - Processes raw ADC value and returns distance
-#define EXT_ADC_READ_1	get_dist(1)	// M234 - Processes raw ADC value and returns distance
-#define EXT_ADC_READ_2	get_dist(2)	// M234 - Processes raw ADC value and returns distance
-#define EXT_ADC_READ_3	get_dist(3)	// M234 - Processes raw ADC value and returns distance
+//M235 - Get distance in micron from distance sensor
+
+#define EXT_ADC_READ_0	get_dist_SingleEnded(0)	// M235 - Processes raw ADC value and returns distance
+#define EXT_ADC_READ_1	get_dist_SingleEnded(1)	// M235 - Processes raw ADC value and returns distance
+#define EXT_ADC_READ_2	get_dist_SingleEnded(2)	// M235 - Processes raw ADC value and returns distance
+#define EXT_ADC_READ_3	get_dist_SingleEnded(3)	// M235 - Processes raw ADC value and returns distance
+
+#define EXT_ADC_READ_0	get_dist_Differential(0, 1)	// M235 - Processes raw ADC value and returns distance
+#define EXT_ADC_READ_1	get_dist_Differential(1, 3)	// M235 - Processes raw ADC value and returns distance
+#define EXT_ADC_READ_2	get_dist_Differential(2, 3)	// M235 - Processes raw ADC value and returns distance
+#define EXT_ADC_READ_3	get_dist_Differential(0, 3)	// M235 - Processes raw ADC value and returns distance
+
 /* Definitions for calculations */
 /*------------------------------*/
 
 // TODO: set this to auto-configure conversion factor based on a value set in the config.h file
 #define CONV_FACTOR     0.003001    // (6.144V / 2047 bits) 
 #define VOLT_TO_DIST    2000        // (10000 um / 5V)
-
-
 
 /* Function Prototypes */
 /*=====================*/
@@ -121,6 +126,10 @@ void regWrite(uint8_t address, uint8_t reg, uint16_t value);
 
 uint16_t regRead(uint8_t address, uint8_t reg);
 
-uint16_t get_dist(uint8_t channel);
+uint16_t get_dist_SingleEnded(uint8_t channel);
+
+uint16_t get_dist_Differential(uint8_t first_channel, uint8_t second_channel);
+
+void ADC_i2c_init(void);
 
 #endif
