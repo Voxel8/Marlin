@@ -29,7 +29,7 @@ float distance = 0;
 /*================================================================================*/
 
 uint16_t readADC_SingleEnded(uint8_t channel) {
-    Wire.begin();
+    
     if(channel > 3) {
         return 0;
     }
@@ -111,23 +111,6 @@ uint16_t readADC_SingleEnded(uint8_t channel) {
     return ADC_val;
 }
 
-uint16_t get_dist(uint8_t channel) {
-
-    uint16_t val_raw = 0;
-
-    val_raw = readADC_SingleEnded(channel);
-
-    // THEORETICALLY, the formula for distance should be distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST)
-    // HOWEVER, empirical data has shown that a linear offset exists such that ...
-    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - offset  , or
-    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - (mx + b)
-    // where m = linear_offset, x = (val_raw * CONV_FACTOR), and b = const_offset
-
-    distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - ((linear_offset * val_raw * CONV_FACTOR) - const_offset);
-    
-    return distance;
-}
-
 /*================================================================================*/
 /*                   GET SINGLE READING FROM ADC (Differential)                   */
 /*================================================================================*/
@@ -205,22 +188,56 @@ uint16_t readADC_Differential(uint8_t first_channel, uint8_t second_channel) {
     
         ADC_val = regRead(ADS1015_I2C_ADDRESS, ADS1015_CONVERSION_REG);
             
-
     #endif
-
-// THEORETICALLY, the formula for distance should be distance = (ADC_val * CONV_FACTOR * VOLT_TO_DIST)
-    // HOWEVER, empirical data has shown that a linear offset exists such that ...
-    // distance = (ADC_val * CONV_FACTOR * VOLT_TO_DIST) - offset  , or
-    // distance = (ADC_val * CONV_FACTOR * VOLT_TO_DIST) - (mx + b)
-    // where m = linear_offset, x = (ADC_val * CONV_FACTOR), and b = const_offset
-    distance = (ADC_val * CONV_FACTOR * VOLT_TO_DIST) - ((linear_offset * ADC_val * CONV_FACTOR) - const_offset);
     
-    return distance;
+    return ADC_val;
 }
 
 /*================================================================================*/
+/*                            GET DISTANCE (Single-Ended)                         */
+/*================================================================================*/
+
+uint16_t get_dist_SingleEnded(uint8_t channel) {
+
+    uint16_t val_raw = 0;
+
+    val_raw = readADC_SingleEnded(channel);
+
+    // THEORETICALLY, the formula for distance should be distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST)
+    // HOWEVER, empirical data has shown that a linear offset exists such that ...
+    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - offset  , or
+    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - (mx + b)
+    // where m = linear_offset, x = (val_raw * CONV_FACTOR), and b = const_offset
+    // The val_raw and CONV_FACTOR terms were factored out to simplify the equation.
+
+    distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - ((linear_offset * val_raw * CONV_FACTOR) - const_offset);
+    
+    return distance;
+}
+/*================================================================================*/
+/*                            GET DISTANCE (Differential)                         */
+/*================================================================================*/
+
+uint16_t get_dist_Differential(uint8_t first_channel, uint8_t second_channel) {
+
+    uint16_t val_raw = 0;
+
+    val_raw = readADC_Differential(first_channel, second_channel);
+
+    // THEORETICALLY, the formula for distance should be distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST)
+    // HOWEVER, empirical data has shown that a linear offset exists such that ...
+    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - offset  , or
+    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - (mx + b)
+    // where m = linear_offset, x = (val_raw * CONV_FACTOR), and b = const_offset
+
+    distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - ((linear_offset * val_raw * CONV_FACTOR) - const_offset);
+    
+    return distance;
+}
+/*================================================================================*/
 /*                               WRITE TO A REGISTER                              */
 /*================================================================================*/
+
 void regWrite(uint8_t address, uint8_t reg, uint16_t value) {
     Wire.beginTransmission(address);
     Wire.write((uint8_t)reg);               // select register
@@ -232,13 +249,12 @@ void regWrite(uint8_t address, uint8_t reg, uint16_t value) {
 /*================================================================================*/
 /*                                 READ  A REGISTER                               */
 /*================================================================================*/
+
 uint16_t regRead(uint8_t address, uint8_t reg) {
     Wire.beginTransmission(address);
     Wire.write(reg);                        // select register
     Wire.endTransmission();
     Wire.requestFrom(address, (uint8_t)2);
-    
-    
     
     #if EXT_ADC == 1
         uint16_t volatile ADC_raw = (Wire.read() << 8) | Wire.read();
@@ -248,4 +264,12 @@ uint16_t regRead(uint8_t address, uint8_t reg) {
 
     return ADC_raw;
 }
+/*================================================================================*/
+/*                              INITIALIZE I2C COMM                               */
+/*================================================================================*/
+
+void ADC_i2c_init(void) {
+    Wire.begin();
+}
+
 #endif
