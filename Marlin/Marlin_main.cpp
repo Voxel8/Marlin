@@ -673,6 +673,10 @@ void setup() {
     DAC_i2c_init();
   #endif
 
+  #ifdef EXT_ADC
+    ADC_i2c_init();
+  #endif
+
   #ifdef DIGIPOT_I2C
     digipot_i2c_init();
   #endif
@@ -4128,7 +4132,7 @@ inline void gcode_M226() {
    */
   inline void gcode_M234() {
     SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_RAW_1);
+    SERIAL_PROTOCOL(EXT_ADC_RAW_0);
     SERIAL_EOL;
   }
   /**
