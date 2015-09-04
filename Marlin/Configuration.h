@@ -254,9 +254,9 @@ Here are some standard links for getting your machine calibrated:
 //  #define  DEFAULT_Kd 66.91
     
 // E3D V6 with PT100
-    #define  DEFAULT_Kp 5.8
-    #define  DEFAULT_Ki 0.25
-    #define  DEFAULT_Kd 33.26
+//    #define  DEFAULT_Kp 5.8
+//    #define  DEFAULT_Ki 0.25
+//    #define  DEFAULT_Kd 33.26
 
 // D3D 24V New Heat Block
 //    #define  DEFAULT_Kp 9.83
@@ -268,10 +268,10 @@ Here are some standard links for getting your machine calibrated:
   //  #define  DEFAULT_Ki 0.45
     //#define  DEFAULT_Kd 69.97
     
-//D3D 7/28 ada prints
-//#define  DEFAULT_Kp 12.06
-//#define  DEFAULT_Ki 0.48
-//#define  DEFAULT_Kd 75.71
+//E3D 9/4 Hedy prints
+#define  DEFAULT_Kp 41.53
+#define  DEFAULT_Ki 6.47
+#define  DEFAULT_Kd 66.68
 
 #endif // PIDTEMP
 
