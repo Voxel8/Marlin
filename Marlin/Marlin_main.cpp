@@ -4128,7 +4128,7 @@ inline void gcode_M226() {
    */
   inline void gcode_M234() {
     SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_RAW_1);
+    SERIAL_PROTOCOL(EXT_ADC_RAW_0);
     SERIAL_EOL;
   }
   /**
