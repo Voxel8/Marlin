@@ -719,12 +719,16 @@ void setup() {
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
   #endif
 
+  #if HAS_STEPPER_RESET
+    enableStepperDrivers();
+  #endif
+
   #ifdef DAC_I2C
     DAC_i2c_init();
   #endif
 
-  #if HAS_STEPPER_RESET
-    enableStepperDrivers();
+  #ifdef EXT_ADC
+    ADC_i2c_init();
   #endif
 
   #if ENABLED(DIGIPOT_I2C)
@@ -4783,7 +4787,7 @@ inline void gcode_M226() {
    */
   inline void gcode_M234() {
     SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_RAW_1);
+    SERIAL_PROTOCOL(EXT_ADC_RAW_0);
     SERIAL_EOL;
   }
   /**
