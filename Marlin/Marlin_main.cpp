@@ -673,6 +673,10 @@ void setup() {
     DAC_i2c_init();
   #endif
 
+  #ifdef EXT_ADC
+    ADC_i2c_init();
+  #endif
+
   #ifdef DIGIPOT_I2C
     digipot_i2c_init();
   #endif
