@@ -64,7 +64,7 @@ Here are some standard links for getting your machine calibrated:
 // The following define selects which electronics board you have.
 // Please choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD BOARD_VOXEL8_GEN3C
+  #define MOTHERBOARD BOARD_VOXEL8_GEN3B
 #endif
 
 // Optional custom name for your RepStrap or other custom machine
@@ -116,7 +116,7 @@ Here are some standard links for getting your machine calibrated:
 // 2 = Differential Mode
 #if EXT_ADC == (1 || 2)
 
-  #define EXT_ADC_MODE 2 // Single-Ended Mode
+  #define EXT_ADC_MODE 1 //
 
 #endif
 
@@ -165,7 +165,7 @@ Here are some standard links for getting your machine calibrated:
 //     #define DUMMY_THERMISTOR_998_VALUE 25
 //     #define DUMMY_THERMISTOR_999_VALUE 100
 // :{ '0': "Not used", '4': "10k !! do not use for a hotend. Bad resolution at high temp. !!", '1': "100k / 4.7k - EPCOS", '51': "100k / 1k - EPCOS", '6': "100k / 4.7k EPCOS - Not as accurate as Table 1", '5': "100K / 4.7k - ATC Semitec 104GT-2 (Used in ParCan & J-Head)", '7': "100k / 4.7k Honeywell 135-104LAG-J01", '71': "100k / 4.7k Honeywell 135-104LAF-J01", '8': "100k / 4.7k 0603 SMD Vishay NTCS0603E3104FXT", '9': "100k / 4.7k GE Sensing AL03006-58.2K-97-G1", '10': "100k / 4.7k RS 198-961", '11': "100k / 4.7k beta 3950 1%", '12': "100k / 4.7k 0603 SMD Vishay NTCS0603E3104FXT (calibrated for Makibox hot bed)", '13': "100k Hisens 3950  1% up to 300°C for hotend 'Simple ONE ' & hotend 'All In ONE'", '60': "100k Maker's Tool Works Kapton Bed Thermistor beta=3950", '55': "100k / 1k - ATC Semitec 104GT-2 (Used in ParCan & J-Head)", '2': "200k / 4.7k - ATC Semitec 204GT-2", '52': "200k / 1k - ATC Semitec 204GT-2", '-2': "Thermocouple + MAX6675 (only for sensor 0)", '-1': "Thermocouple + AD595", '3': "Mendel-parts / 4.7k", '1047': "Pt1000 / 4.7k", '1010': "Pt1000 / 1k (non standard)", '20': "PT100 (Ultimainboard V2.x)", '147': "Pt100 / 4.7k", '110': "Pt100 / 1k (non-standard)", '998': "Dummy 1", '999': "Dummy 2" }
-#define TEMP_SENSOR_0 20
+#define TEMP_SENSOR_0 5
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_3 0
@@ -254,9 +254,9 @@ Here are some standard links for getting your machine calibrated:
 //  #define  DEFAULT_Kd 66.91
     
 // E3D V6 with PT100
-    #define  DEFAULT_Kp 18.37
-    #define  DEFAULT_Ki 0.95
-    #define  DEFAULT_Kd 67.89
+    #define  DEFAULT_Kp 5.8
+    #define  DEFAULT_Ki 0.25
+    #define  DEFAULT_Kd 33.26
 
 // D3D 24V New Heat Block
 //    #define  DEFAULT_Kp 9.83
@@ -377,8 +377,8 @@ Here are some standard links for getting your machine calibrated:
 // using HEAT_1 output
 #define PNEUMATICS
 // Define this if you are using the electro-pneumatic regulator (Model #??)
-#define DAC_I2C
-#define REGULATOR
+//#define DAC_I2C
+//#define REGULATOR
 
 #ifdef REGULATOR
  // 130 psi is max settable pressure for e-regulator
@@ -476,9 +476,9 @@ const bool Z_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic 
 // @section machine
 
 // Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
-#define INVERT_X_DIR false
-#define INVERT_Y_DIR false
-#define INVERT_Z_DIR false
+#define INVERT_X_DIR true
+#define INVERT_Y_DIR true
+#define INVERT_Z_DIR true
 
 // @section extruder
 
@@ -688,8 +688,8 @@ const bool Z_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic 
 // XY motors: (steps * microsteps)/ (tooth-pitch * tooth-count) --> (200steps * 16) / (2mm * 15 teeth) = 106.66666666666667
 // Z motor: (steps * microsteps) / (leadscrew pitch) --> (200steps * 4) / 2mm = 800
 // E motor: 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667*2,106.6666666666667*2,1600,555}  // default steps per unit for Voxel8 gen3
-#define DEFAULT_MAX_FEEDRATE          {90, 90, 10, 600}    // (mm/sec)
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667,106.6666666666667,1600,555}  // default steps per unit for Voxel8 gen3
+#define DEFAULT_MAX_FEEDRATE          {185, 185, 10, 600}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {5000,5000,100,9000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
 
 #define DEFAULT_ACCELERATION          1500    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
