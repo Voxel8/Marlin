@@ -98,15 +98,21 @@
 
 //M235 - Get distance in micron from distance sensor
 
+#if EXT_ADC_MODE == 1 // Single-Ended Mode
+
 #define EXT_ADC_READ_0	get_dist_SingleEnded(0)	// M235 - Processes raw ADC value and returns distance
 #define EXT_ADC_READ_1	get_dist_SingleEnded(1)	// M235 - Processes raw ADC value and returns distance
 #define EXT_ADC_READ_2	get_dist_SingleEnded(2)	// M235 - Processes raw ADC value and returns distance
 #define EXT_ADC_READ_3	get_dist_SingleEnded(3)	// M235 - Processes raw ADC value and returns distance
 
+#elif EXT_ADC_MODE == 2 // Differential Mode
+
 #define EXT_ADC_READ_0	get_dist_Differential(0, 1)	// M235 - Processes raw ADC value and returns distance
 #define EXT_ADC_READ_1	get_dist_Differential(1, 3)	// M235 - Processes raw ADC value and returns distance
 #define EXT_ADC_READ_2	get_dist_Differential(2, 3)	// M235 - Processes raw ADC value and returns distance
 #define EXT_ADC_READ_3	get_dist_Differential(0, 3)	// M235 - Processes raw ADC value and returns distance
+
+#endif
 
 /* Definitions for calculations */
 /*------------------------------*/
