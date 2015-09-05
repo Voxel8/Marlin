@@ -15,4 +15,4 @@
 	#include "ADS1015.h"
 #endif
 
-#endif // EXT_ADC.h include guard
+#endif // EXT_ADC.h

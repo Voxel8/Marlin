@@ -8,21 +8,9 @@
 
 #ifdef EXT_ADC
 
-#if EXT_ADC == 1
-    #include "ADS1115.h"
-#elif EXT_ADC ==2
-    #include "ADS1015.h"
-#endif
+#include "ADC.h"
 
 uint16_t ADC_val = 0;
-float distance = 0;
-#if EXT_ADC == 1
-    float linear_offset = 5.757;    // linear coefficient of offset that was determined with empirical data
-    float const_offset  = 1.57;     // constant term of offset
-#elif EXT_ADC == 2
-    float linear_offset = 0;
-    float const_offset = 0;
-#endif
 
 /*================================================================================*/
 /*                   GET SINGLE READING FROM ADC (Single-Ended)                   */
@@ -193,47 +181,6 @@ uint16_t readADC_Differential(uint8_t first_channel, uint8_t second_channel) {
     return ADC_val;
 }
 
-/*================================================================================*/
-/*                            GET DISTANCE (Single-Ended)                         */
-/*================================================================================*/
-
-uint16_t get_dist_SingleEnded(uint8_t channel) {
-
-    uint16_t val_raw = 0;
-
-    val_raw = readADC_SingleEnded(channel);
-
-    // THEORETICALLY, the formula for distance should be distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST)
-    // HOWEVER, empirical data has shown that a linear offset exists such that ...
-    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - offset  , or
-    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - (mx + b)
-    // where m = linear_offset, x = (val_raw * CONV_FACTOR), and b = const_offset
-    // The val_raw and CONV_FACTOR terms were factored out to simplify the equation.
-
-    distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - ((linear_offset * val_raw * CONV_FACTOR) - const_offset);
-    
-    return distance;
-}
-/*================================================================================*/
-/*                            GET DISTANCE (Differential)                         */
-/*================================================================================*/
-
-uint16_t get_dist_Differential(uint8_t first_channel, uint8_t second_channel) {
-
-    uint16_t val_raw = 0;
-
-    val_raw = readADC_Differential(first_channel, second_channel);
-
-    // THEORETICALLY, the formula for distance should be distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST)
-    // HOWEVER, empirical data has shown that a linear offset exists such that ...
-    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - offset  , or
-    // distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - (mx + b)
-    // where m = linear_offset, x = (val_raw * CONV_FACTOR), and b = const_offset
-
-    distance = (val_raw * CONV_FACTOR * VOLT_TO_DIST) - ((linear_offset * val_raw * CONV_FACTOR) - const_offset);
-    
-    return distance;
-}
 /*================================================================================*/
 /*                               WRITE TO A REGISTER                              */
 /*================================================================================*/

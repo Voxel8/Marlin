@@ -11,6 +11,7 @@
 #include "Arduino.h"
 #include <Wire.h>
 #include "Configuration.h"
+#include "DistanceSensor.h"
 
 /* I2C ADDRESS */
 /*-------------*/
@@ -114,13 +115,6 @@
 
 #endif
 
-/* Definitions for calculations */
-/*------------------------------*/
-
-// TODO: set this to auto-configure conversion factor based on a value set in the config.h file
-#define CONV_FACTOR     0.000188    // (6.144V / 32767 bits) 
-#define VOLT_TO_DIST    2000        // (10000 um / 5V)
-
 /* Function Prototypes */
 /*=====================*/
 
@@ -131,10 +125,6 @@ uint16_t readADC_Differential(uint8_t first_channel, uint8_t second_channel);
 void regWrite(uint8_t address, uint8_t reg, uint16_t value);
 
 uint16_t regRead(uint8_t address, uint8_t reg);
-
-uint16_t get_dist_SingleEnded(uint8_t channel);
-
-uint16_t get_dist_Differential(uint8_t first_channel, uint8_t second_channel);
 
 void ADC_i2c_init(void);
 
