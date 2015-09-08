@@ -15,4 +15,7 @@
 	#include "ADS1015.h"
 #endif
 
+#define ADC_SAMPLE_POWER    0x0F   // (15 in decimal) Max pow of 2 that can be given as arg 
+                                       // for M234/5.
+
 #endif // EXT_ADC.h
