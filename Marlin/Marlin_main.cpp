@@ -185,7 +185,7 @@
  * M221 - Set extrude factor override percentage: S<factor in percent>
  * M226 - Wait until the specified pin reaches the state required: P<pin number> S<pin state>
  * M234 - Output raw external ADC value (or averaged value over S samples if an S parameter is given)
- * M235 - Output processed external ADC data
+ * M235 - Output distance sensor data (or averaged value over S samples if an S parameter is given)
  * M236 - Set output target pressure by writing to DAC
  * M240 - Trigger a camera to take a photograph
  * M250 - Set LCD contrast C<contrast value> (value 0..63)
@@ -4188,8 +4188,8 @@ inline void gcode_M226() {
       SERIAL_PROTOCOL(sample_avg);
     }
     else {
-    SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_READ_0);
+      SERIAL_PROTOCOLPGM("ok ");
+      SERIAL_PROTOCOL(EXT_ADC_READ_0);
     }
     SERIAL_EOL;
   }
