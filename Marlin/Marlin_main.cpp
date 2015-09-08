@@ -4164,10 +4164,33 @@ inline void gcode_M226() {
    * M235 - Return processed external ADC value
    */
   inline void gcode_M235() {
-    //SERIAL_PROTOCOLLN(MSG_M235_REPORT);         Commented out so only number is returned
-    //SERIAL_PROTOCOLPGM(MSG_EXT_ADC_REPORT);
+    if(code_seen('S')) {
+
+      uint8_t power = code_value();
+      uint16_t num_samples = 0x0001 << power;
+      uint16_t i = 0;
+      uint32_t sample_sum = 0; // must be 32 bit unsigned int!
+      uint16_t sample_avg = 0;
+
+      // Value must be less than max sample power
+      // (This value was just taken from M234 for simplicity)
+      if(power > ADC_SAMPLE_POWER) {
+        power = ADC_SAMPLE_POWER;
+      }
+      // Take specified amount of readings
+      for(i = 0; i < num_samples; i++) {
+        sample_sum += EXT_ADC_READ_0;
+      }
+      // Take average of sample readings
+      sample_avg = sample_sum >> power;
+
+      SERIAL_PROTOCOLPGM("ok ");
+      SERIAL_PROTOCOL(sample_avg);
+    }
+    else {
     SERIAL_PROTOCOLPGM("ok ");
     SERIAL_PROTOCOL(EXT_ADC_READ_0);
+    }
     SERIAL_EOL;
   }
 #endif
