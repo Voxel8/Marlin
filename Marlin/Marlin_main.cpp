@@ -181,7 +181,7 @@
  * M220 - Set speed factor override percentage: S<factor in percent>
  * M221 - Set extrude factor override percentage: S<factor in percent>
  * M226 - Wait until the specified pin reaches the state required: P<pin number> S<pin state>
- * M234 - Output raw external ADC value
+ * M234 - Output raw external ADC value (or averaged value over S samples if an S parameter is given)
  * M235 - Output processed external ADC data
  * M236 - Set output target pressure by writing to DAC
  * M240 - Trigger a camera to take a photograph
@@ -4786,8 +4786,33 @@ inline void gcode_M226() {
    * M234 - Return raw external ADC value
    */
   inline void gcode_M234() {
+    // Check for S parameter
+    if(code_seen('S')) {
+
+      uint8_t power = code_value();
+      uint16_t num_samples = 0x0001 << power;
+      uint16_t i = 0;
+      uint32_t sample_sum = 0; // must be 32 bit unsigned int!
+      uint16_t sample_avg = 0;
+
+      // Value must be less than max sample power
+      if(power > ADC_SAMPLE_POWER) {
+        power = ADC_SAMPLE_POWER;
+      }
+      // Take specified amount of readings
+      for(i = 0; i < num_samples; i++) {
+        sample_sum += EXT_ADC_RAW_0;
+      }
+      // Take average of sample readings
+      sample_avg = sample_sum >> power;
+
+      SERIAL_PROTOCOLPGM("ok ");
+      SERIAL_PROTOCOL(sample_avg);
+    }
+    else {
     SERIAL_PROTOCOLPGM("ok ");
     SERIAL_PROTOCOL(EXT_ADC_RAW_0);
+    }
     SERIAL_EOL;
   }
   /**
