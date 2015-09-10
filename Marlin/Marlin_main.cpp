@@ -4202,18 +4202,12 @@ inline void gcode_M226() {
   inline void gcode_M236() {
     if(code_seen('S')) {
       float psi = code_value();
-      // Check that desired pressure is within range allowed
-      if((psi <= OUTPUT_PSI_MAX) && (psi >= OUTPUT_PSI_MIN)) {
-        setOutputPressure(psi);
-      }
       // If psi greater than max, reset psi to max
-      else if(psi > OUTPUT_PSI_MAX) {
+      if(psi > OUTPUT_PSI_MAX) {
         psi = OUTPUT_PSI_MAX;
         SERIAL_PROTOCOLLNPGM("WARNING: Desired Pressure Above Max Allowed Pressure");
         SERIAL_PROTOCOLPGM("Output Pressure set to ");
         SERIAL_PROTOCOLLN(OUTPUT_PSI_MAX);
-        setOutputPressure(psi);
-        SERIAL_EOL;
       }
       // If psi less than min, reset psi to min
       else if(psi < OUTPUT_PSI_MIN) {
@@ -4221,9 +4215,9 @@ inline void gcode_M226() {
         SERIAL_PROTOCOLLNPGM("WARNING: Desired Pressure Below Min Allowed Pressure");
         SERIAL_PROTOCOLPGM("Output Pressure set to ");
         SERIAL_PROTOCOLLN(OUTPUT_PSI_MIN);
-        setOutputPressure(psi);
-        SERIAL_EOL;
       }
+      setOutputPressure(psi);
+      SERIAL_EOL;
     }
   }
 #endif
