@@ -4871,7 +4871,14 @@ inline void gcode_M226() {
         SERIAL_PROTOCOLPGM("Output Pressure set to ");
         SERIAL_PROTOCOLLN(OUTPUT_PSI_MIN);
       }
-      setOutputPressure(psi);
+      // Is desired pressure available?
+      if((psi <= (pressurePneumatic() - 1))  && (psi <= (targetPneumatic() - 1))) {
+        setOutputPressure(psi);
+      }
+      // Desired pressure not available
+      else {
+        SERIAL_PROTOCOLLNPGM("WARNING: Cannot output desired pressure due to insufficient tank pressure");
+      }
       SERIAL_EOL;
     }
   }
