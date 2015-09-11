@@ -846,7 +846,7 @@ static float analog2tempBed(int raw) {
 #ifdef PNEUMATICS
 static float analog2valPneumatic(int raw) {
     float psi = 0;
-    byte i;
+    uint8_t i;
 
     for (i=1; i<PRESSURETABLE_LEN; i++)
     {
