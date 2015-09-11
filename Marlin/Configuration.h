@@ -116,7 +116,7 @@ Here are some standard links for getting your machine calibrated:
 // 2 = Differential Mode
 #if EXT_ADC == (1 || 2)
 
-  #define EXT_ADC_MODE 1 //
+  #define EXT_ADC_MODE 2
 
 #endif
 
@@ -508,7 +508,7 @@ const bool Z_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic 
 #define Z_MIN_POS 0
 #define X_MAX_POS 190
 #define Y_MAX_POS 180
-#define Z_MAX_POS 120
+#define Z_MAX_POS 112
 
 //===========================================================================
 //========================= Filament Runout Sensor ==========================
