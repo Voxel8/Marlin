@@ -4163,7 +4163,7 @@ inline void gcode_M226() {
   /**
    * M235 - Return processed external ADC value
    */
-  inline void gcode_M235(uint8_t power = 0) {
+  inline void gcode_M235(uint8_t power) {
 
     if(code_seen('S')) {
       power = code_value();
@@ -5505,7 +5505,7 @@ void process_commands() {
           return;
           break;
         case 235: // M235 Return processed external ADC value
-          gcode_M235();
+          gcode_M235(0);
           return;
           break;
       #endif // EXT_ADC
