@@ -5809,10 +5809,10 @@ inline void gcode_T(uint8_t tmp_extruder) {
                                              extruder_offset[Y_AXIS][active_extruder],
                                              extruder_offset[Z_AXIS][active_extruder]);
           vector_3 offset_vec = tmp_offset_vec - act_offset_vec;
-          offset_vec.apply_rotation(plan_bed_level_matrix);
+          offset_vec.apply_rotation(plan_bed_level_matrix.transpose(plan_bed_level_matrix));
           current_position[X_AXIS] += offset_vec.x;
           current_position[Y_AXIS] += offset_vec.y;
-          current_position[Z_AXIS] -= offset_vec.z;
+          current_position[Z_AXIS] += offset_vec.z;
 
 
           // Set the new active extruder and position
