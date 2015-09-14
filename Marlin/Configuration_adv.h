@@ -284,7 +284,7 @@ Note the A4982 is set to be limited to 2A. This means the adjustable voltage ran
 Wv, to be entered into firmware or directly over SPI.
 Wv = (VRef / 1.66) * 255
 */
-#define DIGIPOT_MOTOR_CURRENT {135,135,191,102,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+#define DIGIPOT_MOTOR_CURRENT {135,135,191,90,135} // Values 0-255 (RAMBO 90 = ~0.75A, 185 = ~1.5A)
 
 // uncomment to enable an I2C based DIGIPOT like on the Azteeg X3 Pro
 //#define DIGIPOT_I2C
