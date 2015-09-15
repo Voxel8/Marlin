@@ -1147,6 +1147,7 @@ const short temptable_1047[][2] PROGMEM = {
 #if (PNEUMATIC_SENSOR == 1) //pneumatic sensor LUT for P255-50G-D1A
 // Lookup table to convert analog values to pressure values.
 // Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
+// **FOR USE WITH 10-BIT ADC**
 const short pressuretable_1[][2] PROGMEM = {
    {0*OVERSAMPLENR,     0},
    {102*OVERSAMPLENR,   0},
@@ -1158,8 +1159,8 @@ const short pressuretable_1[][2] PROGMEM = {
 // Lookup table to convert analog values to pressure values.
 // Should be ~25 psi/V, but empirical data shows ~40 psi/V
 // Supply voltage MUST BE STABLE!
-
 // Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
+// **FOR USE WITH 10-BIT ADC**
 const short pressuretable_2[][2] PROGMEM = {
    {0*OVERSAMPLENR,       0},
    {129*OVERSAMPLENR,     0},
@@ -1180,13 +1181,28 @@ const short pressuretable_2[][2] PROGMEM = {
 
 #if (PNEUMATIC_SENSOR == 3) //pneumatic sensor LUT for Pressure Transmitter PT1200-1/4NPT
 // Lookup table to convert analog values to pressure values.
-
 // Pressure values are in 10ths of PSIs (i.e 213 = 21.3 PSI).
+// **FOR USE WITH 10-BIT ADC**
 const short pressuretable_3[][2] PROGMEM = {
    {0*OVERSAMPLENR,       0},
    {201*OVERSAMPLENR,     0},
    {1023*OVERSAMPLENR, 1000},
 };
+#endif
+
+#if (E_REGULATOR_SENSOR == 1) // Internal Pressure Sensor LUT for IVT0050-2UL
+const short regulatortable_1[][2] PROGMEM = {
+   {0*OVERSAMPLENR,       0},
+   {206*OVERSAMPLENR,     0},
+   {237*OVERSAMPLENR,    50},
+   {268*OVERSAMPLENR,   100},
+   {299*OVERSAMPLENR,   150},
+   {330*OVERSAMPLENR,   200},
+   {361*OVERSAMPLENR,   250},
+   {392*OVERSAMPLENR,   300},
+   {422*OVERSAMPLENR,   350},
+   {454*OVERSAMPLENR,   400},
+}
 #endif
 
 
@@ -1195,6 +1211,9 @@ const short pressuretable_3[][2] PROGMEM = {
 
 #define _PT_NAME(_N) pressuretable_ ## _N
 #define PT_NAME(_N) _PT_NAME(_N)
+
+#define _RT_NAME(_N) regulatortable_ ## _N
+#define RT_NAME(_N) _RT_NAME(_N)
 
 #ifdef THERMISTORHEATER_0
 # define HEATER_0_TEMPTABLE TT_NAME(THERMISTORHEATER_0)
@@ -1313,6 +1332,13 @@ const short pressuretable_3[][2] PROGMEM = {
   #define PRESSURETABLE_LEN (sizeof(PRESSURETABLE) / sizeof(*PRESSURETABLE))
   #define PNEUMATIC_RAW_HI 16383
   #define PNEUMATIC_RAW_LO 0
+#endif
+
+#ifdef E_REGULATOR
+  #define REGULATORTABLE RT_NAME(E_REGULATOR_SENSOR)
+  #define REGULATORTABLE_LEN (sizeof(REGULATORTABLE) / sizeof(*REGULATORTABLE))
+  #define REGULATOR_RAW_HI 16383
+  #define REGULATOR_RAW_LO 0
 #endif
 
 #endif //THERMISTORTABLES_H_
