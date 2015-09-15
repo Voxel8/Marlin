@@ -60,7 +60,7 @@
   #include "MCP4725.h"
 #endif
 
-#ifdef REGULATOR
+#ifdef E_REGULATOR
   #include "Regulator.h"
 #endif
 
