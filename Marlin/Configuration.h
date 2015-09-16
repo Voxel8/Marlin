@@ -401,6 +401,12 @@ Here are some standard links for getting your machine calibrated:
 #define E_REGULATOR
 
 #ifdef E_REGULATOR
+ // Set E-regulator Sensor Type HERE:
+ // ---------------------------------
+ // 0 - No Pressure Sensor Used
+ // 1 - Built-in Pressure Transducer (ITV0050-2UL)
+
+  #define E_REGULATOR_SENSOR 1
   #define DAC_I2C
  // 130 psi is max settable pressure for e-regulator
   #define OUTPUT_PSI_MAX     130.0 
@@ -408,10 +414,10 @@ Here are some standard links for getting your machine calibrated:
 #endif
 
 #ifdef PNEUMATICS
- 
+
 // Set Pressure Sensor Type HERE:
 // -----------------------------
-// 0 - No Pressure Sensor
+// 0 - No Pressure Sensor Used
 // 1 - Kavlico P255-50G-D1A
 // 2 - American Sensor Tech. 4100 Series (1-5V output)
 // 3 - Pressure Transmitter PT1200-1/4NPT (1-5V output)
