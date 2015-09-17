@@ -15,7 +15,7 @@
 #define BITS_PER_PSI    33.1
 
 #define REG_OFFSET      0.5 // psi
-#define REG_HYSTERESIS  0.35 // psi
+#define REG_HYSTERESIS  0.2 // psi
 #define MCP_CONST (REG_OFFSET - (REG_HYSTERESIS/2.0))
 
 /*================================================================================*/
