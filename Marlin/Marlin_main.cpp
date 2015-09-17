@@ -65,6 +65,7 @@
 
 #ifdef E_REGULATOR
   #include "Regulator.h"
+
 #endif
 
 #ifdef BLINKM
@@ -4218,6 +4219,10 @@ inline void gcode_M226() {
       }
       // Is desired pressure available?
       if((psi <= (pressurePneumatic() - 1))  && (psi <= (targetPneumatic() - 1))) {
+        setOutputPressure(psi);
+      }
+      // Tank pressure is near zero, can set output to near zero
+      else if(((psi == 0) && (pressurePneumatic() <= 1)) || ((psi == 0) && (targetPneumatic() <= 1))) {     
         setOutputPressure(psi);
       }
       // Desired pressure not available
