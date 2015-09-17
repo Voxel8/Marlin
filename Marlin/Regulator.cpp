@@ -10,7 +10,7 @@
 // Set the output pressure (in psi) of the regulator.
 void setOutputPressure(float pressure) {
 	// 4095/(130.355 psi) (adjusted from theoretical value for better accuracy)
-	uint16_t digital_val = (uint16_t)(BITS_PER_PSI * pressure);
+	uint16_t digital_val = (uint16_t)(BITS_PER_PSI * (pressure + MCP_CONST));
 	// Write value to DAC
 	DAC_write(MCP4725_I2C_ADDRESS, digital_val);
 }
