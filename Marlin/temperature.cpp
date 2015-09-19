@@ -23,6 +23,8 @@
 #include "temperature.h"
 #include "watchdog.h"
 #include "language.h"
+#include "Regulator.h"
+#include "MCP4725.h"
 
 #include "Sd2PinMap.h"
 
@@ -59,6 +61,10 @@ millis_t time_since_last_err_bed = 0;
 #ifdef TEMP_SENSOR_1_AS_REDUNDANT
   int redundant_temperature_raw = 0;
   float redundant_temperature = 0.0;
+#endif
+
+#ifdef PNEUMATICS
+  volatile uint8_t pneumatic_error_flag = 0;
 #endif
 
 #ifdef PIDTEMPBED
@@ -528,6 +534,7 @@ void bed_max_temp_error(void) {
     #if HAS_PNEUMATIC_PUMP
       WRITE(PNEUMATIC_PUMP_PIN, 0);
     #endif
+      pneumatic_error_flag = 1;
       _temp_error(-1, PSTR(MSG_PNEUMATIC_PUMP_OFF), PSTR(MSG_ERR_PNEUMATIC));
   }
 #endif
@@ -754,7 +761,11 @@ void manage_heater() {
   }
   #endif // E-REGULATOR
 
-
+  // Turn off E-reg
+  if(pneumatic_error_flag == 1) {
+    DAC_write(MCP4725_I2C_ADDRESS, 0);
+    pneumatic_error_flag = 0;
+  }
     
   #ifndef PIDTEMPBED
     if (ms < next_bed_check_ms) return;
@@ -1827,7 +1838,6 @@ ISR(TIMER0_COMPB_vect) {
       }
     #endif
 
-  
     #if HAS_REGULATOR
       if(current_regulator_raw >= regulator_max_raw) {
         target_value_regulator = 0;
