@@ -112,6 +112,7 @@ void get_command();
 
 void idle(); // the standard idle routine calls manage_inactivity(false)
 uint16_t gcode_M238(uint8_t power = 0);
+void gcode_M241(long num_milliseconds = NULL);
 
 void manage_inactivity(bool ignore_stepper_queue=false);
 
