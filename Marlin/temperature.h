@@ -52,7 +52,6 @@ extern float current_temperature[4];
 
 #ifdef E_REGULATOR
   extern int current_regulator_raw;
-  extern int target_value_regulator;
   extern float current_regulator;
 #endif
 
@@ -123,10 +122,6 @@ FORCE_INLINE float degTargetBed() { return target_temperature_bed; }
 #ifdef E_REGULATOR
   FORCE_INLINE int rawRegulator(void) { return current_regulator_raw; }
   FORCE_INLINE float pressureRegulator(void) { return current_regulator / 10.0; }
-  FORCE_INLINE float targetRegulator(void) { return target_value_regulator / 10.0; }
-
-  // maybe not needed....I already use a function to set the target...probably still need this.
-  FORCE_INLINE void setTargetRegulator(const float &psi) { target_value_regulator = psi * 10;} // Mult by 10 to avoid floats
 #endif
 
 FORCE_INLINE void setTargetHotend(const float &celsius, uint8_t extruder) {

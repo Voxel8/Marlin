@@ -47,7 +47,6 @@
 int target_temperature[4] = { 0 };
 int target_temperature_bed = 0;
 int target_value_pneumatic = 0;
-int target_value_regulator = 0;
 int current_temperature_raw[4] = { 0 };
 float current_temperature[4] = { 0.0 };
 int current_temperature_bed_raw = 0;
@@ -758,42 +757,52 @@ void manage_heater() {
   #ifdef PNEUMATICS
   if (millis() - previous_millis_pneumatic_value > PNEUMATIC_CHECK_INTERVAL) {
 
-          previous_millis_pneumatic_value = millis();
+    previous_millis_pneumatic_value = millis();
 
-          // Check if value is within the correct band
-          if((current_pneumatic > PNEUMATIC_MIN) && (current_pneumatic < PNEUMATIC_MAX))
-            {
-              if(current_pneumatic >= target_value_pneumatic + PNEUMATIC_HYSTERESIS)
-                {
-                  WRITE(PNEUMATIC_PUMP_PIN,LOW);
-                }
-              else if(current_pneumatic < target_value_pneumatic - PNEUMATIC_HYSTERESIS)
-                {
-                  WRITE(PNEUMATIC_PUMP_PIN,HIGH);
-                }
-            }
-          else
-            {
-              WRITE(PNEUMATIC_PUMP_PIN,LOW);
-            }
+    // Check if value is within the correct band
+    if((current_pneumatic > PNEUMATIC_MIN) && (current_pneumatic < PNEUMATIC_MAX)) {
+
+      if(current_pneumatic >= target_value_pneumatic + PNEUMATIC_HYSTERESIS) {
+
+        WRITE(PNEUMATIC_PUMP_PIN,LOW);
+      }
+      else if(current_pneumatic < target_value_pneumatic - PNEUMATIC_HYSTERESIS) {
+                
+        WRITE(PNEUMATIC_PUMP_PIN,HIGH);
+      }
+    }
+    else {
+            
+        WRITE(PNEUMATIC_PUMP_PIN,LOW);
+    }
   }
   #endif // PNEUMATICS
-  
+
   // ELECTRO-PNEUMATIC REGULATOR CONTROL
   #ifdef E_REGULATOR
   if (millis() - previous_millis_regulator_value > REGULATOR_CHECK_INTERVAL) {
-
-          previous_millis_regulator_value = millis();
-
-          // possible control system here (if needed)
+    
+    previous_millis_regulator_value = millis();
+    //Is output pressre more than what is available?
+    if((pressureRegulator() >= pressurePneumatic()) && (pressurePneumatic() >= 1)) {
+      // Shut down
+      if(IsRunning()) {
+        SERIAL_ERROR_START;
+        SERIAL_ERRORLNPGM(MSG_ERR_REGULATOR);
+        // Set output pressure to 0
+        DAC_write(MCP4725_I2C_ADDRESS, 0);
+        // Disable heaters
+        Stop();
+      }
+    }
   }
-  #endif // E-REGULATOR
-
-  // Turn off E-reg
+  // Turn off E-reg if error flag
   if(pneumatic_error_flag == 1) {
+    // Set output pressure to 0
     DAC_write(MCP4725_I2C_ADDRESS, 0);
     pneumatic_error_flag = 0;
   }
+  #endif // E-REGULATOR
     
   #if DISABLED(PIDTEMPBED)
     if (ms < next_bed_check_ms) return;
@@ -1871,15 +1880,6 @@ ISR(TIMER0_COMPB_vect) {
       if (current_pneumatic_raw < pneumatic_min_raw) {
         target_value_pneumatic = 0;
         pneumatic_value_error();
-      }
-    #endif
-
-    #if HAS_REGULATOR
-      if(current_regulator_raw >= regulator_max_raw) {
-        target_value_regulator = 0;
-      }
-      if(current_regulator_raw < regulator_min_raw) {
-        target_value_regulator = 0;
       }
     #endif
       
