@@ -192,6 +192,7 @@
  * M238 - Return ADC value from laser sensor (get distance)
  * M239 - Homing and bed leveling combination
  * M240 - Trigger a camera to take a photograph
+ * M241 - Dwell for a given amount of time in milliseconds (500 by default)
  * M250 - Set LCD contrast C<contrast value> (value 0..63)
  * M280 - Set servo position absolute. P: servo index, S: angle or microseconds
  * M300 - Play beep sound S<frequency Hz> P<duration ms>
@@ -1173,9 +1174,9 @@ inline void set_destination_to_current() { memcpy(destination, current_position,
 
       plan_bed_level_matrix.set_to_identity();
 
-      vector_3 pt1 = vector_3((ABL_PROBE_PT_1_X - X_PROBE_OFFSET_FROM_EXTRUDER), (ABL_PROBE_PT_1_Y - Y_PROBE_OFFSET_FROM_EXTRUDER), z_at_pt_1);
-      vector_3 pt2 = vector_3((ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER), (ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER), z_at_pt_2);
-      vector_3 pt3 = vector_3((ABL_PROBE_PT_3_X - X_PROBE_OFFSET_FROM_EXTRUDER), (ABL_PROBE_PT_3_Y - Y_PROBE_OFFSET_FROM_EXTRUDER), z_at_pt_3);
+      vector_3 pt1 = vector_3(ABL_PROBE_PT_1_X, ABL_PROBE_PT_1_Y, z_at_pt_1);
+      vector_3 pt2 = vector_3(ABL_PROBE_PT_2_X, ABL_PROBE_PT_2_Y, z_at_pt_2);
+      vector_3 pt3 = vector_3(ABL_PROBE_PT_3_X, ABL_PROBE_PT_3_Y, z_at_pt_3);
       vector_3 planeNormal = vector_3::cross(pt1 - pt2, pt3 - pt2).get_normal();
 
       if (planeNormal.z < 0) {
@@ -1295,38 +1296,47 @@ inline void set_destination_to_current() { memcpy(destination, current_position,
     do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
     do_blocking_move_to(x - 0.1, y, z);
     sync_plan_position();
+    gcode_M241(200);
     bedlevelprobes[0] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] + 0.1, z);
     sync_plan_position();
+    gcode_M241(200);
     bedlevelprobes[1] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
     sync_plan_position();
+    gcode_M241(200);
     bedlevelprobes[2] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
     sync_plan_position();
+    gcode_M241(200);
     bedlevelprobes[3] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
     sync_plan_position();
+    gcode_M241(200);
     bedlevelprobes[4] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
     sync_plan_position();
+    gcode_M241(200);
     bedlevelprobes[5] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
     sync_plan_position();
+    gcode_M241(200);
     bedlevelprobes[6] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
     sync_plan_position();
+    gcode_M241(200);
     bedlevelprobes[7] = gcode_M238(4);
 
     do_blocking_move_to(x, y, z);
     sync_plan_position();
+    gcode_M241(200);
     bedlevelprobes[8] = gcode_M238(4);
 
     uint16_t num_samples = 0x0001 << 3;
@@ -4570,6 +4580,32 @@ inline void gcode_M239() {
 
 #endif // CHDK || PHOTOGRAPH_PIN
 
+/*
+* M241 - Dwell for a given amount of time in milliseconds (500 by default)
+*/
+void gcode_M241(long num_milliseconds) {
+  if (num_milliseconds == NULL) {
+    if(code_seen('T')) {
+      num_milliseconds = code_value_long();
+    } else {
+      num_milliseconds = 500;
+    }
+  }
+  millis_t codenum = num_milliseconds;
+  
+  st_synchronize();
+  refresh_cmd_timeout();
+  codenum += previous_cmd_ms;  // keep track of when we started waiting
+
+  if (!lcd_hasstatus()) LCD_MESSAGEPGM(MSG_DWELL);
+
+  while (millis() < codenum) {
+    manage_heater();
+    manage_inactivity();
+    lcd_update();
+  }
+}
+
 #ifdef HAS_LCD_CONTRAST
 
   /**
@@ -5746,6 +5782,10 @@ void process_commands() {
           gcode_M240();
           break;
       #endif // CHDK || PHOTOGRAPH_PIN
+
+      case 241: // M241 - Dwell for a given amount of time in milliseconds (500 by default)
+        gcode_M241();
+        break;
 
       #ifdef HAS_LCD_CONTRAST
         case 250: // M250  Set LCD contrast value: C<value> (value 0..63)
