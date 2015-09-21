@@ -4279,78 +4279,80 @@ inline void gcode_M226() {
   }
 #endif
 
-/*
-* M237 - Custom, more precise auto bed leveling
-*/
-inline void gcode_M237() {
-  if (!axis_known_position[X_AXIS] || !axis_known_position[Y_AXIS]) {
-    LCD_MESSAGEPGM(MSG_POSITION_UNKNOWN);
-    SERIAL_ECHO_START;
-    SERIAL_ECHOLNPGM(MSG_POSITION_UNKNOWN);
-    return;
-  }
+#ifdef ENABLE_AUTO_BED_LEVELING
+  /*
+  * M237 - Custom, more precise auto bed leveling
+  */
+  inline void gcode_M237() {
+    if (!axis_known_position[X_AXIS] || !axis_known_position[Y_AXIS]) {
+      LCD_MESSAGEPGM(MSG_POSITION_UNKNOWN);
+      SERIAL_ECHO_START;
+      SERIAL_ECHOLNPGM(MSG_POSITION_UNKNOWN);
+      return;
+    }
 
-  int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 1;
-  if (verbose_level < 0 || verbose_level > 4) {
-    SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
-    return;
-  }
+    int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 1;
+    if (verbose_level < 0 || verbose_level > 4) {
+      SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
+      return;
+    }
 
-  bool dryrun = code_seen('D') || code_seen('d');
-  st_synchronize();
+    bool dryrun = code_seen('D') || code_seen('d');
+    st_synchronize();
 
-  if (!dryrun) {
-    plan_bed_level_matrix.set_to_identity();
-    #ifdef DELTA
-      reset_bed_level();
-    #else
-      vector_3 uncorrected_position = plan_get_position();
-      current_position[X_AXIS] = uncorrected_position.x;
-      current_position[Y_AXIS] = uncorrected_position.y;
-      current_position[Z_AXIS] = uncorrected_position.z;
+    if (!dryrun) {
+      plan_bed_level_matrix.set_to_identity();
+      #ifdef DELTA
+        reset_bed_level();
+      #else
+        vector_3 uncorrected_position = plan_get_position();
+        current_position[X_AXIS] = uncorrected_position.x;
+        current_position[Y_AXIS] = uncorrected_position.y;
+        current_position[Z_AXIS] = uncorrected_position.z;
+        sync_plan_position();
+      #endif // !DELTA
+    }
+
+    setup_for_endstop_move();
+    feedrate = homing_feedrate[Z_AXIS];
+
+    float levelProbe_1 = bed_level_probe_pt(ABL_PROBE_PT_1_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_1_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
+          levelProbe_2 = bed_level_probe_pt(ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
+          levelProbe_3 = bed_level_probe_pt(ABL_PROBE_PT_3_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_3_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
+    
+    levelProbe_1 = abs((levelProbe_1 - 5000)/1000);
+    levelProbe_2 = abs((levelProbe_2 - 5000)/1000);
+    levelProbe_3 = abs((levelProbe_3 - 5000)/1000);
+    if (verbose_level > 2) {
+      SERIAL_PROTOCOLPGM("ok ");
+      SERIAL_PROTOCOL_F(levelProbe_1, 10);
+      SERIAL_EOL;
+      SERIAL_PROTOCOLPGM("ok ");
+      SERIAL_PROTOCOL_F(levelProbe_2, 10);
+      SERIAL_EOL;
+      SERIAL_PROTOCOLPGM("ok ");
+      SERIAL_PROTOCOL_F(levelProbe_3, 10);
+      SERIAL_EOL;
+    }
+    clean_up_after_endstop_move();
+    if (!dryrun) {
+      set_bed_level_equation_3pts(levelProbe_1, levelProbe_2, levelProbe_3);
+    }
+
+    #ifndef DELTA
+      if (verbose_level > 0) {
+        plan_bed_level_matrix.debug(" \nBed Level Correction Matrix:");
+      }
+      float x_tmp = current_position[X_AXIS] + X_PROBE_OFFSET_FROM_EXTRUDER,
+            y_tmp = current_position[Y_AXIS] + Y_PROBE_OFFSET_FROM_EXTRUDER,
+            z_tmp = current_position[Z_AXIS],
+            real_z = (float)st_get_position(Z_AXIS) / axis_steps_per_unit[Z_AXIS];
+      apply_rotation_xyz(plan_bed_level_matrix, x_tmp, y_tmp, z_tmp);
+      current_position[Z_AXIS] = z_tmp - real_z + current_position[Z_AXIS];
       sync_plan_position();
     #endif // !DELTA
   }
-
-  setup_for_endstop_move();
-  feedrate = homing_feedrate[Z_AXIS];
-
-  float levelProbe_1 = bed_level_probe_pt(ABL_PROBE_PT_1_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_1_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
-        levelProbe_2 = bed_level_probe_pt(ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
-        levelProbe_3 = bed_level_probe_pt(ABL_PROBE_PT_3_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_3_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
-  
-  levelProbe_1 = abs((levelProbe_1 - 5000)/1000);
-  levelProbe_2 = abs((levelProbe_2 - 5000)/1000);
-  levelProbe_3 = abs((levelProbe_3 - 5000)/1000);
-  if (verbose_level > 2) {
-    SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL_F(levelProbe_1, 10);
-    SERIAL_EOL;
-    SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL_F(levelProbe_2, 10);
-    SERIAL_EOL;
-    SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL_F(levelProbe_3, 10);
-    SERIAL_EOL;
-  }
-  clean_up_after_endstop_move();
-  if (!dryrun) {
-    set_bed_level_equation_3pts(levelProbe_1, levelProbe_2, levelProbe_3);
-  }
-
-  #ifndef DELTA
-    if (verbose_level > 0) {
-      plan_bed_level_matrix.debug(" \nBed Level Correction Matrix:");
-    }
-    float x_tmp = current_position[X_AXIS] + X_PROBE_OFFSET_FROM_EXTRUDER,
-          y_tmp = current_position[Y_AXIS] + Y_PROBE_OFFSET_FROM_EXTRUDER,
-          z_tmp = current_position[Z_AXIS],
-          real_z = (float)st_get_position(Z_AXIS) / axis_steps_per_unit[Z_AXIS];
-    apply_rotation_xyz(plan_bed_level_matrix, x_tmp, y_tmp, z_tmp);
-    current_position[Z_AXIS] = z_tmp - real_z + current_position[Z_AXIS];
-    sync_plan_position();
-  #endif // !DELTA
-}
+#endif
 
 /*
 * M238 - Return ADC value from laser sensor (get distance)
@@ -4376,26 +4378,28 @@ uint16_t gcode_M238(uint8_t power) {
   return sample_avg;
 }
 
-/*
-* M239 - Homing and bed leveling combination
-*/
-inline void gcode_M239() {
-  int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
-  if (verbose_level < 0 || verbose_level > 4) {
-    SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
-    return;
-  }
+#ifdef ENABLE_AUTO_BED_LEVELING
+  /*
+  * M239 - Homing and bed leveling combination
+  */
+  inline void gcode_M239() {
+    int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
+    if (verbose_level < 0 || verbose_level > 4) {
+      SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
+      return;
+    }
 
-  if (verbose_level > 0) {
-    SERIAL_PROTOCOLPGM("homing device");
-    SERIAL_EOL;
-  }
-  enqueuecommands_P(PSTR("G28"));
-  char cmd[30] = { 0 };
+    if (verbose_level > 0) {
+      SERIAL_PROTOCOLPGM("homing device");
+      SERIAL_EOL;
+    }
+    enqueuecommands_P(PSTR("G28"));
+    char cmd[30] = { 0 };
 
-  sprintf_P(cmd, PSTR("M237 V%d"), verbose_level);
-  enqueuecommand(cmd);
-}
+    sprintf_P(cmd, PSTR("M237 V%d"), verbose_level);
+    enqueuecommand(cmd);
+  }
+#endif
 
 #if NUM_SERVOS > 0
 
@@ -5714,17 +5718,21 @@ void process_commands() {
           break;
       #endif // DAC_I2C
 
-      case 237: // M237 - Custom, more precise auto bed leveling
-        gcode_M237();
-        break;
+      #ifdef ENABLE_AUTO_BED_LEVELING
+        case 237: // M237 - Custom, more precise auto bed leveling
+          gcode_M237();
+          break;
+      #endif
 
       case 238: // M238 - Return ADC value from laser sensor (get distance)
         gcode_M238();
         break;
 
-      case 239: // M239 - Homing and bed leveling combination
-        gcode_M239();
-        break;
+      #ifdef ENABLE_AUTO_BED_LEVELING
+        case 239: // M239 - Homing and bed leveling combination
+          gcode_M239();
+          break;
+      #endif
 
       #if NUM_SERVOS > 0
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
