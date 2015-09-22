@@ -1239,6 +1239,7 @@ const short regulatortable_1[][2] PROGMEM = {
    {392*OVERSAMPLENR,   300},
    {422*OVERSAMPLENR,   350},
    {454*OVERSAMPLENR,   400},
+   {1023*OVERSAMPLENR, 1305},
 };
 #endif
 
