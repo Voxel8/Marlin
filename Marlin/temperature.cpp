@@ -755,7 +755,7 @@ void manage_heater() {
   if (millis() - previous_millis_regulator_value > REGULATOR_CHECK_INTERVAL) {
     
     previous_millis_regulator_value = millis();
-    //Is output pressre more than what is available?
+    //Is output pressure more than what is available?
     if((pressureRegulator() >= pressurePneumatic()) && (pressurePneumatic() >= 1)) {
       // Shut down
       if(IsRunning()) {
