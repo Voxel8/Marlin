@@ -5540,11 +5540,11 @@ void process_commands() {
           break;
       #endif // EXT_ADC
 
-      #ifdef DAC_I2C
+      #ifdef E_REGULATOR
           case 236: // Send value to DAC; return current output pressure if no S parameter
           gcode_M236();
           break;
-      #endif // DAC_I2C
+      #endif // E_REGULATOR
 
       #if NUM_SERVOS > 0
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
