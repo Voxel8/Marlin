@@ -4381,29 +4381,31 @@ inline void gcode_M226() {
   }
 #endif
 
-/*
-* M238 - Return ADC value from laser sensor (get distance)
-*/
-uint16_t gcode_M238(uint8_t power) {
-  uint16_t num_samples = 0x0001 << power;
-  uint16_t i = 0;
-  uint32_t sample_sum = 0; // must be 32 bit unsigned int!
-  uint16_t sample_avg = 0;
+#ifdef EXT_ADC
+  /*
+  * M238 - Return ADC value from laser sensor (get distance)
+  */
+  uint16_t gcode_M238(uint8_t power) {
+    uint16_t num_samples = 0x0001 << power;
+    uint16_t i = 0;
+    uint32_t sample_sum = 0; // must be 32 bit unsigned int!
+    uint16_t sample_avg = 0;
 
-  // Value must be less than max sample power
-  // (This value was just taken from M234 for simplicity)
-  if(power > ADC_SAMPLE_POWER) {
-    power = ADC_SAMPLE_POWER;
-  }
-  // Take specified amount of readings
-  for(i = 0; i < num_samples; i++) {
-    sample_sum += EXT_ADC_READ_1;
-  }
-  // Take average of sample readings
-  sample_avg = sample_sum >> power;
+    // Value must be less than max sample power
+    // (This value was just taken from M234 for simplicity)
+    if(power > ADC_SAMPLE_POWER) {
+      power = ADC_SAMPLE_POWER;
+    }
+    // Take specified amount of readings
+    for(i = 0; i < num_samples; i++) {
+      sample_sum += EXT_ADC_READ_1;
+    }
+    // Take average of sample readings
+    sample_avg = sample_sum >> power;
 
-  return sample_avg;
-}
+    return sample_avg;
+  }
+#endif
 
 #ifdef ENABLE_AUTO_BED_LEVELING
   /*
