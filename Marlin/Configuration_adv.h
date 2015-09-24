@@ -124,6 +124,7 @@
 #ifdef PNEUMATICS
   // Set pneumatics hysteresis to 20 (2 PSI * 10 = 20)
   #define PNEUMATIC_HYSTERESIS 20
+  #define PNEUMATIC_HYSTERESIS_PSI PNEUMATIC_HYSTERESIS/10
   #define PNEUMATIC_CHECK_INTERVAL 2500 // in ms
 #endif
 
