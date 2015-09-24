@@ -1296,47 +1296,47 @@ inline void set_destination_to_current() { memcpy(destination, current_position,
     do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
     do_blocking_move_to(x - 0.1, y, z);
     sync_plan_position();
-    gcode_M241(200);
+    gcode_M241(1000);
     bedlevelprobes[0] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] + 0.1, z);
     sync_plan_position();
-    gcode_M241(200);
+    gcode_M241(350);
     bedlevelprobes[1] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
     sync_plan_position();
-    gcode_M241(200);
+    gcode_M241(350);
     bedlevelprobes[2] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
     sync_plan_position();
-    gcode_M241(200);
+    gcode_M241(350);
     bedlevelprobes[3] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
     sync_plan_position();
-    gcode_M241(200);
+    gcode_M241(350);
     bedlevelprobes[4] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
     sync_plan_position();
-    gcode_M241(200);
+    gcode_M241(350);
     bedlevelprobes[5] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
     sync_plan_position();
-    gcode_M241(200);
+    gcode_M241(350);
     bedlevelprobes[6] = gcode_M238(4);
 
     do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
     sync_plan_position();
-    gcode_M241(200);
+    gcode_M241(350);
     bedlevelprobes[7] = gcode_M238(4);
 
     do_blocking_move_to(x, y, z);
     sync_plan_position();
-    gcode_M241(200);
+    gcode_M241(350);
     bedlevelprobes[8] = gcode_M238(4);
 
     uint16_t num_samples = 0x0001 << 3;
