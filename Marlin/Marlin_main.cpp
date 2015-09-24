@@ -4880,7 +4880,7 @@ inline void gcode_M226() {
       }
       // Desired pressure not available
       else {
-        uint16_t available_output_pressure = 0;
+        int16_t available_output_pressure = 0;
 
         if (current_tank_target < current_tank) {
           available_output_pressure = (current_tank_target - PNEUMATIC_HYSTERESIS_PSI);
