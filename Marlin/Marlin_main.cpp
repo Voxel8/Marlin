@@ -4880,16 +4880,16 @@ inline void gcode_M226() {
       }
       // Desired pressure not available
       else {
-        int16_t available_output_pressure = 0;
-
-        if (current_tank_target < current_tank) {
-          available_output_pressure = (current_tank_target - PNEUMATIC_HYSTERESIS_PSI);
+        uint16_t available_output_pressure = 0;
+        
+        if ((current_tank <= REGULATOR_LOW_P) || (current_tank_target <= REGULATOR_LOW_P)) {
+          available_output_pressure = 0;
         }
-        else{
+        else if (current_tank <= current_tank_target) {
           available_output_pressure = (current_tank - PNEUMATIC_HYSTERESIS_PSI);
         }
-        if (available_output_pressure <= PNEUMATIC_HYSTERESIS_PSI) {
-          available_output_pressure = 0;
+        else if (current_tank_target < current_tank) {
+          available_output_pressure = (current_tank_target - PNEUMATIC_HYSTERESIS_PSI);
         }
         SERIAL_PROTOCOLLNPGM("WARNING: Cannot output desired pressure due to insufficient tank pressure");
         SERIAL_PROTOCOLPGM("Available Tank Pressure: ");
