@@ -420,6 +420,9 @@
 #ifndef MSG_ERR_PNEUMATIC
 #define MSG_ERR_PNEUMATIC                   "Err: Pressure value out of Range"
 #endif
+#ifndef MSG_ERR_REGULATOR
+#define MSG_ERR_REGULATOR                   "Err: Insufficient tank pressure. Check pneumatic system."
+#endif
 #ifndef MSG_END_HOUR
 #define MSG_END_HOUR                        "hours"
 #endif

@@ -63,8 +63,9 @@
   #include "MCP4725.h"
 #endif
 
-#ifdef REGULATOR
+#ifdef E_REGULATOR
   #include "Regulator.h"
+
 #endif
 
 #ifdef BLINKM
@@ -4192,38 +4193,64 @@ inline void gcode_M226() {
   }
 #endif
  
-#ifdef DAC_I2C
+#ifdef E_REGULATOR
   /**
-   * M236 - Send Value to ADC w/ no EEPROM write *TESTING*
+   * M236 - Send Value to ADC w/ no EEPROM write
    */
   inline void gcode_M236() {
+    uint8_t current_tank = (uint8_t)pressurePneumatic();
+    uint8_t current_tank_target = (uint8_t)targetPneumatic();
+
     if(code_seen('S')) {
       float psi = code_value();
-      // Check that desired pressure is within range allowed
-      if((psi <= OUTPUT_PSI_MAX) && (psi >= OUTPUT_PSI_MIN)) {
-        setOutputPressure(psi);
+      // Desired pressure is more than maximum allowed output pressure
+      if(psi > OUTPUT_PSI_MAX) {
+        SERIAL_PROTOCOLPGM("WARNING: Desired Pressure Above Max Allowed Pressure (");
+        SERIAL_PROTOCOL(OUTPUT_PSI_MAX);
+        SERIAL_PROTOCOLPGM(" psi)");
       }
-      // If psi greater than max, reset psi to max
-      else if(psi > OUTPUT_PSI_MAX) {
-        psi = OUTPUT_PSI_MAX;
-        SERIAL_PROTOCOLLNPGM("WARNING: Desired Pressure Above Max Allowed Pressure");
-        SERIAL_PROTOCOLPGM("Output Pressure set to ");
-        SERIAL_PROTOCOLLN(OUTPUT_PSI_MAX);
-        setOutputPressure(psi);
-        SERIAL_EOL;
-      }
-      // If psi less than min, reset psi to min
+      // Desired pressure is less than minimum allowed output pressure
       else if(psi < OUTPUT_PSI_MIN) {
-        psi = OUTPUT_PSI_MIN;
-        SERIAL_PROTOCOLLNPGM("WARNING: Desired Pressure Below Min Allowed Pressure");
-        SERIAL_PROTOCOLPGM("Output Pressure set to ");
-        SERIAL_PROTOCOLLN(OUTPUT_PSI_MIN);
-        setOutputPressure(psi);
-        SERIAL_EOL;
+        SERIAL_PROTOCOLPGM("WARNING: Desired Pressure Below Min Allowed Pressure (");
+        SERIAL_PROTOCOL(OUTPUT_PSI_MIN);
+        SERIAL_PROTOCOLPGM(" psi)");
       }
+      // Desired pressure is available
+      else if((psi <= (current_tank - REGULATOR_DIFF))  && (psi <= (current_tank_target - REGULATOR_DIFF))) {
+        setOutputPressure(psi);
+      }
+      // Tank pressure is near zero, can set output to near zero
+      else if(((psi == 0) && (current_tank <= REGULATOR_LOW_P)) || ((psi == 0) && (current_tank_target <= REGULATOR_LOW_P))) {     
+        setOutputPressure(psi);
+      }
+      // Desired pressure not available
+      else {
+        uint16_t available_output_pressure = 0;
+
+        if (current_tank_target < current_tank) {
+          available_output_pressure = (current_tank_target - REGULATOR_DIFF);
+        }
+        else{
+          available_output_pressure = (current_tank - REGULATOR_DIFF);
+        }
+        if (available_output_pressure <= REGULATOR_DIFF) {
+          available_output_pressure = 0;
+        }
+        SERIAL_PROTOCOLLNPGM("WARNING: Cannot output desired pressure due to insufficient tank pressure");
+        SERIAL_PROTOCOLPGM("Available Tank Pressure: ");
+        SERIAL_PROTOCOL(available_output_pressure);
+        SERIAL_PROTOCOLPGM(" psi");
+      }
+      SERIAL_EOL;
+    }
+    // Else, return current output pressure
+    else {
+      SERIAL_PROTOCOLPGM("ok ");
+      SERIAL_PROTOCOL(pressureRegulator());
+      SERIAL_EOL;
     }
   }
-#endif
+#endif // E_REGULATOR
 
 #if NUM_SERVOS > 0
 
@@ -5510,11 +5537,11 @@ void process_commands() {
           break;
       #endif // EXT_ADC
 
-      #ifdef DAC_I2C
-          case 236: // Send value to DAC
+      #ifdef E_REGULATOR
+          case 236: // Send value to DAC; return current output pressure if no S parameter
           gcode_M236();
           break;
-      #endif // DAC_I2C
+      #endif // E_REGULATOR
 
       #if NUM_SERVOS > 0
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds

@@ -23,6 +23,8 @@
 #include "temperature.h"
 #include "watchdog.h"
 #include "language.h"
+#include "Regulator.h"
+#include "MCP4725.h"
 
 #include "Sd2PinMap.h"
 
@@ -49,13 +51,19 @@ int current_temperature_raw[4] = { 0 };
 float current_temperature[4] = { 0.0 };
 int current_temperature_bed_raw = 0;
 int current_pneumatic_raw = 0;
+int current_regulator_raw = 0;
 float current_temperature_bed = 0.0;
 float current_pneumatic = 0.0;
+float current_regulator = 0.0;
 millis_t time_since_last_err[4] = { 0 };
 millis_t time_since_last_err_bed = 0;
 #ifdef TEMP_SENSOR_1_AS_REDUNDANT
   int redundant_temperature_raw = 0;
   float redundant_temperature = 0.0;
+#endif
+
+#ifdef PNEUMATICS
+  volatile uint8_t pneumatic_error_flag = 0;
 #endif
 
 #ifdef PIDTEMPBED
@@ -132,6 +140,10 @@ static volatile bool temp_meas_ready = false;
   static unsigned long previous_millis_pneumatic_value;
 #endif
 
+#ifdef E_REGULATOR
+  static unsigned long previous_millis_regulator_value;
+#endif
+
 #ifdef FAN_SOFT_PWM
   static unsigned char soft_pwm_fan;
 #endif
@@ -167,6 +179,12 @@ static int maxttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( 16383, 16383, 16383, 16383 
   static int pneumatic_min_raw = PNEUMATIC_RAW_LO;
   static int pneumatic_max_raw = PNEUMATIC_RAW_HI;
 #endif
+
+#ifdef E_REGULATOR
+  static int regulator_min_raw = REGULATOR_RAW_LO;
+  static int regulator_max_raw = REGULATOR_RAW_HI;
+#endif
+
 //static int bed_minttemp_raw = HEATER_BED_RAW_LO_TEMP; /* No bed mintemp error implemented?!? */
 #ifdef BED_MAXTEMP
   static int bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
@@ -183,6 +201,7 @@ static int maxttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS( 16383, 16383, 16383, 16383 
 static float analog2temp(int raw, uint8_t e);
 static float analog2tempBed(int raw);
 static float analog2valPneumatic(int raw);
+static float analog2valRegulator(int raw);
 static void updateTemperaturesFromRawValues();
 
 #ifdef WATCH_TEMP_PERIOD
@@ -514,6 +533,7 @@ void bed_max_temp_error(void) {
     #if HAS_PNEUMATIC_PUMP
       WRITE(PNEUMATIC_PUMP_PIN, 0);
     #endif
+      pneumatic_error_flag = 1;
       _temp_error(-1, PSTR(MSG_PNEUMATIC_PUMP_OFF), PSTR(MSG_ERR_PNEUMATIC));
   }
 #endif
@@ -709,26 +729,52 @@ void manage_heater() {
   #ifdef PNEUMATICS
   if (millis() - previous_millis_pneumatic_value > PNEUMATIC_CHECK_INTERVAL) {
 
-          previous_millis_pneumatic_value = millis();
+    previous_millis_pneumatic_value = millis();
 
-          // Check if value is within the correct band
-          if((current_pneumatic > PNEUMATIC_MIN) && (current_pneumatic < PNEUMATIC_MAX))
-            {
-              if(current_pneumatic >= target_value_pneumatic + PNEUMATIC_HYSTERESIS)
-                {
-                  WRITE(PNEUMATIC_PUMP_PIN,LOW);
-                }
-              else if(current_pneumatic < target_value_pneumatic - PNEUMATIC_HYSTERESIS)
-                {
-                  WRITE(PNEUMATIC_PUMP_PIN,HIGH);
-                }
-            }
-          else
-            {
-              WRITE(PNEUMATIC_PUMP_PIN,LOW);
-            }
+    // Check if value is within the correct band
+    if((current_pneumatic > PNEUMATIC_MIN) && (current_pneumatic < PNEUMATIC_MAX)) {
+
+      if(current_pneumatic >= target_value_pneumatic + PNEUMATIC_HYSTERESIS) {
+
+        WRITE(PNEUMATIC_PUMP_PIN,LOW);
+      }
+      else if(current_pneumatic < target_value_pneumatic - PNEUMATIC_HYSTERESIS) {
+                
+        WRITE(PNEUMATIC_PUMP_PIN,HIGH);
+      }
+    }
+    else {
+            
+        WRITE(PNEUMATIC_PUMP_PIN,LOW);
+    }
   }
   #endif // PNEUMATICS
+
+  // ELECTRO-PNEUMATIC REGULATOR CONTROL
+  #ifdef E_REGULATOR
+  if (millis() - previous_millis_regulator_value > REGULATOR_CHECK_INTERVAL) {
+    
+    previous_millis_regulator_value = millis();
+    //Is output pressure more than what is available?
+    if((pressureRegulator() >= pressurePneumatic()) && (pressurePneumatic() >= 1)) {
+      // Shut down
+      if(IsRunning()) {
+        SERIAL_ERROR_START;
+        SERIAL_ERRORLNPGM(MSG_ERR_REGULATOR);
+        // Set output pressure to 0
+        DAC_write(MCP4725_I2C_ADDRESS, 0);
+        // Disable heaters
+        Stop();
+      }
+    }
+  }
+  // Turn off E-reg if error flag
+  if(pneumatic_error_flag == 1) {
+    // Set output pressure to 0
+    DAC_write(MCP4725_I2C_ADDRESS, 0);
+    pneumatic_error_flag = 0;
+  }
+  #endif // E-REGULATOR
     
   #ifndef PIDTEMPBED
     if (ms < next_bed_check_ms) return;
@@ -846,9 +892,9 @@ static float analog2tempBed(int raw) {
 #ifdef PNEUMATICS
 static float analog2valPneumatic(int raw) {
     float psi = 0;
-    byte i;
+    uint8_t i;
 
-    for (i=1; i<PRESSURETABLE_LEN; i++)
+    for (i = 1; i < PRESSURETABLE_LEN; i++)
     {
       if (PGM_RD_W(PRESSURETABLE[i][0]) > raw)
       {
@@ -867,6 +913,31 @@ static float analog2valPneumatic(int raw) {
 }
 #endif // PNEUMATICS
 
+// Get pressure reading from raw (internal) ADC value
+#ifdef E_REGULATOR
+static float analog2valRegulator(int raw) {
+    float psi = 0;
+    uint8_t i;
+
+    for (i = 1; i < REGULATORTABLE_LEN; i++)
+    {
+      if (PGM_RD_W(REGULATORTABLE[i][0]) > raw)
+      {
+        psi  = PGM_RD_W(REGULATORTABLE[i-1][1]) + 
+          (raw - PGM_RD_W(REGULATORTABLE[i-1][0])) * 
+          (float)(PGM_RD_W(REGULATORTABLE[i][1]) - PGM_RD_W(REGULATORTABLE[i-1][1])) /
+          (float)(PGM_RD_W(REGULATORTABLE[i][0]) - PGM_RD_W(REGULATORTABLE[i-1][0]));
+        break;
+      }
+    }
+
+    // Overflow: Set to last value in the table
+    if (i == REGULATORTABLE_LEN) psi = PGM_RD_W(REGULATORTABLE[i-1][1]);
+
+    return psi;
+}
+#endif // E_REGULATOR
+
 /* Called to get the raw values into the the actual temperatures. The raw values are created in interrupt context,
     and this function is called from normal context as it is too slow to run in interrupts and will block the stepper routine otherwise */
 static void updateTemperaturesFromRawValues() {
@@ -879,6 +950,9 @@ static void updateTemperaturesFromRawValues() {
   current_temperature_bed = analog2tempBed(current_temperature_bed_raw);
   #ifdef PNEUMATICS
     current_pneumatic = analog2valPneumatic(current_pneumatic_raw);
+  #endif
+  #ifdef E_REGULATOR
+    current_regulator = analog2valRegulator(current_regulator_raw);
   #endif
   #ifdef TEMP_SENSOR_1_AS_REDUNDANT
     redundant_temperature = analog2temp(redundant_temperature_raw, 1);
@@ -1104,6 +1178,18 @@ void tp_init() {
       pneumatic_max_raw -= OVERSAMPLENR;
     }
   #endif //PNEUMATIC_MAX
+
+  #ifdef OUTPUT_PSI_MIN
+    while(analog2valRegulator(regulator_min_raw) < OUTPUT_PSI_MIN) {
+      regulator_min_raw += OVERSAMPLENR;
+    }
+  #endif //OUTPUT_PSI_MIN
+
+  #ifdef OUTPUT_PSI_MAX
+    while(analog2valRegulator(regulator_max_raw) > OUTPUT_PSI_MAX) {
+      regulator_max_raw -= OVERSAMPLENR;
+    }
+  #endif //OUTPUT_PSI_MAX
 }
 
 void setWatch() {
@@ -1298,6 +1384,8 @@ enum TempState {
   MeasureTemp_BED,
   PreparePneumatic,
   MeasurePneumatic,
+  PrepareRegulator,
+  MeasureRegulator,
   PrepareTemp_1,
   MeasureTemp_1,
   PrepareTemp_2,
@@ -1312,6 +1400,7 @@ enum TempState {
 static unsigned long raw_temp_value[4] = { 0 };
 static unsigned long raw_temp_bed_value = 0;
 static unsigned long raw_pneumatic_value = 0;
+static unsigned long raw_regulator_value = 0;
 
 static void set_current_temp_raw() {
   #if HAS_TEMP_0 && !defined(HEATER_0_USES_MAX6675)
@@ -1332,6 +1421,7 @@ static void set_current_temp_raw() {
   #endif
   current_temperature_bed_raw = raw_temp_bed_value;
   current_pneumatic_raw = raw_pneumatic_value;
+  current_regulator_raw = raw_regulator_value;
   temp_meas_ready = true;
 }
 
@@ -1586,6 +1676,20 @@ ISR(TIMER0_COMPB_vect) {
       #if HAS_PNEUMATIC
         raw_pneumatic_value += ADC;
       #endif
+      temp_state = PrepareRegulator;
+    break;
+
+    case PrepareRegulator:
+      #if HAS_REGULATOR
+        START_ADC(REGULATOR_PIN);
+      #endif
+      lcd_buttons_update(); // This doesn't need to be here at all...
+      temp_state = MeasureRegulator;
+    break;
+    case MeasureRegulator:
+      #if HAS_REGULATOR
+        raw_regulator_value += ADC;
+      #endif
       temp_state = PrepareTemp_1;
     break;
 
@@ -1673,6 +1777,7 @@ ISR(TIMER0_COMPB_vect) {
     for (int i = 0; i < 4; i++) raw_temp_value[i] = 0;
     raw_temp_bed_value = 0;
     raw_pneumatic_value = 0;
+    raw_regulator_value = 0;
 
     #if HAS_TEMP_0 && !defined(HEATER_0_USES_MAX6675)
       #if HEATER_0_RAW_LO_TEMP > HEATER_0_RAW_HI_TEMP
