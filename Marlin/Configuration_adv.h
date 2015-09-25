@@ -22,7 +22,7 @@
 //#define WATCH_TEMP_PERIOD 40000 //40 seconds
 //#define WATCH_TEMP_INCREASE 10  //Heat up at least 10 degree in 20 seconds
 
-#define TEMP_ERROR_INTERVAL 1000 //ms between temp error checks
+#define TEMP_ERROR_INTERVAL 100       //ms between temp error checks
 #define TEMP_BED_ERROR_INTERVAL 1000
 
 #ifdef PIDTEMP
