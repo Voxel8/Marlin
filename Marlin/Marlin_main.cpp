@@ -193,6 +193,7 @@
  * M239 - Homing and bed leveling combination
  * M240 - Trigger a camera to take a photograph
  * M241 - Dwell for a given amount of time in milliseconds (500 by default)
+ * M242 - Take a certain amount of measurements along a line while moving continuously
  * M250 - Set LCD contrast C<contrast value> (value 0..63)
  * M280 - Set servo position absolute. P: servo index, S: angle or microseconds
  * M300 - Play beep sound S<frequency Hz> P<duration ms>
@@ -4618,6 +4619,74 @@ void gcode_M241(long num_milliseconds) {
   }
 }
 
+/*
+* M242 - Take a certain amount of measurements along a line while moving continuously
+*/
+void gcode_M242() {
+  int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 1;
+  bool hasX, hasY;
+  float x, y, x1, y2;
+  if (verbose_level < 0 || verbose_level > 4) {
+    SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
+    return;
+  }
+  int num_points;
+  float distance_per_move, distance;
+
+  if (code_seen('P') || code_seen('p')) {
+    num_points = code_value_short();
+  } else {
+    num_points = 1;
+  }
+  if ((hasX = code_seen('X'))) x = code_value();
+  if ((hasY = code_seen('Y'))) y = code_value();
+  if (hasY && hasX) {
+    if (x > X_MAX_POS) {
+      x = X_MAX_POS;
+    }
+    if (y > Y_MAX_POS) {
+      y = Y_MAX_POS;
+    }
+
+    vector_3 m242_vector = vector_3(x1 - x0, y1 - y0, 0);
+    m242_vector.normalize();
+    distance = sqrt(sq(x1-x0) + sq(y1-y0));
+    distance_per_move = distance / num_points;
+
+    if (verbose_level > 1) {
+      SERIAL_PROTOCOL_F(distance, 5);
+      SERIAL_EOL;
+      SERIAL_PROTOCOL_F(distance_per_move, 5);
+      SERIAL_EOL;
+    }
+
+    for (int i = 0; i < num_points; i++) {
+      // calculate new point (in a loop);
+      x1 = x + (m242_vector.x * distance_per_move * (i + 1));
+      y1 = y + (m242_vector.y * distance_per_move * (i + 1));
+
+      if (verbose_level > 1) {
+        SERIAL_PROTOCOLPGM("x1: ");
+        SERIAL_PROTOCOL_F(x1,5);
+        SERIAL_PROTOCOLPGM(" y1: ");
+        SERIAL_PROTOCOL_F(y1,5);
+        SERIAL_PROTOCOLPGM(" Distance: ");
+        SERIAL_PROTOCOL_F(distance_per_move, 5);
+        SERIAL_EOL;
+      }
+
+      do_blocking_move_to(x1, y1, current_position[Z_AXIS]);
+      sync_plan_position();
+    }
+
+    feedrate = saved_feedrate;
+
+  } else {
+    SERIAL_PROTOCOLLNPGM("Please enter in an X and Y coordinate.");
+    return;
+  }
+}
+
 #ifdef HAS_LCD_CONTRAST
 
   /**
@@ -5801,6 +5870,9 @@ void process_commands() {
 
       case 241: // M241 - Dwell for a given amount of time in milliseconds (500 by default)
         gcode_M241();
+        break;
+      case 242: // M242 - Take a certain amount of measurements along a line while moving continuously
+        gcode_M242();
         break;
 
       #ifdef HAS_LCD_CONTRAST
