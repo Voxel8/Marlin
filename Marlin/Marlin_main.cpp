@@ -1289,70 +1289,72 @@ inline void set_destination_to_current() { memcpy(destination, current_position,
     feedrate = oldFeedRate;
   }
 
-  /*
-   * Bed leveling probe - returns a uint16_t with ADC height value
-   */
-  static uint16_t bed_level_probe_pt(float x, float y, float z, int verbose_level=0) {
-    do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
-    do_blocking_move_to(x - 0.1, y, z);
-    sync_plan_position();
-    gcode_M241(1000);
-    bedlevelprobes[0] = gcode_M238(4);
+  #ifdef EXT_ADC
+    /*
+     * Bed leveling probe - returns a uint16_t with ADC height value
+     */
+    static uint16_t bed_level_probe_pt(float x, float y, float z, int verbose_level=0) {
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
+      do_blocking_move_to(x - 0.1, y, z);
+      sync_plan_position();
+      gcode_M241(1000);
+      bedlevelprobes[0] = gcode_M238(4);
 
-    do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] + 0.1, z);
-    sync_plan_position();
-    gcode_M241(350);
-    bedlevelprobes[1] = gcode_M238(4);
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] + 0.1, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[1] = gcode_M238(4);
 
-    do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
-    sync_plan_position();
-    gcode_M241(350);
-    bedlevelprobes[2] = gcode_M238(4);
+      do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[2] = gcode_M238(4);
 
-    do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
-    sync_plan_position();
-    gcode_M241(350);
-    bedlevelprobes[3] = gcode_M238(4);
+      do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[3] = gcode_M238(4);
 
-    do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
-    sync_plan_position();
-    gcode_M241(350);
-    bedlevelprobes[4] = gcode_M238(4);
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[4] = gcode_M238(4);
 
-    do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
-    sync_plan_position();
-    gcode_M241(350);
-    bedlevelprobes[5] = gcode_M238(4);
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[5] = gcode_M238(4);
 
-    do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
-    sync_plan_position();
-    gcode_M241(350);
-    bedlevelprobes[6] = gcode_M238(4);
+      do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[6] = gcode_M238(4);
 
-    do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
-    sync_plan_position();
-    gcode_M241(350);
-    bedlevelprobes[7] = gcode_M238(4);
+      do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[7] = gcode_M238(4);
 
-    do_blocking_move_to(x, y, z);
-    sync_plan_position();
-    gcode_M241(350);
-    bedlevelprobes[8] = gcode_M238(4);
+      do_blocking_move_to(x, y, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[8] = gcode_M238(4);
 
-    uint16_t num_samples = 0x0001 << 3;
-    uint16_t i = 0;
-    uint32_t sample_sum = 0;
-    uint16_t sample_avg = 0;
+      uint16_t num_samples = 0x0001 << 3;
+      uint16_t i = 0;
+      uint32_t sample_sum = 0;
+      uint16_t sample_avg = 0;
 
-    for(i = 0; i < 8; i++) {
-      sample_sum += bedlevelprobes[i];
+      for(i = 0; i < 8; i++) {
+        sample_sum += bedlevelprobes[i];
+      }
+      sample_avg = sample_sum >> 3;
+      sample_sum = sample_avg + bedlevelprobes[8];
+      sample_avg = sample_sum >> 1;
+
+      return sample_avg;
     }
-    sample_avg = sample_sum >> 3;
-    sample_sum = sample_avg + bedlevelprobes[8];
-    sample_avg = sample_sum >> 1;
-
-    return sample_avg;
-  }
+  #endif
 
   static void setup_for_endstop_move() {
     saved_feedrate = feedrate;
@@ -4306,7 +4308,7 @@ inline void gcode_M226() {
   }
 #endif // E_REGULATOR
 
-#ifdef ENABLE_AUTO_BED_LEVELING
+#if defined(ENABLE_AUTO_BED_LEVELING) && defined(EXT_ADC)
   /*
   * M237 - Custom, more precise auto bed leveling
   */
@@ -4342,6 +4344,10 @@ inline void gcode_M226() {
 
     setup_for_endstop_move();
     feedrate = homing_feedrate[Z_AXIS];
+
+    // Need to make sure we're at 1.00 on the Z-axis
+    destination[Z_AXIS] = BED_LEVEL_PROBE_Z;
+    prepare_move();
 
     float levelProbe_1 = bed_level_probe_pt(ABL_PROBE_PT_1_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_1_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
           levelProbe_2 = bed_level_probe_pt(ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
@@ -4407,7 +4413,7 @@ inline void gcode_M226() {
   }
 #endif
 
-#ifdef ENABLE_AUTO_BED_LEVELING
+#if defined(ENABLE_AUTO_BED_LEVELING) && defined(EXT_ADC)
   /*
   * M239 - Homing and bed leveling combination
   */
@@ -5747,7 +5753,7 @@ void process_commands() {
           break;
       #endif // E_REGULATOR
 
-      #ifdef ENABLE_AUTO_BED_LEVELING
+      #if defined(ENABLE_AUTO_BED_LEVELING) && defined(EXT_ADC)
         case 237: // M237 - Custom, more precise auto bed leveling
           gcode_M237();
           break;
@@ -5757,7 +5763,7 @@ void process_commands() {
         gcode_M238();
         break;
 
-      #ifdef ENABLE_AUTO_BED_LEVELING
+      #if defined(ENABLE_AUTO_BED_LEVELING) && defined(EXT_ADC)
         case 239: // M239 - Homing and bed leveling combination
           gcode_M239();
           break;
