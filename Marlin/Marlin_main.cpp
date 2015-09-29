@@ -194,6 +194,7 @@
  * M240 - Trigger a camera to take a photograph
  * M241 - Dwell for a given amount of time in milliseconds (500 by default)
  * M242 - Take a certain amount of measurements along a line while moving continuously
+ * M243 - ^
  * M250 - Set LCD contrast C<contrast value> (value 0..63)
  * M280 - Set servo position absolute. P: servo index, S: angle or microseconds
  * M300 - Play beep sound S<frequency Hz> P<duration ms>
@@ -4250,7 +4251,7 @@ inline void gcode_M226() {
   }
 #endif
  
-#ifdef E_REGULATOR
+#if defined(E_REGULATOR) && defined(PNEUMATICS)
   /**
    * M236 - Send Value to ADC w/ no EEPROM write
    */
@@ -4307,7 +4308,7 @@ inline void gcode_M226() {
       SERIAL_EOL;
     }
   }
-#endif // E_REGULATOR
+#endif // E_REGULATOR && PNEUMATICS
 
 #if defined(ENABLE_AUTO_BED_LEVELING) && defined(EXT_ADC)
   /*
@@ -4625,7 +4626,7 @@ void gcode_M241(long num_milliseconds) {
 void gcode_M242() {
   int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 1;
   bool hasX, hasY;
-  float x, y, x1, y2;
+  float x0 = current_position[X_AXIS], y0 = current_position[Y_AXIS], x1, y1;
   if (verbose_level < 0 || verbose_level > 4) {
     SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
     return;
@@ -4638,53 +4639,144 @@ void gcode_M242() {
   } else {
     num_points = 1;
   }
-  if ((hasX = code_seen('X'))) x = code_value();
-  if ((hasY = code_seen('Y'))) y = code_value();
+  if ((hasX = code_seen('X'))) x1 = code_value();
+  if ((hasY = code_seen('Y'))) y1 = code_value();
   if (hasY && hasX) {
-    if (x > X_MAX_POS) {
-      x = X_MAX_POS;
+    if (x1 > X_MAX_POS) {
+      x1 = X_MAX_POS;
     }
-    if (y > Y_MAX_POS) {
-      y = Y_MAX_POS;
+    if (y1 > Y_MAX_POS) {
+      y1 = Y_MAX_POS;
     }
 
     vector_3 m242_vector = vector_3(x1 - x0, y1 - y0, 0);
     m242_vector.normalize();
-    distance = sqrt(sq(x1-x0) + sq(y1-y0));
+    distance = sqrt(sq(x1 - x0) + sq(y1 - y0));
     distance_per_move = distance / num_points;
 
-    if (verbose_level > 1) {
-      SERIAL_PROTOCOL_F(distance, 5);
-      SERIAL_EOL;
-      SERIAL_PROTOCOL_F(distance_per_move, 5);
-      SERIAL_EOL;
-    }
-
-    for (int i = 0; i < num_points; i++) {
-      // calculate new point (in a loop);
-      x1 = x + (m242_vector.x * distance_per_move * (i + 1));
-      y1 = y + (m242_vector.y * distance_per_move * (i + 1));
-
+    if (distance != 0) {
       if (verbose_level > 1) {
-        SERIAL_PROTOCOLPGM("x1: ");
-        SERIAL_PROTOCOL_F(x1,5);
-        SERIAL_PROTOCOLPGM(" y1: ");
-        SERIAL_PROTOCOL_F(y1,5);
-        SERIAL_PROTOCOLPGM(" Distance: ");
+        SERIAL_PROTOCOL_F(distance, 5);
+        SERIAL_EOL;
         SERIAL_PROTOCOL_F(distance_per_move, 5);
         SERIAL_EOL;
       }
 
-      do_blocking_move_to(x1, y1, current_position[Z_AXIS]);
-      sync_plan_position();
-    }
+      for (int i = 0; i < num_points; i++) {
+        // calculate new point (in a loop);
+        x1 = x0 + (m242_vector.x * distance_per_move * (i + 1));
+        y1 = y0 + (m242_vector.y * distance_per_move * (i + 1));
 
+        if (verbose_level > 1) {
+          SERIAL_PROTOCOLPGM("x1: ");
+          SERIAL_PROTOCOL_F(x1,5);
+          SERIAL_PROTOCOLPGM(" y1: ");
+          SERIAL_PROTOCOL_F(y1,5);
+          SERIAL_PROTOCOLPGM(" Distance: ");
+          SERIAL_PROTOCOL_F(distance_per_move, 5);
+          SERIAL_EOL;
+        }
+
+        // do_blocking_move_to(x1, y1, current_position[Z_AXIS]);
+        // sync_plan_position();
+        destination[X_AXIS] = x1;
+        destination[Y_AXIS] = y1;
+        //destination[Z_AXIS] = current_position[Z_AXIS];
+        prepare_move_custom();
+        SERIAL_PROTOCOLPGM("current[X_AXIS]: ");
+        SERIAL_PROTOCOL_F(current_position[X_AXIS],5);
+        SERIAL_PROTOCOLPGM(" current[X_AXIS]: ");
+        SERIAL_PROTOCOL_F(current_position[Y_AXIS],5);
+        SERIAL_EOL;
+        // st_synchronize();
+      }
+    }
     feedrate = saved_feedrate;
 
   } else {
-    SERIAL_PROTOCOLLNPGM("Please enter in an X and Y coordinate.");
+    SERIAL_PROTOCOLLNPGM("Please enter both an X and Y coordinate.");
     return;
   }
+}
+
+/*
+* M243 - Take a certain amount of measurements along a line while moving continuously
+* NOTE: Using st_synchronize() will force any other commands to wait until all movement is done.
+* This means, we cannot use do_blocking_move_to to complete the move
+*/
+void gcode_M243() {
+  st_synchronize();
+  long testValue = 0;
+  int num_points;
+  float period;
+  bool old_relative_mode = relative_mode;
+  relative_mode = false;
+  millis_t codenum = 0, start_time = 0, end_of_pause = 0;
+  // Theoretically, this should be enough to do a basic move.
+  get_coordinates();
+  //prepare_move();
+
+  float distance = sqrt(sq(destination[X_AXIS] - current_position[X_AXIS]) + sq(destination[Y_AXIS] - current_position[Y_AXIS]));
+  SERIAL_PROTOCOL_F(distance, 10);
+  SERIAL_EOL;
+  float time_to_destination = distance / (feedrate / 60);
+  SERIAL_PROTOCOL_F(time_to_destination, 10);
+  SERIAL_EOL;
+
+  if (code_seen('P') || code_seen('p')) {
+    num_points = code_value_short();
+  } else {
+    num_points = 1;
+  }
+  period = (time_to_destination * 1000) / num_points;
+
+  refresh_cmd_timeout();
+  codenum += previous_cmd_ms;  // keep track of when we started waiting WHY IS PREVIOUS_CMD_MS SO HIGH??
+
+  SERIAL_PROTOCOLPGM("codenum: ");
+  SERIAL_PROTOCOL_F(codenum, 10);
+  SERIAL_EOL;
+
+  SERIAL_PROTOCOLPGM("millis: ");
+  SERIAL_PROTOCOL_F(millis(), 10);
+  SERIAL_EOL;
+  start_time = millis();
+  line_to_destination();
+  set_current_to_destination();
+  
+  end_of_pause = codenum + (time_to_destination * 1000);
+  SERIAL_PROTOCOLPGM ("end_of_pause: ");
+  SERIAL_PROTOCOL_F(end_of_pause, 10);
+  SERIAL_EOL;
+  // Need to know how long this move is going to take
+  // if (code_seen('T')) long duration_of_move = code_value_long(); // <- Duration of move in milliseconds (user defined)
+  // if (code_seen('P')) int points_in_move = code_value_short();
+  // // Do we give a time to complete by?
+
+  // // Wait for the move is done, except what's in while statement
+  // // We can use st_sync here (I think) since the while statement below will allow us to continue based on how much time has passed
+  // st_synchronize();
+
+  // if (!lcd_hasstatus()) LCD_MESSAGEPGM(MSG_DWELL);
+
+  // while (millis() < end_of_pause) {
+  // // Add code in here to take measurements
+  //   manage_heater();
+  //   manage_inactivity();
+  //   lcd_update();
+  //   if ((millis() > (start_time + 2000)) && (millis() < (end_of_pause - 2000))) {
+  //     // SERIAL_PROTOCOLLNPGM("echo");
+  //   }
+  //   //SERIAL_PROTOCOLLNPGM("test");
+  //   // TEST DELAY - DO NOT USE IN PRODUCTION
+  // }
+  while(millis() < end_of_pause) {
+    testValue++;
+    delay(period);
+  }
+  SERIAL_PROTOCOL_F(testValue, 10);
+  SERIAL_EOL;
+  relative_mode = old_relative_mode;
 }
 
 #ifdef HAS_LCD_CONTRAST
@@ -5816,11 +5908,11 @@ void process_commands() {
           break;
       #endif // EXT_ADC
 
-      #ifdef E_REGULATOR
+      #if defined(E_REGULATOR) && defined(PNEUMATICS)
           case 236: // Send value to DAC; return current output pressure if no S parameter
           gcode_M236();
           break;
-      #endif // E_REGULATOR
+      #endif // E_REGULATOR && PNEUMATICS
 
       #if defined(ENABLE_AUTO_BED_LEVELING) && defined(EXT_ADC)
         case 237: // M237 - Custom, more precise auto bed leveling
@@ -5873,6 +5965,9 @@ void process_commands() {
         break;
       case 242: // M242 - Take a certain amount of measurements along a line while moving continuously
         gcode_M242();
+        break;
+      case 243:
+        gcode_M243();
         break;
 
       #ifdef HAS_LCD_CONTRAST
@@ -6278,6 +6373,22 @@ void mesh_plan_buffer_line(float x, float y, float z, const float e, float feed_
   }
 
 #endif // PREVENT_DANGEROUS_EXTRUDE
+
+void prepare_move_custom() {
+  clamp_to_software_endstops(destination);
+  refresh_cmd_timeout();
+
+  #ifdef PREVENT_DANGEROUS_EXTRUDE
+    (void)prevent_dangerous_extrude(current_position[E_AXIS], destination[E_AXIS]);
+  #endif
+  if (current_position[X_AXIS] == destination[X_AXIS] && current_position[Y_AXIS] == destination[Y_AXIS]) {
+    line_to_destination();
+  } else {
+    plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], (feedrate * feedrate_multiplier / 100.0)/60, active_extruder);
+    set_current_to_destination();
+    st_synchronize();
+  }
+}
 
 void prepare_move() {
   clamp_to_software_endstops(destination);

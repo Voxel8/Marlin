@@ -751,7 +751,7 @@ void manage_heater() {
   #endif // PNEUMATICS
 
   // ELECTRO-PNEUMATIC REGULATOR CONTROL
-  #ifdef E_REGULATOR
+  #if defined(E_REGULATOR) && defined(PNEUMATICS)
   if (millis() - previous_millis_regulator_value > REGULATOR_CHECK_INTERVAL) {
     
     previous_millis_regulator_value = millis();
@@ -774,7 +774,7 @@ void manage_heater() {
     DAC_write(MCP4725_I2C_ADDRESS, 0);
     pneumatic_error_flag = 0;
   }
-  #endif // E-REGULATOR
+  #endif // E-REGULATOR && PNEUMATICS
     
   #ifndef PIDTEMPBED
     if (ms < next_bed_check_ms) return;

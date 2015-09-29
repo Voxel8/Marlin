@@ -220,6 +220,7 @@ void get_coordinates();
 #endif
 void reset_bed_level();
 void prepare_move();
+void prepare_move_custom();
 void kill();
 void Stop();
 
