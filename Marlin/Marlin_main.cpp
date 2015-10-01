@@ -4708,30 +4708,31 @@ void gcode_M243() {
   st_synchronize();
   long testValue = 0;
   int num_points;
-  float period;
+  double period, fractpart, intpart;
   bool old_relative_mode = relative_mode;
   relative_mode = false;
   millis_t codenum = 0, start_time = 0, end_of_pause = 0;
-  // Theoretically, this should be enough to do a basic move.
-  get_coordinates();
-  //prepare_move();
-
-  float distance = sqrt(sq(destination[X_AXIS] - current_position[X_AXIS]) + sq(destination[Y_AXIS] - current_position[Y_AXIS]));
-  SERIAL_PROTOCOL_F(distance, 10);
-  SERIAL_EOL;
-  float time_to_destination = distance / (feedrate / 60);
-  SERIAL_PROTOCOL_F(time_to_destination, 10);
-  SERIAL_EOL;
-
   if (code_seen('P') || code_seen('p')) {
     num_points = code_value_short();
   } else {
     num_points = 1;
   }
-  period = (time_to_destination * 1000) / num_points;
+  // Theoretically, this should be enough to do a basic move.
+  get_coordinates();
+  //prepare_move();
+
+  double distance = sqrt(sq(destination[X_AXIS] - current_position[X_AXIS]) + sq(destination[Y_AXIS] - current_position[Y_AXIS]));
+  double time_to_destination = distance / (feedrate / 60);
+  period = ((time_to_destination * 1000) / num_points);
+  fractpart = modf (period , &intpart);
+
+  SERIAL_PROTOCOL_F(distance, 10);
+  SERIAL_EOL;
+  SERIAL_PROTOCOL_F(time_to_destination, 10);
+  SERIAL_EOL;
 
   refresh_cmd_timeout();
-  codenum += previous_cmd_ms;  // keep track of when we started waiting WHY IS PREVIOUS_CMD_MS SO HIGH??
+  codenum += millis();  // keep track of when we started waiting WHY IS PREVIOUS_CMD_MS SO HIGH??
 
   SERIAL_PROTOCOLPGM("codenum: ");
   SERIAL_PROTOCOL_F(codenum, 10);
@@ -4748,29 +4749,16 @@ void gcode_M243() {
   SERIAL_PROTOCOLPGM ("end_of_pause: ");
   SERIAL_PROTOCOL_F(end_of_pause, 10);
   SERIAL_EOL;
-  // Need to know how long this move is going to take
-  // if (code_seen('T')) long duration_of_move = code_value_long(); // <- Duration of move in milliseconds (user defined)
-  // if (code_seen('P')) int points_in_move = code_value_short();
-  // // Do we give a time to complete by?
 
-  // // Wait for the move is done, except what's in while statement
-  // // We can use st_sync here (I think) since the while statement below will allow us to continue based on how much time has passed
-  // st_synchronize();
+  SERIAL_PROTOCOLPGM ("period: ");
+  SERIAL_PROTOCOL_F(intpart, 10);
+  SERIAL_PROTOCOLPGM(" ");
+  SERIAL_PROTOCOL_F(fractpart, 10);
+  SERIAL_EOL;
 
-  // if (!lcd_hasstatus()) LCD_MESSAGEPGM(MSG_DWELL);
-
-  // while (millis() < end_of_pause) {
-  // // Add code in here to take measurements
-  //   manage_heater();
-  //   manage_inactivity();
-  //   lcd_update();
-  //   if ((millis() > (start_time + 2000)) && (millis() < (end_of_pause - 2000))) {
-  //     // SERIAL_PROTOCOLLNPGM("echo");
-  //   }
-  //   //SERIAL_PROTOCOLLNPGM("test");
-  //   // TEST DELAY - DO NOT USE IN PRODUCTION
-  // }
   while(millis() < end_of_pause) {
+    SERIAL_PROTOCOL_F(gcode_M238(1), 10);
+    SERIAL_EOL;
     testValue++;
     delay(period);
   }
