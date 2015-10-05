@@ -1293,67 +1293,102 @@ inline void set_destination_to_current() { memcpy(destination, current_position,
     /*
      * Bed leveling probe - returns a uint16_t with ADC height value
      */
-    static uint16_t bed_level_probe_pt(float x, float y, float z, int verbose_level=0) {
-      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
-      do_blocking_move_to(x - 0.1, y, z);
-      sync_plan_position();
-      gcode_M241(1000);
-      bedlevelprobes[0] = gcode_M238(4);
-
-      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] + 0.1, z);
-      sync_plan_position();
-      gcode_M241(350);
-      bedlevelprobes[1] = gcode_M238(4);
-
-      do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
-      sync_plan_position();
-      gcode_M241(350);
-      bedlevelprobes[2] = gcode_M238(4);
-
-      do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
-      sync_plan_position();
-      gcode_M241(350);
-      bedlevelprobes[3] = gcode_M238(4);
-
-      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
-      sync_plan_position();
-      gcode_M241(350);
-      bedlevelprobes[4] = gcode_M238(4);
-
-      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
-      sync_plan_position();
-      gcode_M241(350);
-      bedlevelprobes[5] = gcode_M238(4);
-
-      do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
-      sync_plan_position();
-      gcode_M241(350);
-      bedlevelprobes[6] = gcode_M238(4);
-
-      do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
-      sync_plan_position();
-      gcode_M241(350);
-      bedlevelprobes[7] = gcode_M238(4);
-
-      do_blocking_move_to(x, y, z);
-      sync_plan_position();
-      gcode_M241(350);
-      bedlevelprobes[8] = gcode_M238(4);
-
-      uint16_t num_samples = 0x0001 << 3;
-      uint16_t i = 0;
-      uint32_t sample_sum = 0;
-      uint16_t sample_avg = 0;
-
-      for(i = 0; i < 8; i++) {
-        sample_sum += bedlevelprobes[i];
-      }
-      sample_avg = sample_sum >> 3;
-      sample_sum = sample_avg + bedlevelprobes[8];
-      sample_avg = sample_sum >> 1;
-
-      return sample_avg;
-    }
+     static uint16_t bed_level_probe_pt(float x, float y, float z, int verbose_level=0) {
+       do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
+       do_blocking_move_to(x - 0.1, y, z);
+       sync_plan_position();
+       gcode_M241(1000);
+       bedlevelprobes[0] = gcode_M238(4);
+     
+       do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] + 0.1, z);
+       sync_plan_position();
+       gcode_M241(350);
+       bedlevelprobes[1] = gcode_M238(4);
+     
+       do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
+       sync_plan_position();
+       gcode_M241(350);
+       bedlevelprobes[2] = gcode_M238(4);
+     
+       do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
+       sync_plan_position();
+       gcode_M241(350);
+       bedlevelprobes[3] = gcode_M238(4);
+     
+       do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
+       sync_plan_position();
+       gcode_M241(350);
+       bedlevelprobes[4] = gcode_M238(4);
+     
+       do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
+       sync_plan_position();
+       gcode_M241(350);
+       bedlevelprobes[5] = gcode_M238(4);
+     
+       do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
+       sync_plan_position();
+       gcode_M241(350);
+       bedlevelprobes[6] = gcode_M238(4);
+     
+       do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
+       sync_plan_position();
+       gcode_M241(350);
+       bedlevelprobes[7] = gcode_M238(4);
+     
+       do_blocking_move_to(x, y, z);
+       sync_plan_position();
+       gcode_M241(350);
+       bedlevelprobes[8] = gcode_M238(4);
+     
+       uint16_t num_samples = 0x0001 << 3;
+       uint16_t i = 0;
+       uint32_t sample_sum = 0;
+       uint16_t sample_avg = 0;
+     
+       for(i = 0; i < 8; i++) {
+         sample_sum += bedlevelprobes[i];
+         if (verbose_level > 3) {
+           SERIAL_PROTOCOLPGM("sample_point #");
+           SERIAL_PROTOCOL_F(i, 10);
+           SERIAL_PROTOCOLPGM(": ");
+           SERIAL_PROTOCOL(bedlevelprobes[i], 10);
+           SERIAL_EOL;
+         }
+       }
+       
+       sample_avg = sample_sum >> 3;
+       if (verbose_level > 3) {
+         SERIAL_PROTOCOLPGM("sample_sum: ");
+         SERIAL_PROTOCOL(sample_sum, 10);
+         SERIAL_EOL;
+         SERIAL_PROTOCOLPGM("sample_avg: ");
+         SERIAL_PROTOCOL(sample_avg, 10);
+         SERIAL_EOL;
+       }
+       sample_sum = sample_avg + bedlevelprobes[8];
+       sample_avg = sample_sum >> 1;
+       if (verbose_level > 3) {
+         SERIAL_PROTOCOLPGM("sample_sum: ");
+         SERIAL_PROTOCOL(sample_sum, 10);
+         SERIAL_EOL;
+         SERIAL_PROTOCOLPGM("sample_avg: ");
+         SERIAL_PROTOCOL(sample_avg, 10);
+         SERIAL_EOL;
+       }
+       
+       if (verbose_level > 3) {
+         SERIAL_PROTOCOLPGM("Bed");
+         SERIAL_PROTOCOLPGM(" X: ");
+         SERIAL_PROTOCOL_F(x, 3);
+         SERIAL_PROTOCOLPGM(" Y: ");
+         SERIAL_PROTOCOL_F(y, 3);
+         SERIAL_PROTOCOLPGM(" Z: ");
+         SERIAL_PROTOCOL(sample_avg);
+         SERIAL_EOL;
+       }
+     
+       return sample_avg;
+     }
   #endif
 
   static void setup_for_endstop_move() {
@@ -4319,16 +4354,16 @@ inline void gcode_M226() {
       SERIAL_ECHOLNPGM(MSG_POSITION_UNKNOWN);
       return;
     }
-
+  
     int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 1;
     if (verbose_level < 0 || verbose_level > 4) {
       SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
       return;
     }
-
+  
     bool dryrun = code_seen('D') || code_seen('d');
     st_synchronize();
-
+  
     if (!dryrun) {
       plan_bed_level_matrix.set_to_identity();
       #ifdef DELTA
@@ -4341,21 +4376,21 @@ inline void gcode_M226() {
         sync_plan_position();
       #endif // !DELTA
     }
-
+  
     setup_for_endstop_move();
     feedrate = homing_feedrate[Z_AXIS];
-
+  
     // Need to make sure we're at 1.00 on the Z-axis
     destination[Z_AXIS] = BED_LEVEL_PROBE_Z;
     prepare_move();
-
+  
     float levelProbe_1 = bed_level_probe_pt(ABL_PROBE_PT_1_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_1_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
           levelProbe_2 = bed_level_probe_pt(ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
           levelProbe_3 = bed_level_probe_pt(ABL_PROBE_PT_3_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_3_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
     
-    levelProbe_1 = abs((levelProbe_1 - 5000)/1000);
-    levelProbe_2 = abs((levelProbe_2 - 5000)/1000);
-    levelProbe_3 = abs((levelProbe_3 - 5000)/1000);
+    levelProbe_1 = (levelProbe_1 - 5000)/1000;
+    levelProbe_2 = (levelProbe_2 - 5000)/1000;
+    levelProbe_3 = (levelProbe_3 - 5000)/1000;
     if (verbose_level > 2) {
       SERIAL_PROTOCOLPGM("ok ");
       SERIAL_PROTOCOL_F(levelProbe_1, 10);
@@ -4371,7 +4406,7 @@ inline void gcode_M226() {
     if (!dryrun) {
       set_bed_level_equation_3pts(levelProbe_1, levelProbe_2, levelProbe_3);
     }
-
+  
     #ifndef DELTA
       if (verbose_level > 0) {
         plan_bed_level_matrix.debug(" \nBed Level Correction Matrix:");
