@@ -556,7 +556,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
 
-  #define BED_LEVEL_PROBE_Z 5 // Height at which to probe z-axis
+  #define BED_LEVEL_PROBE_Z 3 // Height at which to probe z-axis
 
   // There are 2 different ways to specify probing locations:
   //
