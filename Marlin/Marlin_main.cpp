@@ -5067,7 +5067,7 @@ inline void gcode_M226() {
     }
     // Take specified amount of readings
     for(i = 0; i < num_samples; i++) {
-      sample_sum += EXT_ADC_READ_1;
+      sample_sum += EXT_ADC_READ_0;
     }
     // Take average of sample readings
     sample_avg = sample_sum >> power;
