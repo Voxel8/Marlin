@@ -1351,7 +1351,7 @@ inline void set_destination_to_current() { memcpy(destination, current_position,
            SERIAL_PROTOCOLPGM("sample_point #");
            SERIAL_PROTOCOL_F(i, 10);
            SERIAL_PROTOCOLPGM(": ");
-           SERIAL_PROTOCOL(bedlevelprobes[i], 10);
+           SERIAL_PROTOCOL(bedlevelprobes[i]);
            SERIAL_EOL;
          }
        }
@@ -1359,20 +1359,20 @@ inline void set_destination_to_current() { memcpy(destination, current_position,
        sample_avg = sample_sum >> 3;
        if (verbose_level > 3) {
          SERIAL_PROTOCOLPGM("sample_sum: ");
-         SERIAL_PROTOCOL(sample_sum, 10);
+         SERIAL_PROTOCOL(sample_sum);
          SERIAL_EOL;
          SERIAL_PROTOCOLPGM("sample_avg: ");
-         SERIAL_PROTOCOL(sample_avg, 10);
+         SERIAL_PROTOCOL(sample_avg);
          SERIAL_EOL;
        }
        sample_sum = sample_avg + bedlevelprobes[8];
        sample_avg = sample_sum >> 1;
        if (verbose_level > 3) {
          SERIAL_PROTOCOLPGM("sample_sum: ");
-         SERIAL_PROTOCOL(sample_sum, 10);
+         SERIAL_PROTOCOL(sample_sum);
          SERIAL_EOL;
          SERIAL_PROTOCOLPGM("sample_avg: ");
-         SERIAL_PROTOCOL(sample_avg, 10);
+         SERIAL_PROTOCOL(sample_avg);
          SERIAL_EOL;
        }
        
