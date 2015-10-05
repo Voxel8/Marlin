@@ -38,7 +38,7 @@ class MarlinTestCase(unittest.TestCase):
         for i in range(cycles):
             g.move(Z=1)
             g.write('G28')
-            g.write('G237')
+            g.write('M237')
             g.write('G1 F9000')
             for j, location in enumerate(measurement_locations):
                 print ".",
