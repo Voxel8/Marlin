@@ -315,7 +315,7 @@
   #endif
 
   #if TEMP_SENSOR_1 == 0
-    #if EXTRUDERS > 1
+    #if (EXTRUDERS > 1 && DISABLED(PNEUMATICS))
       #error TEMP_SENSOR_1 is required with 2 or more EXTRUDERS.
     #elif ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
       #error TEMP_SENSOR_1 is required with TEMP_SENSOR_1_AS_REDUNDANT.
