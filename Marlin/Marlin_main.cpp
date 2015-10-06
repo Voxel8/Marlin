@@ -52,17 +52,16 @@
 #include "math.h"
 #include "buzzer.h"
 
-#ifdef EXT_ADC
+#if ENABLED(EXT_ADC)
   #include "ADC.h"
 #endif
 
-#ifdef DAC_I2C
+#if ENABLED(DAC_I2C)
   #include "MCP4725.h"
 #endif
 
-#ifdef E_REGULATOR
+#if ENABLED(E_REGULATOR)
   #include "Regulator.h"
-
 #endif
 
 #if ENABLED(BLINKM)
@@ -730,11 +729,11 @@ void setup() {
     enableStepperDrivers();
   #endif
 
-  #ifdef DAC_I2C
+  #if ENABLED(DAC_I2C)
     DAC_i2c_init();
   #endif
 
-  #ifdef EXT_ADC
+  #if ENABLED(EXT_ADC)
     ADC_i2c_init();
   #endif
 
@@ -3998,7 +3997,7 @@ inline void gcode_M105() {
     SERIAL_ERRORLNPGM(MSG_ERR_NO_THERMISTORS);
   #endif
 
-  #ifdef PNEUMATICS
+  #if ENABLED(PNEUMATICS)
     SERIAL_PROTOCOLPGM(" P:");
     SERIAL_PROTOCOL_F(pressurePneumatic(), 1);
     SERIAL_PROTOCOLPGM(" /");
@@ -4526,7 +4525,7 @@ inline void gcode_M120() { enable_endstops(true); }
  */
 inline void gcode_M121() { enable_endstops(false); }
 
-#ifdef PNEUMATICS
+#if ENABLED(PNEUMATICS)
   /**
    * M125 - Set pneumatics pressure
    */
@@ -4896,7 +4895,7 @@ inline void gcode_M226() {
   } // code_seen('P')
 }
 
-#ifdef EXT_ADC
+#if ENABLED(EXT_ADC)
   /**
    * M234 - Return raw external ADC value
    */
@@ -4946,7 +4945,7 @@ inline void gcode_M226() {
   }
 #endif
  
-#ifdef E_REGULATOR
+#if ENABLED(E_REGULATOR)
   /**
    * M236 - Send Value to ADC w/ no EEPROM write
    */
@@ -6452,7 +6451,7 @@ void process_next_command() {
         gcode_M119();
         break;
 
-      #ifdef PNEUMATICS
+      #if ENABLED(PNEUMATICS)
         case 125: // M125: Set pneumatics target pressure
           gcode_M125();
           break;
@@ -6551,7 +6550,7 @@ void process_next_command() {
           break;
       #endif // EXT_ADC
 
-      #ifdef E_REGULATOR
+      #if ENABLED(E_REGULATOR)
           case 236: // Send value to DAC; return current output pressure if no S parameter
           gcode_M236();
           break;
