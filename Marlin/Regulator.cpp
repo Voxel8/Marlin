@@ -7,7 +7,7 @@
 #include "MCP4725.h"
 #include "temperature.h"
 
-#if defined(E_REGULATOR)
+#if ENABLED(E_REGULATOR)
 
 // Set the output pressure (in psi) of the regulator.
 void setOutputPressure(float desired_pressure) {
@@ -28,4 +28,4 @@ void setOutputPressure(float desired_pressure) {
 	DAC_write(MCP4725_I2C_ADDRESS, digital_val);
 }
 
-#endif // defined(E_REGULATOR)
+#endif // ENABLED(E_REGULATOR)
