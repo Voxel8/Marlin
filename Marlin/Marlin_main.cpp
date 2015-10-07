@@ -1438,102 +1438,121 @@ static void setup_for_endstop_move() {
     /*
      * Bed leveling probe - returns a uint16_t with ADC height value
      */
-     static uint16_t bed_level_probe_pt(float x, float y, float z, int verbose_level=0) {
-       do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
-       do_blocking_move_to(x - 0.1, y, z);
-       sync_plan_position();
-       gcode_M241(1000);
-       bedlevelprobes[0] = gcode_M238(4);
-     
-       do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] + 0.1, z);
-       sync_plan_position();
-       gcode_M241(350);
-       bedlevelprobes[1] = gcode_M238(4);
-     
-       do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
-       sync_plan_position();
-       gcode_M241(350);
-       bedlevelprobes[2] = gcode_M238(4);
-     
-       do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
-       sync_plan_position();
-       gcode_M241(350);
-       bedlevelprobes[3] = gcode_M238(4);
-     
-       do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
-       sync_plan_position();
-       gcode_M241(350);
-       bedlevelprobes[4] = gcode_M238(4);
-     
-       do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
-       sync_plan_position();
-       gcode_M241(350);
-       bedlevelprobes[5] = gcode_M238(4);
-     
-       do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
-       sync_plan_position();
-       gcode_M241(350);
-       bedlevelprobes[6] = gcode_M238(4);
-     
-       do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
-       sync_plan_position();
-       gcode_M241(350);
-       bedlevelprobes[7] = gcode_M238(4);
-     
-       do_blocking_move_to(x, y, z);
-       sync_plan_position();
-       gcode_M241(350);
-       bedlevelprobes[8] = gcode_M238(4);
-     
-       uint16_t num_samples = 0x0001 << 3;
-       uint16_t i = 0;
-       uint32_t sample_sum = 0;
-       uint16_t sample_avg = 0;
-     
-       for(i = 0; i < 8; i++) {
-         sample_sum += bedlevelprobes[i];
-         if (verbose_level > 3) {
-           SERIAL_PROTOCOLPGM("sample_point #");
-           SERIAL_PROTOCOL_F(i, 10);
-           SERIAL_PROTOCOLPGM(": ");
-           SERIAL_PROTOCOL(bedlevelprobes[i]);
-           SERIAL_EOL;
-         }
-       }
-       
-       sample_avg = sample_sum >> 3;
-       if (verbose_level > 3) {
-         SERIAL_PROTOCOLPGM("sample_sum: ");
-         SERIAL_PROTOCOL(sample_sum);
-         SERIAL_EOL;
-         SERIAL_PROTOCOLPGM("sample_avg: ");
-         SERIAL_PROTOCOL(sample_avg);
-         SERIAL_EOL;
-       }
-       sample_sum = sample_avg + bedlevelprobes[8];
-       sample_avg = sample_sum >> 1;
-       if (verbose_level > 3) {
-         SERIAL_PROTOCOLPGM("sample_sum: ");
-         SERIAL_PROTOCOL(sample_sum);
-         SERIAL_EOL;
-         SERIAL_PROTOCOLPGM("sample_avg: ");
-         SERIAL_PROTOCOL(sample_avg);
-         SERIAL_EOL;
-       }
-       
-       if (verbose_level > 3) {
-         SERIAL_PROTOCOLPGM("Bed");
-         SERIAL_PROTOCOLPGM(" X: ");
-         SERIAL_PROTOCOL_F(x, 3);
-         SERIAL_PROTOCOLPGM(" Y: ");
-         SERIAL_PROTOCOL_F(y, 3);
-         SERIAL_PROTOCOLPGM(" Z: ");
-         SERIAL_PROTOCOL(sample_avg);
-         SERIAL_EOL;
-       }
-     
-       return sample_avg;
-     }
+    static float bed_level_probe_pt(float x, float y, float z, int verbose_level=0) {
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
+      do_blocking_move_to(x - 0.1, y, z);
+      sync_plan_position();
+      gcode_M241(1000);
+      bedlevelprobes[0] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] + 0.1, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[1] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[2] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[3] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[4] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[5] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[6] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[7] = gcode_M238(4);
+
+      do_blocking_move_to(x, y, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[8] = gcode_M238(4);
+
+      // Determine outliers
+      int length = 9, max_key = 0, min_key = 0;  // establish size of array
+      SERIAL_PROTOCOLPGM("Size of array: ");
+      SERIAL_PROTOCOL_F(length, 10);
+      SERIAL_EOL;
+      uint16_t max = bedlevelprobes[0];
+      for(int i = 1; i<length; i++) {
+        if(bedlevelprobes[i] > max) {
+          max = bedlevelprobes[i];
+          max_key = i;
+        }
+      }
+
+      uint16_t min = bedlevelprobes[0];
+      for(int i = 1; i<length; i++) {
+        if(bedlevelprobes[i] < min) {
+          min = bedlevelprobes[i];
+          min_key = i;
+        }
+      }
+
+      // Output outliers
+      if (verbose_level > 3) {
+        SERIAL_PROTOCOLPGM("Throwing out ");
+        SERIAL_PROTOCOL(max);
+        SERIAL_PROTOCOLPGM(" ");
+        SERIAL_PROTOCOL(max_key);
+        SERIAL_PROTOCOLPGM(" and ");
+        SERIAL_PROTOCOL(min);
+        SERIAL_PROTOCOLPGM(" ");
+        SERIAL_PROTOCOL(min_key);
+        SERIAL_EOL;
+      }
+
+      // Eliminate max and min values from being calculated in average
+      bedlevelprobes[max_key] = 0;
+      bedlevelprobes[min_key] = 0;
+
+      float sample_sum = 0;
+      float sample_avg = 0;
+
+      for(int i = 0; i < length; i++) {
+        sample_sum += bedlevelprobes[i];
+        if (verbose_level > 3) {
+          SERIAL_PROTOCOLPGM("sample_point #");
+          SERIAL_PROTOCOL_F(i, 10);
+          SERIAL_PROTOCOLPGM(": ");
+          SERIAL_PROTOCOL(bedlevelprobes[i]);
+          SERIAL_EOL;
+        }
+      }
+
+      sample_avg = sample_sum / 7;
+      // Need to divide by 7 since we erased 2 numbers
+
+      if (verbose_level > 3) {
+        SERIAL_PROTOCOLPGM("Bed");
+        SERIAL_PROTOCOLPGM(" X: ");
+        SERIAL_PROTOCOL_F(x, 3);
+        SERIAL_PROTOCOLPGM(" Y: ");
+        SERIAL_PROTOCOL_F(y, 3);
+        SERIAL_PROTOCOLPGM(" Z: ");
+        SERIAL_PROTOCOL(sample_avg);
+        SERIAL_EOL;
+      }
+
+      return sample_avg;
+    }
   #endif
 
   static void clean_up_after_endstop_move() {
