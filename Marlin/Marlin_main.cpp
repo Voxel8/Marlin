@@ -4998,7 +4998,7 @@ inline void gcode_M226() {
   }
 #endif // E_REGULATOR
 
-#if defined(ENABLE_AUTO_BED_LEVELING) && defined(EXT_ADC)
+#if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
   /*
   * M237 - Custom, more precise auto bed leveling
   */
@@ -5103,7 +5103,7 @@ inline void gcode_M226() {
   }
 #endif
 
-#if defined(ENABLE_AUTO_BED_LEVELING) && defined(EXT_ADC)
+#if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
   /*
   * M239 - Homing and bed leveling combination
   */
@@ -6518,7 +6518,7 @@ void process_next_command() {
           break;
       #endif // E_REGULATOR
 
-      #if defined(ENABLE_AUTO_BED_LEVELING) && defined(EXT_ADC)
+      #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
         case 237: // M237 - Custom, more precise auto bed leveling
           gcode_M237();
           break;
@@ -6528,7 +6528,7 @@ void process_next_command() {
         gcode_M238();
         break;
 
-      #if defined(ENABLE_AUTO_BED_LEVELING) && defined(EXT_ADC)
+      #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
         case 239: // M239 - Homing and bed leveling combination
           gcode_M239();
           break;

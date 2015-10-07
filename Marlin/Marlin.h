@@ -111,7 +111,7 @@ FORCE_INLINE void serialprintPGM(const char *str) {
 void get_command();
 
 void idle(); // the standard idle routine calls manage_inactivity(false)
-#ifdef EXT_ADC
+#if ENABLED(EXT_ADC)
   uint16_t gcode_M238(uint8_t power = 0);
 #endif
 void gcode_M241(long num_milliseconds = NULL);
