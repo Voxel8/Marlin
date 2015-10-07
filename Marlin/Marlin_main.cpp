@@ -1487,9 +1487,6 @@ static void setup_for_endstop_move() {
 
       // Determine outliers
       int length = 9, max_key = 0, min_key = 0;  // establish size of array
-      SERIAL_PROTOCOLPGM("Size of array: ");
-      SERIAL_PROTOCOL_F(length, 10);
-      SERIAL_EOL;
       uint16_t max = bedlevelprobes[0];
       for(int i = 1; i<length; i++) {
         if(bedlevelprobes[i] > max) {
