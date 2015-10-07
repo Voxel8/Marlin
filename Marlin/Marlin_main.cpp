@@ -6543,9 +6543,11 @@ void process_next_command() {
           break;
       #endif
 
-      case 238: // M238 - Return ADC value from laser sensor (get distance)
-        gcode_M238();
-        break;
+      #if ENABLED(EXT_ADC)
+        case 238: // M238 - Return ADC value from laser sensor (get distance)
+          gcode_M238();
+          break;
+      #endif
 
       #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
         case 239: // M239 - Homing and bed leveling combination
