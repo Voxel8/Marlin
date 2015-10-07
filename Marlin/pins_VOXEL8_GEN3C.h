@@ -61,7 +61,7 @@
 #define Z_MS2_PIN               67  // Z stepper driver microstep select 2
 
 /************************
-    DIGITAL POTENTIOMETER PINS
+DIGITAL POTENTIOMETER PINS
 *************************/
 // Currently used for limiting motor current
 #undef DIGIPOTSS_PIN
@@ -69,14 +69,14 @@
 #define DIGIPOT_CHANNELS        {4,5,3,0,1}  // X Y Z E0 E1 digipot channels to stepper driver mapping
 
 /*************************
-	  HEATED BED PINS
+    HEATED BED PINS
 *************************/
 #define BED_AVAIL_PIN           82  // From key circuit
 #define HEATER_BED_PIN          4   // Drive the heated bed
 #define TEMP_BED_PIN            2   // Heated bed thermistor
 
 /*************************
-	  CARTRIDGE PINS
+    CARTRIDGE PINS
 *************************/
 #define CART1_SIG1_PIN          5   // PWM Capable
 #define CART1_SIG2_PIN          46  // PWM Capable
@@ -86,28 +86,35 @@
 #define CART2_SIG3_PIN          85
 
 /*************************
-	  FFF PINS
+	     FFF PINS
 *************************/
 #define HEATER_0_PIN            CART1_SIG1_PIN
-#define TEMP_0_PIN              6   // A6 Input Cart0 Therm
-
 #define HEATER_1_PIN            CART2_SIG1_PIN
-#define TEMP_1_PIN              1   // A1 Input Cart1 Therm
+
 
 /*************************
-	  PNEUMATIC PINS
+  TEMPERATURE SENSE PINS
+*************************/
+#define TEMP_0_PIN              6   // A6 Input Cart0 Therm
+#define TEMP_1_PIN              1   // A1 Input Cart1 Therm
+#define TEMP_2_PIN              -1
+
+/*************************
+    PNEUMATIC PINS
 *************************/
 #ifdef PNEUMATICS
     #define PNEUMATIC_PUMP_PIN  7   // Pump driver
     #define PNEUMATIC_PIN       5   // A5 Input analog tank pressure reading
     #define REGULATOR_PIN       3   // A3 Input analog output pressure reading
     #define PNEUMATIC_CART2_PIN 4   // A4 Cartridge 2 analog pressure reading
-//     #define HEATER_1_PIN        -1  // Heat_1 Output Used for Pneumatics
-// #else
-//     #define HEATER_1_PIN        7
 #endif
 
-#define TEMP_2_PIN              -1
+/*************************
+    SOLENOID PINS
+*************************/
+#define SOL0_PIN                CART1_SIG1_PIN
+#define SOL1_PIN                CART2_SIG1_PIN
+
 
 #define E0_STEP_PIN             34
 #define E0_DIR_PIN              43
