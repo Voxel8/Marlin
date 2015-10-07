@@ -1536,14 +1536,6 @@ static void setup_for_endstop_move() {
      }
   #endif
 
-  static void setup_for_endstop_move() {
-    saved_feedrate = feedrate;
-    saved_feedrate_multiplier = feedrate_multiplier;
-    feedrate_multiplier = 100;
-    refresh_cmd_timeout();
-    enable_endstops(true);
-  }
-
   static void clean_up_after_endstop_move() {
     #if ENABLED(ENDSTOPS_ONLY_FOR_HOMING)
       #if ENABLED(DEBUG_LEVELING_FEATURE)
