@@ -6520,7 +6520,7 @@ void process_next_command() {
         gcode_M226();
         break;
 
-      #ifdef EXT_ADC
+      #if ENABLED(EXT_ADC)
         case 234: // M234 Return raw external ADC value
           gcode_M234();
           return;
