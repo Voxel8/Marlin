@@ -3,8 +3,8 @@ HERE=$(pwd)
 sh ./version.sh . Marlin/_Version.h
 case "$(uname -s)"
   in Darwin)
-    ARDUINO_EXEC="~/Applications/Arduino.app"
-    ARDUINO_DEP="~/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
+    ARDUINO_EXEC="/Applications/Arduino.app"
+    ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
   ;; Linux)
     echo 'Linux'
   ;; CYGWIN*)
