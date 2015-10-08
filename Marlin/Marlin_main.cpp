@@ -6211,8 +6211,12 @@ void process_next_command() {
         break;
 
       #if ENABLED(AUTO_BED_LEVELING_FEATURE) || ENABLED(MESH_BED_LEVELING)
-        case 29: // G29 Detailed Z probe, probes the bed at 3 or more points.
-          gcode_M237(); // G29 has been replaced by M237 for heigher accuracy
+        case 29: // Auto bed leveling
+          #if ENABLED(EXT_ADC) 
+            gcode_M237(); // M237: Auto bed leveling function using profilometer data
+          #else
+            gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more points
+          #endif
           break;
       #endif
 
