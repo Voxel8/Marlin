@@ -185,7 +185,11 @@
  * M234 - Output raw external ADC value (or averaged value over S samples if an S parameter is given)
  * M235 - Output distance sensor data (or averaged value over S samples if an S parameter is given)
  * M236 - Set output target pressure by writing to DAC
+ * M237 - Custom, more precise auto bed leveling
+ * M238 - Return ADC value from laser sensor (get distance)
+ * M239 - Homing and bed leveling combination
  * M240 - Trigger a camera to take a photograph
+ * M241 - Dwell for a given amount of time in milliseconds (500 by default)
  * M250 - Set LCD contrast C<contrast value> (value 0..63)
  * M280 - Set servo position absolute. P: servo index, S: angle or microseconds
  * M300 - Play beep sound S<frequency Hz> P<duration ms>
@@ -259,6 +263,7 @@ uint8_t marlin_debug_flags = DEBUG_INFO|DEBUG_ERRORS;
 static float feedrate = 1500.0, saved_feedrate;
 float current_position[NUM_AXIS] = { 0.0 };
 static float destination[NUM_AXIS] = { 0.0 };
+static uint16_t bedlevelprobes[9] = { 0.0 };
 bool axis_known_position[3] = { false };
 
 static long gcode_N, gcode_LastN, Stopped_gcode_LastN = 0;
@@ -1428,6 +1433,119 @@ static void setup_for_endstop_move() {
   inline void do_blocking_move_to_x(float x) { do_blocking_move_to(x, current_position[Y_AXIS], current_position[Z_AXIS]); }
   inline void do_blocking_move_to_z(float z) { do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], z); }
   inline void raise_z_after_probing() { do_blocking_move_to_z(current_position[Z_AXIS] + Z_RAISE_AFTER_PROBING); }
+
+  #ifdef EXT_ADC
+    /*
+     * Bed leveling probe - returns a uint16_t with ADC height value
+     */
+    static float bed_level_probe_pt(float x, float y, float z, int verbose_level=0) {
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS]);
+      do_blocking_move_to(x - 0.1, y, z);
+      sync_plan_position();
+      gcode_M241(1000);
+      bedlevelprobes[0] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] + 0.1, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[1] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[2] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS] + 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[3] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[4] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS] - 0.1, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[5] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[6] = gcode_M238(4);
+
+      do_blocking_move_to(current_position[X_AXIS] - 0.1, current_position[Y_AXIS], z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[7] = gcode_M238(4);
+
+      do_blocking_move_to(x, y, z);
+      sync_plan_position();
+      gcode_M241(350);
+      bedlevelprobes[8] = gcode_M238(4);
+
+      // Determine outliers
+      int length = 9, max_key = 0, min_key = 0;  // establish size of array
+      uint16_t max = bedlevelprobes[0], min = bedlevelprobes[0];
+      for(int i = 1; i<length; i++) {
+        if(bedlevelprobes[i] > max) {
+          max = bedlevelprobes[i];
+          max_key = i;
+        } else if(bedlevelprobes[i] < min) {
+          min = bedlevelprobes[i];
+          min_key = i;
+        }
+      }
+
+      // Output outliers
+      if (verbose_level > 3) {
+        SERIAL_PROTOCOLPGM("Throwing out ");
+        SERIAL_PROTOCOL(max);
+        SERIAL_PROTOCOLPGM(" ");
+        SERIAL_PROTOCOL(max_key);
+        SERIAL_PROTOCOLPGM(" and ");
+        SERIAL_PROTOCOL(min);
+        SERIAL_PROTOCOLPGM(" ");
+        SERIAL_PROTOCOL(min_key);
+        SERIAL_EOL;
+      }
+
+      // Eliminate max and min values from being calculated in average
+      bedlevelprobes[max_key] = 0;
+      bedlevelprobes[min_key] = 0;
+
+      float sample_sum = 0;
+      float sample_avg = 0;
+
+      for(int i = 0; i < length; i++) {
+        sample_sum += bedlevelprobes[i];
+        if (verbose_level > 3) {
+          SERIAL_PROTOCOLPGM("sample_point #");
+          SERIAL_PROTOCOL_F(i, 10);
+          SERIAL_PROTOCOLPGM(": ");
+          SERIAL_PROTOCOL(bedlevelprobes[i]);
+          SERIAL_EOL;
+        }
+      }
+
+      sample_avg = sample_sum / 7;
+      // Need to divide by 7 since we erased 2 numbers
+
+      if (verbose_level > 3) {
+        SERIAL_PROTOCOLPGM("Bed");
+        SERIAL_PROTOCOLPGM(" X: ");
+        SERIAL_PROTOCOL_F(x, 3);
+        SERIAL_PROTOCOLPGM(" Y: ");
+        SERIAL_PROTOCOL_F(y, 3);
+        SERIAL_PROTOCOLPGM(" Z: ");
+        SERIAL_PROTOCOL(sample_avg);
+        SERIAL_EOL;
+      }
+
+      return sample_avg;
+    }
+  #endif
 
   static void clean_up_after_endstop_move() {
     #if ENABLED(ENDSTOPS_ONLY_FOR_HOMING)
@@ -4816,31 +4934,15 @@ inline void gcode_M226() {
     }
     SERIAL_EOL;
   }
+
   /**
    * M235 - Return processed external ADC value
    */
   inline void gcode_M235(uint8_t power) {
-
     if(code_seen('S')) {
       power = code_value();
     }
-
-    uint16_t num_samples = 0x0001 << power;
-    uint16_t i = 0;
-    uint32_t sample_sum = 0; // must be 32 bit unsigned int!
-    uint16_t sample_avg = 0;
-
-    // Value must be less than max sample power
-    // (This value was just taken from M234 for simplicity)
-    if(power > ADC_SAMPLE_POWER) {
-      power = ADC_SAMPLE_POWER;
-    }
-    // Take specified amount of readings
-    for(i = 0; i < num_samples; i++) {
-      sample_sum += EXT_ADC_READ_0;
-    }
-    // Take average of sample readings
-    sample_avg = sample_sum >> power;
+    uint16_t sample_avg = gcode_M238(power);
 
     SERIAL_PROTOCOLPGM("ok ");
     SERIAL_PROTOCOL(sample_avg);
@@ -4907,7 +5009,136 @@ inline void gcode_M226() {
   }
 #endif // E_REGULATOR
 
+#if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
+  /*
+  * M237 - Custom, more precise auto bed leveling
+  */
+  inline void gcode_M237() {
+    if (!axis_known_position[X_AXIS] || !axis_known_position[Y_AXIS]) {
+      LCD_MESSAGEPGM(MSG_POSITION_UNKNOWN);
+      SERIAL_ECHO_START;
+      SERIAL_ECHOLNPGM(MSG_POSITION_UNKNOWN);
+      return;
+    }
+  
+    int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
+    if (verbose_level < 0 || verbose_level > 4) {
+      SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
+      return;
+    }
+  
+    bool dryrun = code_seen('D') || code_seen('d');
+    st_synchronize();
+  
+    if (!dryrun) {
+      plan_bed_level_matrix.set_to_identity();
+      #ifdef DELTA
+        reset_bed_level();
+      #else
+        vector_3 uncorrected_position = plan_get_position();
+        current_position[X_AXIS] = uncorrected_position.x;
+        current_position[Y_AXIS] = uncorrected_position.y;
+        current_position[Z_AXIS] = uncorrected_position.z;
+        sync_plan_position();
+      #endif // !DELTA
+    }
+  
+    setup_for_endstop_move();
+    feedrate = homing_feedrate[Z_AXIS];
+  
+    // Adjust z-axis to specified height
+    destination[Z_AXIS] = BED_LEVEL_PROBE_Z;
+    prepare_move();
+  
+    float levelProbe_1 = bed_level_probe_pt(ABL_PROBE_PT_1_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_1_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
+          levelProbe_2 = bed_level_probe_pt(ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
+          levelProbe_3 = bed_level_probe_pt(ABL_PROBE_PT_3_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_3_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
+    
+    levelProbe_1 = (levelProbe_1 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
+    levelProbe_2 = (levelProbe_2 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
+    levelProbe_3 = (levelProbe_3 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
+    if (verbose_level > 2) {
+      SERIAL_PROTOCOLPGM("probe 1: ");
+      SERIAL_PROTOCOL_F(levelProbe_1, 5);
+      SERIAL_EOL;
+      SERIAL_PROTOCOLPGM("probe 2: ");
+      SERIAL_PROTOCOL_F(levelProbe_2, 5);
+      SERIAL_EOL;
+      SERIAL_PROTOCOLPGM("probe 3: ");
+      SERIAL_PROTOCOL_F(levelProbe_3, 5);
+      SERIAL_EOL;
+    }
+    clean_up_after_endstop_move();
+    if (!dryrun) {
+      set_bed_level_equation_3pts(levelProbe_1, levelProbe_2, levelProbe_3);
+    }
+  
+    #ifndef DELTA
+      if (verbose_level > 0) {
+        plan_bed_level_matrix.debug(" \nBed Level Correction Matrix:");
+      }
+      float x_tmp = current_position[X_AXIS] + X_PROBE_OFFSET_FROM_EXTRUDER,
+            y_tmp = current_position[Y_AXIS] + Y_PROBE_OFFSET_FROM_EXTRUDER,
+            z_tmp = current_position[Z_AXIS],
+            real_z = st_get_position_mm(Z_AXIS);
+      apply_rotation_xyz(plan_bed_level_matrix, x_tmp, y_tmp, z_tmp);
+      current_position[Z_AXIS] = z_tmp - real_z + current_position[Z_AXIS];
+      sync_plan_position();
+    #endif // !DELTA
+  }
+#endif
+
+#ifdef EXT_ADC
+  /*
+  * M238 - Return ADC value from laser sensor (get distance)
+  */
+  uint16_t gcode_M238(uint8_t power) {
+    uint16_t num_samples = 0x0001 << power;
+    uint16_t i = 0;
+    uint32_t sample_sum = 0; // must be 32 bit unsigned int!
+    uint16_t sample_avg = 0;
+
+    // Value must be less than max sample power
+    // (This value was just taken from M234 for simplicity)
+    if(power > ADC_SAMPLE_POWER) {
+      power = ADC_SAMPLE_POWER;
+    }
+    // Take specified amount of readings
+    for(i = 0; i < num_samples; i++) {
+      sample_sum += EXT_ADC_READ_0;
+    }
+    // Take average of sample readings
+    sample_avg = sample_sum >> power;
+
+    return sample_avg;
+  }
+#endif
+
+#if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
+  /*
+  * M239 - Homing and bed leveling combination
+  */
+  inline void gcode_M239() {
+    int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
+    if (verbose_level < 0 || verbose_level > 4) {
+      SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
+      return;
+    }
+
+    if (verbose_level > 0) {
+      SERIAL_PROTOCOLPGM("homing device");
+      SERIAL_EOL;
+    }
+    enqueuecommands_P(PSTR("G28"));
+    char cmd[30] = { 0 };
+
+    sprintf_P(cmd, PSTR("M237 V%d"), verbose_level);
+    enqueuecommand(cmd);
+  }
+#endif
+
 #if HAS_SERVOS
+
   /**
    * M280: Get or set servo position. P<index> S<angle>
    */
@@ -5063,6 +5294,33 @@ inline void gcode_M226() {
   }
 
 #endif // CHDK || PHOTOGRAPH_PIN
+
+/*
+* M241 - Dwell for a given amount of time in milliseconds (500 by default)
+* Note: Different from G4 in that this can be called within other gcodes directly
+*/
+void gcode_M241(long num_milliseconds) {
+  if (num_milliseconds == NULL) {
+    if(code_seen('T')) {
+      num_milliseconds = code_value_long();
+    } else {
+      num_milliseconds = 500;
+    }
+  }
+  millis_t codenum = num_milliseconds;
+  
+  st_synchronize();
+  refresh_cmd_timeout();
+  codenum += previous_cmd_ms;  // keep track of when we started waiting
+
+  if (!lcd_hasstatus()) LCD_MESSAGEPGM(MSG_DWELL);
+
+  while (millis() < codenum) {
+    manage_heater();
+    manage_inactivity();
+    lcd_update();
+  }
+}
 
 #if ENABLED(HAS_LCD_CONTRAST)
 
@@ -5953,8 +6211,12 @@ void process_next_command() {
         break;
 
       #if ENABLED(AUTO_BED_LEVELING_FEATURE) || ENABLED(MESH_BED_LEVELING)
-        case 29: // G29 Detailed Z probe, probes the bed at 3 or more points.
-          gcode_G29();
+        case 29: // Auto bed leveling
+          #if ENABLED(EXT_ADC) 
+            gcode_M237(); // M237: Auto bed leveling function using profilometer data
+          #else
+            gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more points
+          #endif
           break;
       #endif
 
@@ -6255,7 +6517,7 @@ void process_next_command() {
         gcode_M226();
         break;
 
-      #ifdef EXT_ADC
+      #if ENABLED(EXT_ADC)
         case 234: // M234 Return raw external ADC value
           gcode_M234();
           return;
@@ -6271,6 +6533,24 @@ void process_next_command() {
           gcode_M236();
           break;
       #endif // E_REGULATOR
+
+      #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
+        case 237: // M237 - Custom, more precise auto bed leveling
+          gcode_M237();
+          break;
+      #endif
+
+      #if ENABLED(EXT_ADC)
+        case 238: // M238 - Return ADC value from laser sensor (get distance)
+          gcode_M238();
+          break;
+      #endif
+
+      #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
+        case 239: // M239 - Homing and bed leveling combination
+          gcode_M239();
+          break;
+      #endif
 
       #if HAS_SERVOS
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
@@ -6301,6 +6581,10 @@ void process_next_command() {
           gcode_M240();
           break;
       #endif // CHDK || PHOTOGRAPH_PIN
+
+      case 241: // M241 - Dwell for a given amount of time in milliseconds (500 by default)
+        gcode_M241();
+        break;
 
       #if ENABLED(HAS_LCD_CONTRAST)
         case 250: // M250  Set LCD contrast value: C<value> (value 0..63)
