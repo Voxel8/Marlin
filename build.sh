@@ -19,7 +19,7 @@ case "$(uname -s)"
 esac
 # Prepare for build by copying in RAMBo boards.txt and pins Files
 
-if [ -d "$ARDUINO_DEP" ]; then
+if [ -d "$ARDUINO_DEP/variants/rambo" ]; then
   # Control will enter here if $DIRECTORY exists.
   eval "mv \"$ARDUINO_DEP/variants/rambo/\" \"$ARDUINO_DEP/variants/rambo_backup/\""
 fi
