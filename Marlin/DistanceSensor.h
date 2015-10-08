@@ -30,7 +30,6 @@ For use with Laser Distance Sensor
 #define LDIST_OFFSET 5000         // Offset range of the laser sensor
 #define LDIST_UNIT_DIVISOR 1000   // Value to divide Z-Probe value by
 
-
 /* Function Prototypes */
 /*=====================*/
 
