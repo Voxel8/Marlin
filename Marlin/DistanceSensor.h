@@ -27,6 +27,10 @@ For use with Laser Distance Sensor
 
 #define VOLT_TO_DIST    2000        // (10000 um / 5V)
 
+#define LDIST_OFFSET 5000         // Offset range of the laser sensor
+#define LDIST_UNIT_DIVISOR 1000   // Value to divide Z-Probe value by
+
+
 /* Function Prototypes */
 /*=====================*/
 

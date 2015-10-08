@@ -1487,17 +1487,12 @@ static void setup_for_endstop_move() {
 
       // Determine outliers
       int length = 9, max_key = 0, min_key = 0;  // establish size of array
-      uint16_t max = bedlevelprobes[0];
+      uint16_t max = bedlevelprobes[0], min = bedlevelprobes[0];
       for(int i = 1; i<length; i++) {
         if(bedlevelprobes[i] > max) {
           max = bedlevelprobes[i];
           max_key = i;
-        }
-      }
-
-      uint16_t min = bedlevelprobes[0];
-      for(int i = 1; i<length; i++) {
-        if(bedlevelprobes[i] < min) {
+        } else if(bedlevelprobes[i] < min) {
           min = bedlevelprobes[i];
           min_key = i;
         }
@@ -5026,7 +5021,7 @@ inline void gcode_M226() {
       return;
     }
   
-    int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 1;
+    int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
     if (verbose_level < 0 || verbose_level > 4) {
       SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
       return;
@@ -5051,7 +5046,7 @@ inline void gcode_M226() {
     setup_for_endstop_move();
     feedrate = homing_feedrate[Z_AXIS];
   
-    // Need to make sure we're at 1.00 on the Z-axis
+    // Adjust z-axis to specified height
     destination[Z_AXIS] = BED_LEVEL_PROBE_Z;
     prepare_move();
   
@@ -5059,18 +5054,18 @@ inline void gcode_M226() {
           levelProbe_2 = bed_level_probe_pt(ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
           levelProbe_3 = bed_level_probe_pt(ABL_PROBE_PT_3_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_3_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
     
-    levelProbe_1 = (levelProbe_1 - 5000)/1000;
-    levelProbe_2 = (levelProbe_2 - 5000)/1000;
-    levelProbe_3 = (levelProbe_3 - 5000)/1000;
+    levelProbe_1 = (levelProbe_1 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
+    levelProbe_2 = (levelProbe_2 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
+    levelProbe_3 = (levelProbe_3 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
     if (verbose_level > 2) {
-      SERIAL_PROTOCOLPGM("ok ");
-      SERIAL_PROTOCOL_F(levelProbe_1, 10);
+      SERIAL_PROTOCOLPGM("probe 1: ");
+      SERIAL_PROTOCOL_F(levelProbe_1, 5);
       SERIAL_EOL;
-      SERIAL_PROTOCOLPGM("ok ");
-      SERIAL_PROTOCOL_F(levelProbe_2, 10);
+      SERIAL_PROTOCOLPGM("probe 2: ");
+      SERIAL_PROTOCOL_F(levelProbe_2, 5);
       SERIAL_EOL;
-      SERIAL_PROTOCOLPGM("ok ");
-      SERIAL_PROTOCOL_F(levelProbe_3, 10);
+      SERIAL_PROTOCOLPGM("probe 3: ");
+      SERIAL_PROTOCOL_F(levelProbe_3, 5);
       SERIAL_EOL;
     }
     clean_up_after_endstop_move();
@@ -5085,7 +5080,7 @@ inline void gcode_M226() {
       float x_tmp = current_position[X_AXIS] + X_PROBE_OFFSET_FROM_EXTRUDER,
             y_tmp = current_position[Y_AXIS] + Y_PROBE_OFFSET_FROM_EXTRUDER,
             z_tmp = current_position[Z_AXIS],
-            real_z = (float)st_get_position(Z_AXIS) / axis_steps_per_unit[Z_AXIS];
+            real_z = st_get_position_mm(Z_AXIS);
       apply_rotation_xyz(plan_bed_level_matrix, x_tmp, y_tmp, z_tmp);
       current_position[Z_AXIS] = z_tmp - real_z + current_position[Z_AXIS];
       sync_plan_position();
@@ -5302,6 +5297,7 @@ inline void gcode_M226() {
 
 /*
 * M241 - Dwell for a given amount of time in milliseconds (500 by default)
+* Note: Different from G4 in that this can be called within other gcodes directly
 */
 void gcode_M241(long num_milliseconds) {
   if (num_milliseconds == NULL) {
@@ -6216,7 +6212,7 @@ void process_next_command() {
 
       #if ENABLED(AUTO_BED_LEVELING_FEATURE) || ENABLED(MESH_BED_LEVELING)
         case 29: // G29 Detailed Z probe, probes the bed at 3 or more points.
-          gcode_G29();
+          gcode_M237(); // G29 has been replaced by M237 for heigher accuracy
           break;
       #endif
 
