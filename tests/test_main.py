@@ -11,7 +11,7 @@ g = G(
     direct_write=True,
     direct_write_mode='serial',
     #printer_port="/dev/tty.usbmodem1411",
-    printer_port="COM8",
+    printer_port="COM14",
 )
 
 
@@ -46,8 +46,17 @@ class MarlinTestCase(unittest.TestCase):
                 g.write('G4 P300')
                 measurements[j] = read_profilometer(samples=4)
             stdev = np.std(measurements)
-            msg = "Bed level standard deviation was larger than 10 microns"
+            msg = 'Bed level standard deviation was larger than 15 microns'
             self.assertLess(stdev, 15, msg)
+
+    def test_M218(self):
+        g.write('M218 T1 X10 Y10 Z10')
+        response = g.write('M218', resp_needed=True)
+        msg = 'Hotend offset was not applied'
+        self.assertEqual('echo:Hotend offsets: 0.00,0.00,0.00 10.00,10.00,10.00\nok\n', response, msg)
+
+        # Reset Offset Values
+        g.write('M218 T1 X0 Y0 Z0')
 
 
 if __name__ == '__main__':
