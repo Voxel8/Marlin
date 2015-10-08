@@ -16,12 +16,8 @@ case "$(uname -s)"
 esac
 # Prepare for build by copying in RAMBo boards.txt and pins Files
 
-if [[ -f "$ARDUINO_DEP/boards.txt" ]]; then
-    echo "exists"
-fi
 if [ -d "$ARDUINO_DEP" ]; then
   # Control will enter here if $DIRECTORY exists.
-  echo "Directory exists"
   eval "mv \"$ARDUINO_DEP/variants/rambo/\" \"$ARDUINO_DEP/variants/rambo_backup/\""
 fi
 # Even if a user doesn't have a rambo folder, they should have a boards.txt
