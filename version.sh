@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# generate_version_header_for_marlin
+# Version generation for Marlin 
 
 DIR="$1" export DIR
 OUTFILE="$2" export OUTFILE
@@ -22,9 +22,10 @@ echo "#define STRING_DISTRIBUTION_DATE" `date '+"%Y-%m-%d %H:%M"'` >>"$OUTFILE"
     BRANCH=" $BRANCH"
   fi
   VERSION=`git describe --tags --first-parent 2>/dev/null`
+  BRANCH=$(echo $BRANCH | sed 's/\//\\\//g')
   if [ "x$VERSION" != "x" ] ; then
-    echo "#define SHORT_BUILD_VERSION \"$VERSION\"" | sed "s/-.*/$BRANCH\"/" >>"$OUTFILE"
-    echo "#define DETAILED_BUILD_VERSION \"$VERSION\"" | sed "s/-/$BRANCH-/" >>"$OUTFILE"
+    echo "#define SHORT_BUILD_VERSION \"$VERSION\"" | sed "s/-.*/ $BRANCH\"/" >>"$OUTFILE"
+    echo "#define DETAILED_BUILD_VERSION \"$VERSION\"" | sed "s/-/ $BRANCH-/" >>"$OUTFILE"
   else
     VERSION=`git describe --tags --first-parent --always 2>/dev/null`
     echo "#define SHORT_BUILD_VERSION \"$BRANCH\"" >>"$OUTFILE"
@@ -33,7 +34,5 @@ echo "#define STRING_DISTRIBUTION_DATE" `date '+"%Y-%m-%d %H:%M"'` >>"$OUTFILE"
   URL=`git config --local --get remote.origin.url | sed "sx.*github.com.xhttps://github.com/x" | sed "sx\.gitx/x"`
   if [ "x$URL" != "x" ] ; then
     echo "#define SOURCE_CODE_URL  \""$URL"\"" >>"$OUTFILE"
-    echo "// Deprecated URL definition" >>"$OUTFILE"
-    echo "#define FIRMWARE_URL  \""$URL"\"" >>"$OUTFILE"
   fi
 )

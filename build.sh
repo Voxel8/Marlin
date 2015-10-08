@@ -1,11 +1,12 @@
 #!/bin/bash
+HERE=$(pwd)
+sh $HERE/version.sh . Marlin/_Version.h
 case "$(uname -s)"
   in Darwin)
     echo 'Mac OS X'
   ;; Linux)
     echo 'Linux'
   ;; CYGWIN*|MINGW32*|MSYS*)
-    HERE=$(pwd)
     mkdir $HERE/build/
     arduino_debug "$2" $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo --port "$1"
     case "$?" in
@@ -26,5 +27,3 @@ case "$(uname -s)"
     echo 'This operating system is unfamiliar'
   ;;
 esac
-
-sh $HERE/version.sh . _Version.h
