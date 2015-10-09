@@ -53,7 +53,7 @@ class MarlinTestCase(unittest.TestCase):
         g.write('M218 T1 X10 Y10 Z10')
         response = g.write('M218', resp_needed=True)
         msg = 'Hotend offset was not applied'
-        self.assertEqual('echo:Hotend offsets: 0.00,0.00,0.00 10.00,10.00,10.00\nok\n', response, msg)
+        self.assertIn('0.00,0.00,0.00 10.00,10.00,10.00', response, msg)
 
         # Reset Offset Values
         g.write('M218 T1 X0 Y0 Z0')
