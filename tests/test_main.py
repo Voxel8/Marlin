@@ -11,7 +11,7 @@ g = G(
     direct_write=True,
     direct_write_mode='serial',
     #printer_port="/dev/tty.usbmodem1411",
-    printer_port="COM14",
+    printer_port="COM5",
 )
 
 def read_profilometer(samples=1):
@@ -26,30 +26,31 @@ def read_profilometer(samples=1):
 
 class MarlinTestCase(unittest.TestCase):
 
-    # def test_M237(self):
-    #     cycles = 2
-    #     measurement_locations = [
-    #         (25, 60),
-    #         (95, 175),
-    #         (165, 60),
-    #     ]
-    #     measurements = np.zeros(len(measurement_locations))
-    #     for i in range(cycles):
-    #         g.move(Z=1)
-    #         g.write('G28')
-    #         g.write('M237')
-    #         g.write('G1 F9000')
-    #         for j, location in enumerate(measurement_locations):
-    #             print ".",
-    #             g.abs_move(*location)
-    #             g.write('G4 P300')
-    #             measurements[j] = read_profilometer(samples=4)
-    #         stdev = np.std(measurements)
-    #         msg = 'Bed level standard deviation was larger than 15 microns'
-    #         self.assertLess(stdev, 15, msg)
+    def test_M237(self):
+        cycles = 2
+        measurement_locations = [
+            (25, 60),
+            (95, 175),
+            (165, 60),
+        ]
+        measurements = np.zeros(len(measurement_locations))
+        for i in range(cycles):
+            g.move(Z=1)
+            g.write('G28')
+            g.write('M237')
+            g.write('G1 F9000')
+            for j, location in enumerate(measurement_locations):
+                print ".",
+                g.abs_move(*location)
+                g.write('G4 P300')
+                measurements[j] = read_profilometer(samples=4)
+            stdev = np.std(measurements)
+            msg = 'Bed level standard deviation was larger than 15 microns'
+            self.assertLess(stdev, 15, msg)
 
     def test_M218(self):
         # Assert offset echoed correctly
+        g.write('G92 X0 Y0 Z0')
         g.write('M218 T1 X10 Y10 Z10')
         response = g.write('M218', resp_needed=True)
         self.assertIn('0.00,0.00,0.00 10.00,10.00,10.00', response)
