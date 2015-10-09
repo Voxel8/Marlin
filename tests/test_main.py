@@ -26,40 +26,44 @@ def read_profilometer(samples=1):
 
 class MarlinTestCase(unittest.TestCase):
 
-    def test_M237(self):
-        cycles = 2
-        measurement_locations = [
-            (25, 60),
-            (95, 175),
-            (165, 60),
-        ]
-        measurements = np.zeros(len(measurement_locations))
-        for i in range(cycles):
-            g.move(Z=1)
-            g.write('G28')
-            g.write('M237')
-            g.write('G1 F9000')
-            for j, location in enumerate(measurement_locations):
-                print ".",
-                g.abs_move(*location)
-                g.write('G4 P300')
-                measurements[j] = read_profilometer(samples=4)
-            stdev = np.std(measurements)
-            msg = 'Bed level standard deviation was larger than 15 microns'
-            self.assertLess(stdev, 15, msg)
+    # def test_M237(self):
+    #     cycles = 2
+    #     measurement_locations = [
+    #         (25, 60),
+    #         (95, 175),
+    #         (165, 60),
+    #     ]
+    #     measurements = np.zeros(len(measurement_locations))
+    #     for i in range(cycles):
+    #         g.move(Z=1)
+    #         g.write('G28')
+    #         g.write('M237')
+    #         g.write('G1 F9000')
+    #         for j, location in enumerate(measurement_locations):
+    #             print ".",
+    #             g.abs_move(*location)
+    #             g.write('G4 P300')
+    #             measurements[j] = read_profilometer(samples=4)
+    #         stdev = np.std(measurements)
+    #         msg = 'Bed level standard deviation was larger than 15 microns'
+    #         self.assertLess(stdev, 15, msg)
 
     def test_M218(self):
+        # Assert offset echoed correctly
         g.write('M218 T1 X10 Y10 Z10')
         response = g.write('M218', resp_needed=True)
-        print response
         self.assertIn('0.00,0.00,0.00 10.00,10.00,10.00', response)
+
+        # Assert offset applied to current position on tool change
         response = g.write('M114', resp_needed=True)
         self.assertIn('X:0.00 Y:0.00 Z:0.00', response)
         g.write('T1')
         response = g.write('M114', resp_needed=True)
         self.assertIn('X:10.00 Y:10.00 Z:10.00', response)
-        # Reset Offset Values
+
+        # Reset Offset Values and state
         g.write('M218 T1 X0 Y0 Z0')
+        g.write('T0')
 
 if __name__ == '__main__':
     unittest.main()
