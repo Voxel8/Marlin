@@ -1,38 +1,88 @@
 #!/bin/bash
+# Correct Syntax: ./build.sh [COM port] [verify/build] 
 HERE=$(pwd)
 sh ./version.sh . Marlin/_Version.h
+VERSION='Voxel8 Marlin Build Script v1.0'
+
+if [ -z "$1" ]; then
+  echo "Please enter the port of the device."
+  exit 1
+fi
+if [ $1 = "verify" ] || [ $1 = "upload" ]; then
+  echo "Syntax error. Please use --help for more info."
+  exit 1
+elif [ $1 = "--help" ] && [ -z "$2" ]; then
+  echo $VERSION
+  echo "A star (*) represents a default value."
+  echo ""
+  echo "SYNTAX: build.sh [port] [*upload/verify]"
+  echo ""
+  echo "Type '--help name' to find out more about the argument 'name'."
+  exit 1
+elif [ $1 = "--help" ] && [ ! -z "$2" ]; then
+  if [ $2 = "port" ]; then
+    echo "This is the port of the device in which the sketch will be uploaded to."
+  elif [ $2 = "verify" ]; then
+    echo "Specifying this argument will only compile the script. No uploading will be done."
+  elif [ $2 = "upload" ]; then
+    echo "Specifying this argument will compile and upload the sketch to the given device port."
+  else
+    echo "This argument does not exist."
+  fi
+  exit 1
+else
+  PORT=$1
+  if [ -z "$2" ]; then
+    COMMAND="upload"
+  elif [ $2 = "verify" ] || [ $2 = "upload" ]; then
+    COMMAND=$2
+  else
+    echo "Syntax error. Please use --help for more info."
+    exit 1
+  fi   
+fi
+
+# If /build/ exists, remove.
+if [ -d "$HERE/build/" ]; then
+  echo "Build directory exists, removing..."
+  eval "rm -rf \"$HERE/build/\""
+fi
+
+echo $VERSION
+echo ""
+
 case "$(uname -s)"
   in Darwin)
-    ARDUINO_EXEC="/Applications/Arduino.app"
+    ARDUINO_EXEC="/Applications/Arduino.app --$COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo --port $PORT"
     ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
   ;; Linux)
     echo 'Linux'
   ;; CYGWIN*)
     CYGHERE="$(cygpath -aw $(pwd))"
-    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe --verify \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo --port $1"
+    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe --$COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo --port $PORT"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;;MINGW32*|MSYS*)
-    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe --verify $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo --port $1"
+    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe --$COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo --port $PORT"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;; *)
     echo 'This operating system is unfamiliar'
 esac
-# Prepare for build by copying in RAMBo boards.txt and pins Files
+
+# Prepare for build by copying in RAMBo boards.txt and pins files
 
 if [ -d "$ARDUINO_DEP/variants/rambo" ]; then
-  # Control will enter here if $DIRECTORY exists.
   eval "mv \"$ARDUINO_DEP/variants/rambo/\" \"$ARDUINO_DEP/variants/rambo_backup/\""
 fi
 # Even if a user doesn't have a rambo folder, they should have a boards.txt
 eval "mv \"$ARDUINO_DEP/boards.txt\" \"$ARDUINO_DEP/boards_backup.txt\""
-eval "cp \"$HERE/ArduinoAddons/Arduino_1.5.x/hardware/marlin/avr/boards.txt\" \"$ARDUINO_DEP/\""
-eval "cp -r \"$HERE/ArduinoAddons/Arduino_1.5.x/hardware/marlin/avr/variants/rambo/\" \"$ARDUINO_DEP/variants/rambo/\""
+eval "cp \"$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/boards.txt\" \"$ARDUINO_DEP/\""
+eval "cp -r \"$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/\" \"$ARDUINO_DEP/variants/rambo/\""
 
 # Create the build directory
 mkdir $HERE/build/
 eval $ARDUINO_EXEC
 case "$?" in
-  0) echo "Your sketch was successfully built and uploaded."
+  0) echo "The action has been performed successfully."
   ;;
   1) echo "There was an error building or uploading your sketch."
   ;;
@@ -43,7 +93,6 @@ case "$?" in
   4) echo "The desired preference option does not exist."
   ;;
 esac
-# C:/Program\ Files\ \(x86\)/Arduino/hardware/tools/avr/bin/avrdude.exe -CC:/Program\ Files\ \(x86\)/Arduino/hardware/tools/avr/etc/avrdude.conf -patmega2560 -cwiring -PCOM4 -b115200 -D -Uflash:w:./build/Marlin.cpp.hex:i
 
 # Clean Up
 rm -rf ./build/
