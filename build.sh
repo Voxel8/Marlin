@@ -18,13 +18,13 @@ elif [ $1 = "--help" ] && [ -z "$2" ]; then
   echo $VERSION
   echo "A star (*) represents a default value."
   echo ""
-  echo "SYNTAX: build.sh [port] [*upload/verify]"
+  echo "SYNTAX: build.sh [port [*upload | verify]]"
   echo ""
   echo "Type '--help name' to find out more about the argument 'name'."
   exit 1
 elif [ $1 = "--help" ] && [ ! -z "$2" ]; then
   if [ $2 = "port" ]; then
-    echo "This is the port of the device in which the sketch will be uploaded to."
+    echo "This is the port of the device in which the sketch will be uploaded to. Can be emitted if just verifying."
   elif [ $2 = "verify" ]; then
     echo "Specifying this argument will only compile the script. No uploading will be done."
   elif [ $2 = "upload" ]; then
