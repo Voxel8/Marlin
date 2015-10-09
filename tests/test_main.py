@@ -4,6 +4,7 @@ import unittest
 import numpy as np
 from mecode import G
 
+user_input = raw_input("Printer port: ")
 
 g = G(
     print_lines=False,
@@ -11,7 +12,7 @@ g = G(
     direct_write=True,
     direct_write_mode='serial',
     #printer_port="/dev/tty.usbmodem1411",
-    printer_port="COM8",
+    printer_port=user_input,
 )
 
 
@@ -28,7 +29,7 @@ def read_profilometer(samples=1):
 class MarlinTestCase(unittest.TestCase):
 
     def test_M237(self):
-        cycles = 2
+        cycles = 10
         measurement_locations = [
             (25, 60),
             (95, 175),
@@ -43,10 +44,10 @@ class MarlinTestCase(unittest.TestCase):
             for j, location in enumerate(measurement_locations):
                 print ".",
                 g.abs_move(*location)
-                g.write('G4 P300')
+                g.write('G4 P500')
                 measurements[j] = read_profilometer(samples=4)
             stdev = np.std(measurements)
-            msg = "Bed level standard deviation was larger than 10 microns"
+            msg = "Bed level standard deviation was larger than 15 microns"
             self.assertLess(stdev, 15, msg)
 
 
