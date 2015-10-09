@@ -11,9 +11,8 @@ g = G(
     direct_write=True,
     direct_write_mode='serial',
     #printer_port="/dev/tty.usbmodem1411",
-    printer_port="COM8",
+    printer_port="COM5",
 )
-
 
 def read_profilometer(samples=1):
     samples = np.floor(np.log2(samples))
@@ -46,9 +45,26 @@ class MarlinTestCase(unittest.TestCase):
                 g.write('G4 P300')
                 measurements[j] = read_profilometer(samples=4)
             stdev = np.std(measurements)
-            msg = "Bed level standard deviation was larger than 10 microns"
+            msg = 'Bed level standard deviation was larger than 15 microns'
             self.assertLess(stdev, 15, msg)
 
+    def test_M218(self):
+        # Assert offset echoed correctly
+        g.write('G92 X0 Y0 Z0')
+        g.write('M218 T1 X10 Y10 Z10')
+        response = g.write('M218', resp_needed=True)
+        self.assertIn('0.00,0.00,0.00 10.00,10.00,10.00', response)
+
+        # Assert offset applied to current position on tool change
+        response = g.write('M114', resp_needed=True)
+        self.assertIn('X:0.00 Y:0.00 Z:0.00', response)
+        g.write('T1')
+        response = g.write('M114', resp_needed=True)
+        self.assertIn('X:10.00 Y:10.00 Z:10.00', response)
+
+        # Reset Offset Values and state
+        g.write('M218 T1 X0 Y0 Z0')
+        g.write('T0')
 
 if __name__ == '__main__':
     unittest.main()
