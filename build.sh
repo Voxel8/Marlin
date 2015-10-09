@@ -5,7 +5,7 @@ sh ./version.sh . Marlin/_Version.h
 VERSION='Voxel8 Marlin Build Script v1.0'
 
 if [ -z "$1" ]; then
-  echo "Please enter the port of the device."
+  echo "Please enter the port of the device or specify 'verify'"
   exit 1
 fi
 if [ $1 = "upload" ]; then
