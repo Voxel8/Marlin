@@ -8,9 +8,12 @@ if [ -z "$1" ]; then
   echo "Please enter the port of the device."
   exit 1
 fi
-if [ $1 = "verify" ] || [ $1 = "upload" ]; then
+if [ $1 = "upload" ]; then
   echo "Syntax error. Please use --help for more info."
   exit 1
+elif [ $1 = "verify" ]; then
+  PORT_ARG=""
+  COMMAND="--verify"
 elif [ $1 = "--help" ] && [ -z "$2" ]; then
   echo $VERSION
   echo "A star (*) represents a default value."
@@ -31,11 +34,11 @@ elif [ $1 = "--help" ] && [ ! -z "$2" ]; then
   fi
   exit 1
 else
-  PORT=$1
+  PORT_ARG="--port $1"
   if [ -z "$2" ]; then
-    COMMAND="upload"
+    COMMAND="--upload"
   elif [ $2 = "verify" ] || [ $2 = "upload" ]; then
-    COMMAND=$2
+    COMMAND="--$2"
   else
     echo "Syntax error. Please use --help for more info."
     exit 1
@@ -53,16 +56,16 @@ echo ""
 
 case "$(uname -s)"
   in Darwin)
-    ARDUINO_EXEC="/Applications/Arduino.app --$COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo --port $PORT"
+    ARDUINO_EXEC="/Applications/Arduino.app $COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
   ;; Linux)
     echo 'Linux'
   ;; CYGWIN*)
     CYGHERE="$(cygpath -aw $(pwd))"
-    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe --$COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo --port $PORT"
+    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;;MINGW32*|MSYS*)
-    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe --$COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo --port $PORT"
+    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;; *)
     echo 'This operating system is unfamiliar'
@@ -79,7 +82,7 @@ eval "cp \"$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/boards.txt\" \"
 eval "cp -r \"$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/\" \"$ARDUINO_DEP/variants/rambo/\""
 
 # Create the build directory
-mkdir $HERE/build/
+eval "mkdir \"$HERE/build/\""
 eval $ARDUINO_EXEC
 case "$?" in
   0) echo "The action has been performed successfully."
