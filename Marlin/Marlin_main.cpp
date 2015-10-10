@@ -5428,28 +5428,30 @@ inline void gcode_M303() {
 
 #endif // SCARA
 
-#if ENABLED(EXT_SOLENOID)
+#if ENABLED(PNEUMATICS)
 
   void enable_solenoid(uint8_t num) {
     switch(num) {
-      case 0:
-        OUT_WRITE(SOL0_PIN, HIGH);
-        break;
-        #if HAS_SOLENOID_1
-          case 1:
-            OUT_WRITE(SOL1_PIN, HIGH);
-            break;
-        #endif
-        #if HAS_SOLENOID_2
-          case 2:
-            OUT_WRITE(SOL2_PIN, HIGH);
-            break;
-        #endif
-        #if HAS_SOLENOID_3
-          case 3:
-            OUT_WRITE(SOL3_PIN, HIGH);
-            break;
-        #endif
+      #if HAS_SOLENOID_0
+        case 0:
+          OUT_WRITE(SOL0_PIN, HIGH);
+          break;
+      #endif
+      #if HAS_SOLENOID_1
+        case 1:
+          OUT_WRITE(SOL1_PIN, HIGH);
+          break;
+      #endif
+      #if HAS_SOLENOID_2
+        case 2:
+          OUT_WRITE(SOL2_PIN, HIGH);
+          break;
+      #endif
+      #if HAS_SOLENOID_3
+        case 3:
+          OUT_WRITE(SOL3_PIN, HIGH);
+          break;
+      #endif
       default:
         SERIAL_ECHO_START;
         SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
@@ -5457,26 +5459,41 @@ inline void gcode_M303() {
     }
   }
 
-  void enable_solenoid_on_active_extruder() { enable_solenoid(active_extruder); }
+  void enable_solenoid_on_active_extruder() { 
+    enable_solenoid(active_extruder);
+  }
 
   void disable_all_solenoids() {
-    OUT_WRITE(SOL0_PIN, LOW);
-    OUT_WRITE(SOL1_PIN, LOW);
-    OUT_WRITE(SOL2_PIN, LOW);
-    OUT_WRITE(SOL3_PIN, LOW);
+    #if HAS_SOLENOID_0
+      OUT_WRITE(SOL0_PIN, LOW);
+    #endif
+    #if HAS_SOLENOID_1
+      OUT_WRITE(SOL1_PIN, LOW);
+    #endif
+    #if HAS_SOLENOID_2
+      OUT_WRITE(SOL2_PIN, LOW);
+    #endif
+    #if HAS_SOLENOID_3
+      OUT_WRITE(SOL3_PIN, LOW);
+    #endif
   }
 
   /**
    * M380: Enable solenoid on the active extruder
    */
-  inline void gcode_M380() { enable_solenoid_on_active_extruder(); }
+  inline void gcode_M380() { 
+    enable_solenoid_on_active_extruder();
+
+  }
 
   /**
    * M381: Disable all solenoids
    */
-  inline void gcode_M381() { disable_all_solenoids(); }
+  inline void gcode_M381() {
+    disable_all_solenoids();
+  }
 
-#endif // EXT_SOLENOID
+#endif // PNEUMATICS
 
 /**
   M399: Pause command
@@ -6617,6 +6634,15 @@ void process_next_command() {
           gcode_M365();
           break;
       #endif // SCARA
+
+      #if ENABLED(PNEUMATICS)
+        case 380: // M380 Enable solenoid on the active extruder
+          gcode_M380();
+          break;
+        case 381: // M381 Disable all solenoids
+          gcode_M381();
+          break;
+      #endif
 
       case 399: // M399 Pause command
         gcode_M399();
