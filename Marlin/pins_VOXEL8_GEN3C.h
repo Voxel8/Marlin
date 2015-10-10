@@ -6,7 +6,7 @@
   #error Oops!  Make sure you have 'Arduino Mega 2560' selected from the 'Tools -> Boards' menu.
 #endif
 
-#define LARGE_FLASH true
+#define LARGE_FLASH             true
 
 // Servo support
 #ifdef NUM_SERVOS
@@ -78,19 +78,19 @@ DIGITAL POTENTIOMETER PINS
 /*************************
     CARTRIDGE PINS
 *************************/
-#define CART1_SIG1_PIN          5   // PWM Capable
-#define CART1_SIG2_PIN          46  // PWM Capable
-#define CART1_SIG3_PIN          74  // 
-#define CART2_SIG1_PIN          45  // PWM Capable
-#define CART2_SIG2_PIN          75  // Interrupt Capable
-#define CART2_SIG3_PIN          85
+#define CART0_SIG1_PIN          5   // PWM Capable
+#define CART0_SIG2_PIN          46  // PWM Capable
+#define CART0_SIG3_PIN          74  // 
+#define CART1_SIG1_PIN          45  // PWM Capable
+#define CART1_SIG2_PIN          75  // Interrupt Capable
+#define CART1_SIG3_PIN          85
 
 /*************************
 	     FFF PINS
 *************************/
-#define HEATER_0_PIN            CART1_SIG1_PIN
-#define HEATER_1_PIN            CART2_SIG1_PIN
 
+#define HEATER_0_PIN          CART0_SIG1_PIN
+#define HEATER_1_PIN          -1 // Set to CART1_SIG1_PIN to use FFF in CART1
 
 /*************************
   TEMPERATURE SENSE PINS
@@ -103,17 +103,17 @@ DIGITAL POTENTIOMETER PINS
     PNEUMATIC PINS
 *************************/
 #ifdef PNEUMATICS
-    #define PNEUMATIC_PUMP_PIN  7   // Pump driver
-    #define PNEUMATIC_PIN       5   // A5 Input analog tank pressure reading
-    #define REGULATOR_PIN       3   // A3 Input analog output pressure reading
-    #define PNEUMATIC_CART2_PIN 4   // A4 Cartridge 2 analog pressure reading
+  #define PNEUMATIC_PUMP_PIN    7   // Pump driver
+  #define PNEUMATIC_PIN         5   // A5 Input analog tank pressure reading
+  #define REGULATOR_PIN         3   // A3 Input analog output pressure reading
+  #define PNEUMATIC_CART1_PIN   4   // A4 Cartridge 2 analog pressure reading
 #endif
 
 /*************************
     SOLENOID PINS
 *************************/
-#define SOL0_PIN                CART1_SIG1_PIN
-#define SOL1_PIN                CART2_SIG1_PIN
+#define SOL0_PIN                -1 // Set to CART0_SIG1_PIN for pneumatics in CART0
+#define SOL1_PIN                CART1_SIG1_PIN
 
 
 #define E0_STEP_PIN             34
@@ -135,8 +135,8 @@ DIGITAL POTENTIOMETER PINS
   Fan_2 2
 ***********************************************************/
 #define LED_PIN                 13
-#define FAN_PIN                 CART1_SIG3_PIN  // FFF fan toggle
-#define FAN_CHASSIS_TOP_PIN     13  // Shared with LED pin for now
+#define FAN_PIN                 CART0_SIG3_PIN  // FFF fan toggle
+#define FAN_CHASSIS_TOP_PIN     2
 #define FAN_CHASSIS_BOT_PIN     44
 
 /*************************

@@ -309,7 +309,7 @@
   #endif
 
   #if EXTRUDERS > 1 || ENABLED(HEATERS_PARALLEL)
-    #if !HAS_HEATER_1
+    #if (!HAS_HEATER_1 && DISABLED(PNEUMATICS))
       #error HEATER_1_PIN not defined for this board.
     #endif
   #endif
