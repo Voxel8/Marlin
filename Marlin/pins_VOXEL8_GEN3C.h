@@ -89,8 +89,8 @@ DIGITAL POTENTIOMETER PINS
 	     FFF PINS
 *************************/
 
-#define HEATER_0_PIN          CART0_SIG1_PIN
-#define HEATER_1_PIN          -1 // Set to CART1_SIG1_PIN to use FFF in CART1
+#define HEATER_0_PIN            CART0_SIG1_PIN
+#define HEATER_1_PIN            -1 // Set to CART1_SIG1_PIN to use FFF in CART1
 
 /*************************
   TEMPERATURE SENSE PINS

@@ -5430,39 +5430,6 @@ inline void gcode_M303() {
 
 #if ENABLED(PNEUMATICS)
 
-  void enable_solenoid(uint8_t num) {
-    switch(num) {
-      #if HAS_SOLENOID_0
-        case 0:
-          OUT_WRITE(SOL0_PIN, HIGH);
-          break;
-      #endif
-      #if HAS_SOLENOID_1
-        case 1:
-          OUT_WRITE(SOL1_PIN, HIGH);
-          break;
-      #endif
-      #if HAS_SOLENOID_2
-        case 2:
-          OUT_WRITE(SOL2_PIN, HIGH);
-          break;
-      #endif
-      #if HAS_SOLENOID_3
-        case 3:
-          OUT_WRITE(SOL3_PIN, HIGH);
-          break;
-      #endif
-      default:
-        SERIAL_ECHO_START;
-        SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
-        break;
-    }
-  }
-
-  void enable_solenoid_on_active_extruder() { 
-    enable_solenoid(active_extruder);
-  }
-
   void disable_all_solenoids() {
     #if HAS_SOLENOID_0
       OUT_WRITE(SOL0_PIN, LOW);
@@ -5470,20 +5437,41 @@ inline void gcode_M303() {
     #if HAS_SOLENOID_1
       OUT_WRITE(SOL1_PIN, LOW);
     #endif
-    #if HAS_SOLENOID_2
-      OUT_WRITE(SOL2_PIN, LOW);
-    #endif
-    #if HAS_SOLENOID_3
-      OUT_WRITE(SOL3_PIN, LOW);
-    #endif
   }
 
   /**
    * M380: Enable solenoid on the active extruder
    */
   inline void gcode_M380() { 
-    enable_solenoid_on_active_extruder();
-
+    int8_t current_solenoid_pin = -1;
+    switch(active_extruder) {
+      #if HAS_SOLENOID_0
+        case 0:
+          OUT_WRITE(SOL0_PIN, HIGH);
+          current_solenoid_pin = SOL0_PIN;
+          break;
+      #endif
+      #if HAS_SOLENOID_1
+        case 1:
+          OUT_WRITE(SOL1_PIN, HIGH);
+          current_solenoid_pin = SOL1_PIN;
+          break;
+      #endif
+      default:
+        SERIAL_ECHO_START;
+        SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
+        break;
+    }
+    // Verbosity Handling
+    if (code_seen('V')) {
+      if (current_solenoid_pin != -1) {
+        bool pin_status = digitalRead(current_solenoid_pin);
+        SERIAL_PROTOCOLPGM("Solenoid ");
+        SERIAL_PROTOCOL_F(active_extruder, DEC);
+        SERIAL_PROTOCOLPGM(" Status: ");
+        SERIAL_PROTOCOLLN(pin_status);
+      }
+    }
   }
 
   /**
@@ -5491,6 +5479,19 @@ inline void gcode_M303() {
    */
   inline void gcode_M381() {
     disable_all_solenoids();
+    if (code_seen('V')) {
+      bool pin_status;
+      #if HAS_SOLENOID_0
+        pin_status = digitalRead(SOL0_PIN);
+        SERIAL_PROTOCOLPGM("Solenoid 0 Status: ");
+        SERIAL_PROTOCOLLN(pin_status);
+      #endif
+      #if HAS_SOLENOID_1
+        pin_status = digitalRead(SOL1_PIN);
+        SERIAL_PROTOCOLPGM("Solenoid 1 Status: ");
+        SERIAL_PROTOCOLLN(pin_status);
+      #endif
+    }
   }
 
 #endif // PNEUMATICS
