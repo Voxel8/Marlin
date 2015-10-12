@@ -1,10 +1,19 @@
 #! /usr/bin/env python
 
 import unittest
+import sys
+from optparse import OptionParser
 import numpy as np
 from mecode import G
 
-user_input = raw_input("Printer port: ")
+parser = OptionParser()
+parser.add_option("-p", "--port", dest="com_port",
+                  help="Device port value", metavar="PORT")
+
+(options, args) = parser.parse_args()
+
+if not options.com_port:
+    parser.error('Port not given')
 
 g = G(
     print_lines=False,
@@ -12,7 +21,7 @@ g = G(
     direct_write=True,
     direct_write_mode='serial',
     #printer_port="/dev/tty.usbmodem1411",
-    printer_port=user_input,
+    printer_port=options.com_port,
 )
 
 
