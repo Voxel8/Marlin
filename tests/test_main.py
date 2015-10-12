@@ -11,7 +11,7 @@ g = G(
     direct_write=True,
     direct_write_mode='serial',
     #printer_port="/dev/tty.usbmodem1411",
-    printer_port="COM5",
+    printer_port="COM14",
 )
 
 def read_profilometer(samples=1):
@@ -65,6 +65,21 @@ class MarlinTestCase(unittest.TestCase):
         # Reset Offset Values and state
         g.write('M218 T1 X0 Y0 Z0')
         g.write('T0')
+
+    def test_M380(self):
+        # Assert Solenoid 0 Is Invalid
+        g.write('T0')
+        response = g.write('M380 V', resp_needed=True)
+        self.assertIn('Invalid solenoid', response)
+        
+        # Assert Solenoid 1 Pin Status is High
+        g.write('T1')
+        response = g.write('M380 V', resp_needed=True)
+        self.assertIn('Solenoid 1 Status: 1', response)
+
+        # Disable Enabled Solenoid (T1)
+        response = g.write('M381 V', resp_needed=True)
+        self.assertIn('Solenoid 1 Status: 0', response)
 
 if __name__ == '__main__':
     unittest.main()
