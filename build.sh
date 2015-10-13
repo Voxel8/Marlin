@@ -48,6 +48,7 @@ else
 fi
 
 # Generate _Version.h using Git repo info
+# Could use git describe --dirty to append this, but we have more control here
 if ! git diff-index --quiet HEAD --; then
   VERSION_MODIFIED="-modified"
 else
