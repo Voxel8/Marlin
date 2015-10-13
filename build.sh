@@ -10,7 +10,8 @@ if [ -z "$1" ]; then
   exit 1
 fi
 if [ $1 = "upload" ]; then
-  echo "Syntax error. Please use --help for more info."
+  echo "Syntax error: The device port must be specified before the 'upload' argument."
+  echo "Please use --help for more info."
   exit 1
 elif [ $1 = "verify" ]; then
   PORT_ARG=""
@@ -25,7 +26,7 @@ elif [ $1 = "--help" ] && [ -z "$2" ]; then
   exit 1
 elif [ $1 = "--help" ] && [ ! -z "$2" ]; then
   if [ $2 = "port" ]; then
-    echo "This is the port of the device in which the sketch will be uploaded to. Can be emitted if just verifying."
+    echo "This is the port of the device in which the sketch will be uploaded to. Can be omitted if just verifying."
   elif [ $2 = "verify" ]; then
     echo "Specifying this argument will only compile the script. No uploading will be done."
   elif [ $2 = "upload" ]; then
@@ -41,7 +42,7 @@ else
   elif [ $2 = "verify" ] || [ $2 = "upload" ]; then
     COMMAND="--$2"
   else
-    echo "Syntax error. Please use --help for more info."
+    echo "Invalid argument. Please use --help for more info."
     exit 1
   fi   
 fi
