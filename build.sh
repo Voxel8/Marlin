@@ -72,12 +72,15 @@ echo "#define STRING_DISTRIBUTION_DATE" `date '+"%Y-%m-%d %H:%M"'` >>"$OUTFILE"
     BRANCH=" $BRANCH"
   fi
   VERSION=`git describe --tags --first-parent 2>/dev/null`
+  VERSION_NUM=`git describe --tags --abbrev=0`
   BRANCH=$(echo $BRANCH | sed 's/\//\\\//g')
   if [ "x$VERSION" != "x" ] ; then
+    echo "#define BUILD_VERSION_NUMERIC \"$VERSION_NUM\"" >>"$OUTFILE"
     echo "#define SHORT_BUILD_VERSION \"$VERSION\"" | sed "s/-.*/ $BRANCH$VERSION_MODIFIED\"/" >>"$OUTFILE"
     echo "#define DETAILED_BUILD_VERSION \"$VERSION$VERSION_MODIFIED\"" | sed "s/-/ $BRANCH-/" >>"$OUTFILE"
   else
     VERSION=`git describe --tags --first-parent --always 2>/dev/null`
+    echo "#define BUILD_VERSION_NUMERIC \"$VERSION_NUM\"" >>"$OUTFILE"
     echo "#define SHORT_BUILD_VERSION \"$BRANCH$VERSION_MODIFIED\"" >>"$OUTFILE"
     echo "#define DETAILED_BUILD_VERSION \"${BRANCH}-$VERSION$VERSION_MODIFIED\"" >>"$OUTFILE"
   fi
