@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
 import unittest
-import sys
 import argparse
 import numpy as np
 from mecode import G

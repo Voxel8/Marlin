@@ -1,6 +1,6 @@
 #!/bin/bash
 # Correct Syntax: ./build.sh [port [*upload | verify]]
-set -eu
+set -e
 HERE=$(pwd)
 VERSION='Voxel8 Marlin Build Script v1.0'
 
