@@ -2,17 +2,16 @@
 
 import unittest
 import sys
-from optparse import OptionParser
+import argparse
 import numpy as np
 from mecode import G
 
-parser = OptionParser()
-parser.add_option("-p", "--port", dest="com_port",
-                  help="Device port value", metavar="PORT")
+parser = argparse.ArgumentParser()
+parser.add_argument("-p", "--port", dest="com_port",
+                    help="Device port value", metavar="PORT")
+args = parser.parse_args()
 
-(options, args) = parser.parse_args()
-
-if not options.com_port:
+if not args.com_port:
     parser.error('Port not given')
 
 g = G(
@@ -21,7 +20,7 @@ g = G(
     direct_write=True,
     direct_write_mode='serial',
     #printer_port="/dev/tty.usbmodem1411",
-    printer_port=options.com_port,
+    printer_port=args.com_port,
 )
 
 
