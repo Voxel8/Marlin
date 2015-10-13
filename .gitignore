@@ -1,6 +1,6 @@
 // Our automatic versioning scheme generates the following file
 // NEVER put it in the repository
-Marlin/_Version.h
+_Version.h
 
 // All of the following OS, IDE and compiler generated file
 // references should be moved from this file
