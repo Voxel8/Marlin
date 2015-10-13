@@ -102,10 +102,10 @@ echo ""
 
 case "$(uname -s)"
   in Darwin)
-    ARDUINO_EXEC="/Applications/Arduino.app $COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
+    ARDUINO_EXEC="/Applications/Arduino.app/Contents/MacOS/Arduino $COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
   ;; Linux)
-    echo 'Linux'
+    # Future support for Linux
   ;; CYGWIN*)
     CYGHERE="$(cygpath -aw $(pwd))"
     ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
