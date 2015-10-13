@@ -6,9 +6,9 @@ import argparse
 import numpy as np
 from mecode import G
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-p", "--port", dest="com_port",
-                    help="Device port value", metavar="PORT")
+parser = argparse.ArgumentParser(description='Voxel8 Test Suite')
+parser.add_argument("com_port", help="Device port value",
+                    metavar="PORT")
 args = parser.parse_args()
 
 if not args.com_port:
