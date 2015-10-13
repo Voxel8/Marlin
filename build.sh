@@ -1,5 +1,6 @@
 #!/bin/bash
 # Correct Syntax: ./build.sh [port [*upload | verify]]
+set -eu
 HERE=$(pwd)
 VERSION='Voxel8 Marlin Build Script v1.0'
 
@@ -62,7 +63,6 @@ echo "" >>"$OUTFILE"
 echo "#define BUILD_UNIX_DATETIME" `date +%s` >>"$OUTFILE"
 echo "#define STRING_DISTRIBUTION_DATE" `date '+"%Y-%m-%d %H:%M"'` >>"$OUTFILE"
 ( set +e
-  cd "$DIR"
   BRANCH=`git symbolic-ref -q --short HEAD`
   if [ "x$BRANCH" == "x" ] ; then
     BRANCH=""
@@ -90,7 +90,7 @@ echo "#define STRING_DISTRIBUTION_DATE" `date '+"%Y-%m-%d %H:%M"'` >>"$OUTFILE"
 # If /build/ exists, remove.
 if [ -d "$HERE/build/" ]; then
   echo "Build directory exists, removing..."
-  eval "rm -rf \"$HERE/build/\""
+  rm -rf $HERE/build/
 fi
 
 echo $VERSION
@@ -115,16 +115,16 @@ esac
 
 # Prepare for build by copying in RAMBo boards.txt and pins files
 
-if [ -d "$ARDUINO_DEP/variants/rambo" ]; then
+if [ -d "$ARDUINO_DEP/variants/rambo" ] && [ ! -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
   eval "mv \"$ARDUINO_DEP/variants/rambo/\" \"$ARDUINO_DEP/variants/rambo_backup/\""
 fi
 # Even if a user doesn't have a rambo folder, they should have a boards.txt
-eval "mv \"$ARDUINO_DEP/boards.txt\" \"$ARDUINO_DEP/boards_backup.txt\""
-eval "cp \"$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/boards.txt\" \"$ARDUINO_DEP/\""
-eval "cp -r \"$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/\" \"$ARDUINO_DEP/variants/rambo/\""
+mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
+cp "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/boards.txt" "$ARDUINO_DEP/"
+cp -r "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/" "$ARDUINO_DEP/variants/rambo/"
 
 # Create the build directory
-eval "mkdir \"$HERE/build/\""
+mkdir "$HERE/build/"
 eval $ARDUINO_EXEC
 case "$?" in
   0) echo "The action has been performed successfully."
@@ -142,8 +142,8 @@ esac
 # Clean Up
 rm -rf ./build/
 if [ -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
-  eval "rm \"$ARDUINO_DEP/boards.txt\""
-  eval "rm -rf \"$ARDUINO_DEP/variants/rambo/\""
-  eval "mv \"$ARDUINO_DEP/boards_backup.txt\" \"$ARDUINO_DEP/boards.txt\""
-  eval "mv \"$ARDUINO_DEP/variants/rambo_backup/\" \"$ARDUINO_DEP/variants/rambo/\""
+  rm "$ARDUINO_DEP/boards.txt"
+  rm -rf "$ARDUINO_DEP/variants/rambo/"
+  mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
+  mv "$ARDUINO_DEP/variants/rambo_backup/" "$ARDUINO_DEP/variants/rambo/"
 fi
