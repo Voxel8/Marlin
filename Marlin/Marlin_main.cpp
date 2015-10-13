@@ -1434,7 +1434,7 @@ static void setup_for_endstop_move() {
   inline void do_blocking_move_to_z(float z) { do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], z); }
   inline void raise_z_after_probing() { do_blocking_move_to_z(current_position[Z_AXIS] + Z_RAISE_AFTER_PROBING); }
 
-  #ifdef EXT_ADC
+  #if ENABLED(EXT_ADC)
     /*
      * Bed leveling probe - returns a uint16_t with ADC height value
      */
@@ -5083,7 +5083,7 @@ inline void gcode_M226() {
   }
 #endif
 
-#ifdef EXT_ADC
+#if ENABLED(EXT_ADC)
   /*
   * M238 - Return ADC value from laser sensor (get distance)
   */
