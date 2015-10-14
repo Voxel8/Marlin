@@ -107,8 +107,6 @@ case "$(uname -s)"
     ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
   ;; Linux)
     # Future support for Linux
-    echo "Linux machine detected"
-    exit 1
   ;; CYGWIN*)
     CYGHERE="$(cygpath -aw $(pwd))"
     ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
