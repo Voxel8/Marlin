@@ -670,10 +670,11 @@ void setup() {
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
   
-  pinMode(CART1_SIG2_PIN, OUTPUT);
-  digitalWrite(CART1_SIG2_PIN, LOW);
+  // Turn on all chassis fans
   pinMode(FAN_CHASSIS_BOT_PIN, OUTPUT);
   digitalWrite(FAN_CHASSIS_BOT_PIN, HIGH);
+  pinMode(FAN_CHASSIS_TOP_PIN, OUTPUT);
+  digitalWrite(FAN_CHASSIS_TOP_PIN, HIGH);
 
   // Check startup - does nothing if bootloader sets MCUSR to 0
   byte mcu = MCUSR;
