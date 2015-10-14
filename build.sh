@@ -111,7 +111,7 @@ case "$(uname -s)"
     CYGHERE="$(cygpath -aw $(pwd))"
     ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
-  ;;MINGW32*|MSYS*)
+  ;;MINGW32*|MINGW64*|MSYS*)
     ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;; *)
@@ -121,10 +121,12 @@ esac
 # Prepare for build by copying in RAMBo boards.txt and pins files
 
 if [ -d "$ARDUINO_DEP/variants/rambo" ] && [ ! -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
-  eval "mv \"$ARDUINO_DEP/variants/rambo/\" \"$ARDUINO_DEP/variants/rambo_backup/\""
+  mv "$ARDUINO_DEP/variants/rambo/" "$ARDUINO_DEP/variants/rambo_backup/"
 fi
 # Even if a user doesn't have a rambo folder, they should have a boards.txt
-mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
+if [ -f "$ARDUINO_DEP/boards.txt" ]; then
+  mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
+fi
 cp "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/boards.txt" "$ARDUINO_DEP/"
 cp -r "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/" "$ARDUINO_DEP/variants/rambo/"
 
@@ -147,8 +149,10 @@ esac
 # Clean Up
 rm -rf ./build/
 if [ -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
-  rm "$ARDUINO_DEP/boards.txt"
   rm -rf "$ARDUINO_DEP/variants/rambo/"
-  mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
   mv "$ARDUINO_DEP/variants/rambo_backup/" "$ARDUINO_DEP/variants/rambo/"
+fi
+if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
+  rm "$ARDUINO_DEP/boards.txt"
+  mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
 fi
