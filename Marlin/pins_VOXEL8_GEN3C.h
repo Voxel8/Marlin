@@ -78,19 +78,19 @@ DIGITAL POTENTIOMETER PINS
 /*************************
     CARTRIDGE PINS
 *************************/
-#define CART0_SIG1_PIN          5   // PWM Capable
-#define CART0_SIG2_PIN          46  // PWM Capable
-#define CART0_SIG3_PIN          74  // 
-#define CART1_SIG1_PIN          45  // PWM Capable
-#define CART1_SIG2_PIN          75  // Interrupt Capable
-#define CART1_SIG3_PIN          85
+#define CART0_SIG0_PIN          5   // PWM Capable
+#define CART0_SIG1_PIN          46  // PWM Capable
+#define CART0_SIG2_PIN          74
+#define CART1_SIG0_PIN          45  // PWM Capable
+#define CART1_SIG1_PIN          75  // Interrupt Capable
+#define CART1_SIG2_PIN          85
 
 /*************************
 	     FFF PINS
 *************************/
 
-#define HEATER_0_PIN            CART0_SIG1_PIN
-#define HEATER_1_PIN            -1 // Set to CART1_SIG1_PIN to use FFF in CART1
+#define HEATER_0_PIN            CART0_SIG0_PIN
+#define HEATER_1_PIN            -1 // Set to CART1_SIG0_PIN to use FFF in CART1
 
 /*************************
   TEMPERATURE SENSE PINS
@@ -112,8 +112,8 @@ DIGITAL POTENTIOMETER PINS
 /*************************
     SOLENOID PINS
 *************************/
-#define SOL0_PIN                -1 // Set to CART0_SIG1_PIN for pneumatics in CART0
-#define SOL1_PIN                CART1_SIG1_PIN
+#define SOL0_PIN                -1 // Set to CART0_SIG0_PIN for pneumatics in CART0
+#define SOL1_PIN                CART1_SIG0_PIN
 
 
 #define E0_STEP_PIN             34
@@ -135,7 +135,7 @@ DIGITAL POTENTIOMETER PINS
   Fan_2 2
 ***********************************************************/
 #define LED_PIN                 13
-#define FAN_PIN                 CART0_SIG3_PIN  // FFF fan toggle
+#define FAN_PIN                 CART0_SIG2_PIN  // FFF fan toggle
 #define FAN_CHASSIS_TOP_PIN     2
 #define FAN_CHASSIS_BOT_PIN     44
 
