@@ -5445,7 +5445,20 @@ inline void gcode_M303() {
    */
   inline void gcode_M380() { 
     int8_t current_solenoid_pin = -1;
-    switch(active_extruder) {
+    uint8_t tool = active_extruder;
+    // Tool number provided
+    if (code_seen('T')) {
+      tool = code_value();
+      if (tool > EXTRUDERS) {
+        SERIAL_ECHO_START;
+        SERIAL_CHAR('T');
+        SERIAL_PROTOCOL_F(tool, DEC);
+        SERIAL_PROTOCOLPGM(" ");
+        SERIAL_ECHOLN(MSG_INVALID_SOLENOID);
+        return;
+      }
+    }
+    switch(tool) {
       #if HAS_SOLENOID_0
         case 0:
           OUT_WRITE(SOL0_PIN, HIGH);
@@ -5458,8 +5471,12 @@ inline void gcode_M303() {
           current_solenoid_pin = SOL1_PIN;
           break;
       #endif
+      // Invalid Tool Number
       default:
         SERIAL_ECHO_START;
+        SERIAL_CHAR('T');
+        SERIAL_PROTOCOL_F(tool, DEC);
+        SERIAL_PROTOCOLPGM(" ");
         SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
         break;
     }
@@ -5468,7 +5485,7 @@ inline void gcode_M303() {
       if (current_solenoid_pin != -1) {
         bool pin_status = digitalRead(current_solenoid_pin);
         SERIAL_PROTOCOLPGM("Solenoid ");
-        SERIAL_PROTOCOL_F(active_extruder, DEC);
+        SERIAL_PROTOCOL_F(tool, DEC);
         SERIAL_PROTOCOLPGM(" Status: ");
         SERIAL_PROTOCOLLN(pin_status);
       }
