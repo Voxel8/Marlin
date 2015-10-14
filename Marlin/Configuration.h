@@ -38,6 +38,8 @@ Here are some standard links for getting your machine calibrated:
 
 // @section info
 
+#define USE_AUTOMATIC_VERSIONING 1
+
 #if ENABLED(USE_AUTOMATIC_VERSIONING)
   #include "_Version.h"
 #else

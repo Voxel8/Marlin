@@ -20,3 +20,5 @@ Marlin/Debug/
 Marlin/Visual Micro/
 Marlin/Marlin.cppproj
 Marlin/Marlin.atsuo
+
+build/
