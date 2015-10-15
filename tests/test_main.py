@@ -87,7 +87,7 @@ class MarlinTestCase(unittest.TestCase):
         self.assertIn('Solenoid 1 Status: 1', response)
 
         # Assert T Parameter of T0 invokes error
-        response = g.write('M380 T0 V')
+        response = g.write('M380 T0 V', resp_needed=True)
         self.assertIn('T0 Invalid solenoid', response)
         g.write('M381')
 
