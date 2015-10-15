@@ -37,7 +37,7 @@ class MarlinTestCase(unittest.TestCase):
         for i in range(cycles):
             g.move(Z=1)
             g.write('G28')
-            g.write('M237')
+            g.write('G29')
             g.write('G1 F9000')
             for j, location in enumerate(measurement_locations):
                 print ".",
@@ -47,6 +47,9 @@ class MarlinTestCase(unittest.TestCase):
             stdev = np.std(measurements)
             msg = 'Bed level standard deviation was larger than 15 microns'
             self.assertLess(stdev, 15, msg)
+
+        # Home printer after M237 test
+        g.write('G28')
 
     def test_M218(self):
         # Assert offset echoed correctly
