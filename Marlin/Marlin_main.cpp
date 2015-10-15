@@ -5449,14 +5449,6 @@ inline void gcode_M303() {
     // Tool number provided
     if (code_seen('T')) {
       tool = code_value();
-      if (tool > EXTRUDERS) {
-        SERIAL_ECHO_START;
-        SERIAL_CHAR('T');
-        SERIAL_PROTOCOL_F(tool, DEC);
-        SERIAL_PROTOCOLPGM(" ");
-        SERIAL_ECHOLN(MSG_INVALID_SOLENOID);
-        return;
-      }
     }
     switch(tool) {
       #if HAS_SOLENOID_0
