@@ -1350,6 +1350,10 @@ void disable_all_heaters() {
       WRITE(PNEUMATIC_PUMP_PIN, LOW);
     #endif
   #endif
+
+  #if (HAS_SOLENOID_0 || HAS_SOLENOID_1)
+    disable_all_solenoids();
+  #endif
 }
 
 #if ENABLED(HEATER_0_USES_MAX6675)

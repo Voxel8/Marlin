@@ -355,6 +355,10 @@ extern uint8_t active_extruder;
   extern void digipot_i2c_init();
 #endif
 
+#if ENABLED(PNEUMATICS)
+  void disable_all_solenoids(void);
+#endif
+
 extern void calculate_volumetric_multipliers();
 
 #endif //MARLIN_H

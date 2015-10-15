@@ -11,7 +11,7 @@ g = G(
     direct_write=True,
     direct_write_mode='serial',
     #printer_port="/dev/tty.usbmodem1411",
-    printer_port="COM5",
+    printer_port="COM14",
 )
 
 def read_profilometer(samples=1):
@@ -65,6 +65,39 @@ class MarlinTestCase(unittest.TestCase):
         # Reset Offset Values and state
         g.write('M218 T1 X0 Y0 Z0')
         g.write('T0')
+
+    def test_M380(self):
+        # Assert Solenoid 0 Is Invalid if Active Extruder is 0
+        g.write('T0')
+        response = g.write('M380 V', resp_needed=True)
+        self.assertIn('Invalid solenoid', response)
+        
+        # Assert Solenoid 1 Pin Status is High if Active Extruder is 1
+        g.write('T1')
+        response = g.write('M380 V', resp_needed=True)
+        self.assertIn('Solenoid 1 Status: 1', response)
+
+        # Assert Enabled Solenoid (T1) is disabled with M381
+        response = g.write('M381 V', resp_needed=True)
+        self.assertIn('Solenoid 1 Status: 0', response)
+        g.write('T0')
+
+        # Assert T Parameter of T1 enables Solenoid 1
+        response = g.write('M380 T1 V', resp_needed=True)
+        self.assertIn('Solenoid 1 Status: 1', response)
+
+        # Assert T Parameter of T0 invokes error
+        response = g.write('M380 T0 V', resp_needed=True)
+        self.assertIn('T0 Invalid solenoid', response)
+        g.write('M381')
+
+        # Assert T Parameter of T2 invokes error (tool > extruder)
+        response = g.write('M380 T2 V', resp_needed=True)
+        self.assertIn('T2 Invalid solenoid', response)
+
+        # Explicitly reset tool and solenoid status
+        g.write('T0')
+        g.write('M381')
 
 if __name__ == '__main__':
     unittest.main()

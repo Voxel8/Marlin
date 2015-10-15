@@ -670,10 +670,11 @@ void setup() {
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
   
-  pinMode(CART1_SIG2_PIN, OUTPUT);
-  digitalWrite(CART1_SIG2_PIN, LOW);
+  // Turn on all chassis fans
   pinMode(FAN_CHASSIS_BOT_PIN, OUTPUT);
   digitalWrite(FAN_CHASSIS_BOT_PIN, HIGH);
+  pinMode(FAN_CHASSIS_TOP_PIN, OUTPUT);
+  digitalWrite(FAN_CHASSIS_TOP_PIN, HIGH);
 
   // Check startup - does nothing if bootloader sets MCUSR to 0
   byte mcu = MCUSR;
@@ -5428,55 +5429,82 @@ inline void gcode_M303() {
 
 #endif // SCARA
 
-#if ENABLED(EXT_SOLENOID)
-
-  void enable_solenoid(uint8_t num) {
-    switch(num) {
-      case 0:
-        OUT_WRITE(SOL0_PIN, HIGH);
-        break;
-        #if HAS_SOLENOID_1
-          case 1:
-            OUT_WRITE(SOL1_PIN, HIGH);
-            break;
-        #endif
-        #if HAS_SOLENOID_2
-          case 2:
-            OUT_WRITE(SOL2_PIN, HIGH);
-            break;
-        #endif
-        #if HAS_SOLENOID_3
-          case 3:
-            OUT_WRITE(SOL3_PIN, HIGH);
-            break;
-        #endif
-      default:
-        SERIAL_ECHO_START;
-        SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
-        break;
-    }
-  }
-
-  void enable_solenoid_on_active_extruder() { enable_solenoid(active_extruder); }
+#if ENABLED(PNEUMATICS)
 
   void disable_all_solenoids() {
-    OUT_WRITE(SOL0_PIN, LOW);
-    OUT_WRITE(SOL1_PIN, LOW);
-    OUT_WRITE(SOL2_PIN, LOW);
-    OUT_WRITE(SOL3_PIN, LOW);
+    #if HAS_SOLENOID_0
+      OUT_WRITE(SOL0_PIN, LOW);
+    #endif
+    #if HAS_SOLENOID_1
+      OUT_WRITE(SOL1_PIN, LOW);
+    #endif
   }
 
   /**
    * M380: Enable solenoid on the active extruder
    */
-  inline void gcode_M380() { enable_solenoid_on_active_extruder(); }
+  inline void gcode_M380() { 
+    int8_t current_solenoid_pin = -1;
+    uint8_t tool = active_extruder;
+    // Tool number provided
+    if (code_seen('T')) {
+      tool = code_value();
+    }
+    switch(tool) {
+      #if HAS_SOLENOID_0
+        case 0:
+          OUT_WRITE(SOL0_PIN, HIGH);
+          current_solenoid_pin = SOL0_PIN;
+          break;
+      #endif
+      #if HAS_SOLENOID_1
+        case 1:
+          OUT_WRITE(SOL1_PIN, HIGH);
+          current_solenoid_pin = SOL1_PIN;
+          break;
+      #endif
+      // Invalid Tool Number
+      default:
+        SERIAL_ECHO_START;
+        SERIAL_CHAR('T');
+        SERIAL_PROTOCOL_F(tool, DEC);
+        SERIAL_PROTOCOLPGM(" ");
+        SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
+        break;
+    }
+    // Verbosity Handling
+    if (code_seen('V')) {
+      if (current_solenoid_pin != -1) {
+        bool pin_status = digitalRead(current_solenoid_pin);
+        SERIAL_PROTOCOLPGM("Solenoid ");
+        SERIAL_PROTOCOL_F(tool, DEC);
+        SERIAL_PROTOCOLPGM(" Status: ");
+        SERIAL_PROTOCOLLN(pin_status);
+      }
+    }
+  }
 
   /**
    * M381: Disable all solenoids
    */
-  inline void gcode_M381() { disable_all_solenoids(); }
+  inline void gcode_M381() {
+    disable_all_solenoids();
+    if (code_seen('V')) {
+      bool pin_status;
+      #if HAS_SOLENOID_0
+        pin_status = digitalRead(SOL0_PIN);
+        SERIAL_PROTOCOLPGM("Solenoid 0 Status: ");
+        SERIAL_PROTOCOLLN(pin_status);
+      #endif
+      #if HAS_SOLENOID_1
+        pin_status = digitalRead(SOL1_PIN);
+        SERIAL_PROTOCOLPGM("Solenoid 1 Status: ");
+        SERIAL_PROTOCOLLN(pin_status);
+      #endif
+    }
+  }
 
-#endif // EXT_SOLENOID
+#endif // PNEUMATICS
 
 /**
   M399: Pause command
@@ -6617,6 +6645,15 @@ void process_next_command() {
           gcode_M365();
           break;
       #endif // SCARA
+
+      #if ENABLED(PNEUMATICS)
+        case 380: // M380 Enable solenoid on the active extruder
+          gcode_M380();
+          break;
+        case 381: // M381 Disable all solenoids
+          gcode_M381();
+          break;
+      #endif
 
       case 399: // M399 Pause command
         gcode_M399();

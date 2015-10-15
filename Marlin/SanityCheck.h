@@ -309,12 +309,14 @@
   #endif
 
   #if EXTRUDERS > 1 || ENABLED(HEATERS_PARALLEL)
-    #if !HAS_HEATER_1
+    // Pneumatics do not require a heater
+    #if (!HAS_HEATER_1 && DISABLED(PNEUMATICS))
       #error HEATER_1_PIN not defined for this board.
     #endif
   #endif
 
   #if TEMP_SENSOR_1 == 0
+   // Pneumatics do not require a temp sensor
     #if (EXTRUDERS > 1 && DISABLED(PNEUMATICS))
       #error TEMP_SENSOR_1 is required with 2 or more EXTRUDERS.
     #elif ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
