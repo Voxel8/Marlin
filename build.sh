@@ -115,7 +115,7 @@ case "$(uname -s)"
   ;; Linux)
     ARDUINO_DEP="/usr/share/arduino/hardware/arduino/"
     ARDUINO_EXEC_COMPILE="ino build -m mega2560"
-    ARDUINO_EXEC_UPLOAD="/usr/share/arduino/hardware/tools/avrdude -C /usr/share/arduino/hardware/tools/avrdude.conf -U flash:w:firmware.hex:i -v -p atmega2560 -b 115200 -c stk500v2 -P $PORT -D"
+    ARDUINO_EXEC_UPLOAD="/usr/share/arduino/hardware/tools/avrdude -C /usr/share/arduino/hardware/tools/avrdude.conf -U flash:w:firmware.hex:i -v -p atmega2560 -b 115200 -c stk500v2 -D"
   ;; CYGWIN*)
     CYGHERE="$(cygpath -aw $(pwd))"
     ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
