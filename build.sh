@@ -36,15 +36,20 @@ elif [ $1 = "--help" ] && [ ! -z "$2" ]; then
   fi
   exit 1
 else
-  PORT_ARG="--port $1"
-  if [ -z "$2" ]; then
-    COMMAND="--upload"
-  elif [ $2 = "verify" ] || [ $2 = "upload" ]; then
-    COMMAND="--$2"
-  else
-    echo "Invalid argument. Please use --help for more info."
-    exit 1
-  fi   
+  case "$(uname -s)"
+    in Linux)
+      PORT="-P $1"
+    ;; *)
+      PORT_ARG="--port $1"
+      if [ -z "$2" ]; then
+        COMMAND="--upload"
+      elif [ $2 = "verify" ] || [ $2 = "upload" ]; then
+        COMMAND="--$2"
+      else
+        echo "Invalid argument. Please use --help for more info."
+        exit 1
+      fi   
+  esac
 fi
 
 # Generate _Version.h using Git repo info
@@ -93,9 +98,11 @@ echo "#define STRING_DISTRIBUTION_DATE" `date '+"%Y-%m-%d %H:%M"'` >>"$OUTFILE"
 )
 
 # If /build/ exists, remove.
-if [ -d "$HERE/build/" ]; then
-  echo "Build directory exists, removing..."
-  rm -rf $HERE/build/
+if [ ! "$(uname -s)" = "Linux" ]; then
+  if [ -d "$HERE/build/" ]; then
+    echo "Build directory exists, removing..."
+    rm -rf $HERE/build/
+  fi
 fi
 
 echo $VERSION
@@ -106,7 +113,9 @@ case "$(uname -s)"
     ARDUINO_EXEC="/Applications/Arduino.app/Contents/MacOS/Arduino $COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
   ;; Linux)
-    # Future support for Linux
+    ARDUINO_DEP="/usr/share/arduino/hardware/arduino/"
+    ARDUINO_EXEC_COMPILE="ino build -m mega2560"
+    ARDUINO_EXEC_UPLOAD="/usr/share/arduino/hardware/tools/avrdude -C /usr/share/arduino/hardware/tools/avrdude.conf -U flash:w:firmware.hex:i -v -p atmega2560 -b 115200 -c stk500v2 -P $PORT -D"
   ;; CYGWIN*)
     CYGHERE="$(cygpath -aw $(pwd))"
     ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
@@ -119,20 +128,39 @@ case "$(uname -s)"
 esac
 
 # Prepare for build by copying in RAMBo boards.txt and pins files
-
-if [ -d "$ARDUINO_DEP/variants/rambo" ] && [ ! -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
-  mv "$ARDUINO_DEP/variants/rambo/" "$ARDUINO_DEP/variants/rambo_backup/"
+if [ ! "$(uname -s)" = "Linux" ]; then
+  if [ -d "$ARDUINO_DEP/variants/rambo" ] && [ ! -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
+    mv "$ARDUINO_DEP/variants/rambo/" "$ARDUINO_DEP/variants/rambo_backup/"
+  fi
+  # Even if a user doesn't have a rambo folder, they should have a boards.txt
+  if [ -f "$ARDUINO_DEP/boards.txt" ]; then
+    mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
+  fi
+  cp "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/boards.txt" "$ARDUINO_DEP/"
+  cp -r "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/" "$ARDUINO_DEP/variants/rambo/"
+else
+  if [ -d "$ARDUINO_DEP/variants/standard" ] && [ ! -d "$ARDUINO_DEP/variants/standard_backup" ]; then
+    sudo mv "$ARDUINO_DEP/variants/standard/" "$ARDUINO_DEP/variants/standard_backup/"
+  fi
+  if [ -f "$ARDUINO_DEP/boards.txt" ]; then
+    sudo mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
+  fi
+  sudo cp "$HERE/ArduinoAddons/Arduino_1.0.x/hardware/rambo/boards.txt" "$ARDUINO_DEP/"
+  sudo cp -r "$HERE/ArduinoAddons/Arduino_1.0.x/hardware/rambo/variants/standard/" "$ARDUINO_DEP/variants/standard/"
 fi
-# Even if a user doesn't have a rambo folder, they should have a boards.txt
-if [ -f "$ARDUINO_DEP/boards.txt" ]; then
-  mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
-fi
-cp "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/boards.txt" "$ARDUINO_DEP/"
-cp -r "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/" "$ARDUINO_DEP/variants/rambo/"
 
 # Create the build directory
-mkdir "$HERE/build/"
-eval $ARDUINO_EXEC
+if [ ! "$(uname -s)" = "Linux" ]; then
+  mkdir "$HERE/build/"
+  eval $ARDUINO_EXEC
+else
+  #TODO ADD IF CHECK FOR VS VERIFY OR VERIFY AND BUILD
+  eval $ARDUINO_EXEC_COMPILE
+  if [ ! $1 = "verify" ]; then
+    cd .build/mega2560/
+    eval $ARDUINO_EXEC_UPLOAD
+  fi
+fi
 case "$?" in
   0) echo "The action has been performed successfully."
   ;;
@@ -147,12 +175,23 @@ case "$?" in
 esac
 
 # Clean Up
-rm -rf ./build/
-if [ -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
-  rm -rf "$ARDUINO_DEP/variants/rambo/"
-  mv "$ARDUINO_DEP/variants/rambo_backup/" "$ARDUINO_DEP/variants/rambo/"
-fi
-if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
-  rm "$ARDUINO_DEP/boards.txt"
-  mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
+if [ ! "$(uname -s)" = "Linux" ]; then
+  rm -rf ./build/
+  if [ -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
+    rm -rf "$ARDUINO_DEP/variants/rambo/"
+    mv "$ARDUINO_DEP/variants/rambo_backup/" "$ARDUINO_DEP/variants/rambo/"
+  fi
+  if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
+    rm "$ARDUINO_DEP/boards.txt"
+    mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
+  fi
+else 
+  if [ -d "$ARDUINO_DEP/variants/standard_backup" ]; then
+    sudo rm -rf "$ARDUINO_DEP/variants/standard/"
+    sudo mv "$ARDUINO_DEP/variants/standard_backup/" "$ARDUINO_DEP/variants/standard/"
+  fi
+  if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
+    sudo rm "$ARDUINO_DEP/boards.txt"
+    sudo mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
+  fi
 fi
