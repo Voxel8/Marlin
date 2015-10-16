@@ -36,7 +36,7 @@
   #define THERMAL_PROTECTION_BED_HYSTERESIS 10// Degrees Celsius
 #endif
 
-#define TEMP_ERROR_INTERVAL 100       //ms between temp error checks
+#define TEMP_ERROR_INTERVAL 500       //ms between temp error checks
 #define TEMP_BED_ERROR_INTERVAL 1000
 
 #if ENABLED(PIDTEMP)
