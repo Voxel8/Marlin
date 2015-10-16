@@ -5035,8 +5035,8 @@ inline void gcode_M226() {
       #ifdef DELTA
         reset_bed_level();
       #else
-        vector_3 corrected_position = plan_get_position_mm();
-        if (verbose_level > 3) corrected_position.debug("position before M237");
+        //vector_3 corrected_position = plan_get_position_mm();
+        //if (verbose_level > 3) corrected_position.debug("position before M237");
         vector_3 uncorrected_position = plan_get_position();
         if (verbose_level > 3) uncorrected_position.debug("position during M237");
         
@@ -6244,8 +6244,8 @@ void process_next_command() {
       #if ENABLED(AUTO_BED_LEVELING_FEATURE) || ENABLED(MESH_BED_LEVELING)
         case 29: // Auto bed leveling
           #if ENABLED(EXT_ADC) 
-            //gcode_M237(); // M237: Auto bed leveling function using profilometer data
-            gcode_G29();
+            gcode_M237(); // M237: Auto bed leveling function using profilometer data
+            //gcode_G29();
           #else
             gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more points
           #endif
