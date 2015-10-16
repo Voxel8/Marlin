@@ -372,23 +372,6 @@ Here are some standard links for getting your machine calibrated:
 // Define this if you are using pneumatic direct write on the RAMBo AND you are not
 // using HEAT_1 output
 #define PNEUMATICS
-// Define this if you are using the electro-pneumatic regulator
-#define E_REGULATOR
-
-#ifdef E_REGULATOR
- // Set E-regulator Sensor Type HERE:
- // ---------------------------------
- // 0 - No Pressure Sensor Used
- // 1 - Built-in Pressure Transducer (ITV0050-2UL)
-
-  #define E_REGULATOR_SENSOR 1
-  #define DAC_I2C
- // 130 psi is max settable pressure for e-regulator
-  #define OUTPUT_PSI_MAX     130.0 
-  #define OUTPUT_PSI_MIN       0.0
-#endif
-
-#ifdef PNEUMATICS
 
 // Set Pressure Sensor Type HERE:
 // -----------------------------
@@ -396,17 +379,35 @@ Here are some standard links for getting your machine calibrated:
 // 1 - Kavlico P255-50G-D1A
 // 2 - American Sensor Tech. 4100 Series (1-5V output)
 // 3 - Pressure Transmitter PT1200-1/4NPT (1-5V output)
+#define PNEUMATIC_SENSOR 3
 
-  #define PNEUMATIC_SENSOR 3
+// 0 is a valid pressure reading
+#define PNEUMATIC_MIN -1
 
-  // 0 is a valid pressure reading
-  #define PNEUMATIC_MIN -1
-  
-  // If the pressure goes above this value the pump will be turned off. This prevents
-  // the tank from being overpressurized. This value has units of PSI * 10 (to eliminate
-  // floating point numbers in the lookup table).
-  #define PNEUMATIC_MAX 500
-#endif
+// If the pressure goes above this value the pump will be turned off. This prevents
+// the tank from being overpressurized. This value has units of PSI * 10 (to eliminate
+// floating point numbers in the lookup table).
+#define PNEUMATIC_MAX 500
+
+// Define this if you are using the MCP4725 DAC
+#define DAC_I2C
+
+#if ENABLED(PNEUMATICS) && ENABLED(DAC_I2C)
+
+  // Define this if you are using the electro-pneumatic regulator
+  #define E_REGULATOR
+
+  #if ENABLED(E_REGULATOR)
+    // Set E-regulator Sensor Type HERE:
+    // ---------------------------------
+    // 0 - No Pressure Sensor Used
+    // 1 - Built-in Pressure Transducer (ITV0050-2UL)
+    #define E_REGULATOR_SENSOR 1
+    // 130 psi is max settable pressure for e-regulator
+    #define OUTPUT_PSI_MAX     130.0
+    #define OUTPUT_PSI_MIN       0.0
+  #endif // E_REGULATOR
+#endif // PNEUMATICS && DAC_I2C
 
 //===========================================================================
 //============================= Mechanical Settings =========================
