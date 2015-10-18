@@ -237,6 +237,8 @@
  * ************ Custom codes - This can change to suit future G-code regulations
  * M100 - Watch Free Memory (For Debugging Only)
  * M851 - Set Z probe's Z offset (mm above extruder -- The value will always be negative)
+                                     *
+ * M852 - Automaticaly adjust the Z probe's Z offset so that the current position is set to 0.
 
 
  * M928 - Start SD logging (M928 filename.g) - ended by M29
@@ -5952,6 +5954,29 @@ inline void gcode_M503() {
 
 #endif // DUAL_X_CARRIAGE
 
+/*
+* M852 - Set new bed zero point. This mcode modifies the zprobe offset to make
+*        the current position 0 after homing. The new offset is stored in
+*        EEPROM.
+*
+* Optional arguments:
+*
+*   Z - How high off the bed in mm you are asserting the hotend is.
+*   V - Verbose mode (echo the new zprobe offset)
+*/
+inline void gcode_M852() {
+  // additional_offset is how high off the bed you are asserting you are
+  float additional_offset = code_seen('Z') ? code_value() : 0;
+  zprobe_zoffset += (current_position[Z_AXIS] - additional_offset);
+  current_position[Z_AXIS] = 0;
+  sync_plan_position();
+  Config_StoreSettings();
+  if (code_seen('V') {
+    SERIAL_PROTOCOLPGM("New zprobe offset: ");
+    SERIAL_PROTOCOLLN(zprobe_zoffset);
+  }
+}
+
 /**
  * M907: Set digital trimpot motor current using axis codes X, Y, Z, E, B, S
  */
@@ -6762,6 +6787,10 @@ void process_next_command() {
           break;
 
       #endif // HAS_MICROSTEPS
+
+      case 852:
+        gcode_M852(); // M852 - Set new bed zero point
+        break;
 
       case 999: // M999: Restart after being Stopped
         gcode_M999();
