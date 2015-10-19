@@ -5,28 +5,37 @@ import numpy as np
 from mecode import G
 
 
-g = G(
-    print_lines=False,
-    aerotech_include=False,
-    direct_write=True,
-    direct_write_mode='serial',
-    #printer_port="/dev/tty.usbmodem1411",
-    printer_port="COM14",
-)
-
-def read_profilometer(samples=1):
-    samples = np.floor(np.log2(samples))
-    g.write('M400')
-    prof_val = int(g.write('M235 S{}'.format(samples), resp_needed=True)[3:-1])
-    if prof_val > 10000:
-        return None
-    prof_val -= 5000
-    return prof_val
-
-
 class MarlinTestCase(unittest.TestCase):
 
+    def setUp(self):
+        self.g = G(
+            print_lines=False,
+            aerotech_include=False,
+            direct_write=True,
+            direct_write_mode='serial',
+            printer_port="/dev/tty.usbmodem1421",
+            #printer_port="COM14",
+        )
+
+    def tearDown(self):
+        # Make sure the previous test is fully finished before the next one
+        # starts.
+        self.g.write('M400', resp_needed=True)
+        self.g.teardown()
+        self.g = None
+
+    def read_profilometer(self, samples=1):
+        g = self.g
+        samples = np.floor(np.log2(samples))
+        g.write('M400')
+        prof_val = int(g.write('M235 S{}'.format(samples), resp_needed=True)[3:-1])
+        if prof_val > 10000:
+            return None
+        prof_val -= 5000
+        return prof_val
+
     def test_M237(self):
+        g = self.g
         cycles = 2
         measurement_locations = [
             (25, 60),
@@ -43,7 +52,7 @@ class MarlinTestCase(unittest.TestCase):
                 print ".",
                 g.abs_move(*location)
                 g.write('G4 P300')
-                measurements[j] = read_profilometer(samples=4)
+                measurements[j] = self.read_profilometer(samples=4)
             stdev = np.std(measurements)
             msg = 'Bed level standard deviation was larger than 15 microns'
             self.assertLess(stdev, 15, msg)
@@ -52,6 +61,7 @@ class MarlinTestCase(unittest.TestCase):
         g.write('G28')
 
     def test_M218(self):
+        g = self.g
         # Assert offset echoed correctly
         g.write('G92 X0 Y0 Z0')
         g.write('M218 T1 X10 Y10 Z10')
@@ -70,6 +80,7 @@ class MarlinTestCase(unittest.TestCase):
         g.write('T0')
 
     def test_M380(self):
+        g = self.g
         # Assert Solenoid 0 Is Invalid if Active Extruder is 0
         g.write('T0')
         response = g.write('M380 V', resp_needed=True)
@@ -103,8 +114,27 @@ class MarlinTestCase(unittest.TestCase):
         g.write('M381')
 
     def test_M852(self):
-        current_position = g.get_response('M114', resp_needed=True)
+        g = self.g
+        # Assert startup state is as expected.
+        current_position = g.write('M114', resp_needed=True)
         self.assertIn('X:0.00 Y:0.00 Z:0.00', current_position)
+        zprobe_zoffset = g.write('M851', resp_needed=True)
+        self.assertIn('-3.0', zprobe_zoffset)
+
+        # Move bed level position up 100 microns.
+        g.write('G28')
+        g.abs_move(Z=0.1)
+        resp = g.write('M852 V', resp_needed=True)
+        self.assertIn('-2.9', resp)
+
+        # Calling again from the same position should have no effect.
+        resp = g.write('M852 V', resp_needed=True)
+        self.assertIn('-2.9', resp)
+
+        # Reset state
+        g.write('M851 Z-3')
+        g.write('M500')
+        g.write('G28')
 
 
 if __name__ == '__main__':
