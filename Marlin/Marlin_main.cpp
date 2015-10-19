@@ -190,6 +190,7 @@
  * M239 - Homing and bed leveling combination
  * M240 - Trigger a camera to take a photograph
  * M241 - Dwell for a given amount of time in milliseconds (500 by default)
+ * M242 - Output a detailed version description
  * M250 - Set LCD contrast C<contrast value> (value 0..63)
  * M280 - Set servo position absolute. P: servo index, S: angle or microseconds
  * M300 - Play beep sound S<frequency Hz> P<duration ms>
@@ -5326,6 +5327,16 @@ void gcode_M241(long num_milliseconds) {
   }
 }
 
+/*
+* M242 - Output a detailed version description
+*/
+void gcode_M242() {
+  SERIAL_PROTOCOLPGM("Version: ");
+  SERIAL_PROTOCOLLN(DETAILED_BUILD_VERSION);
+  SERIAL_PROTOCOLPGM("Build date: ");
+  SERIAL_PROTOCOLLN(STRING_DISTRIBUTION_DATE);
+}
+
 #if ENABLED(HAS_LCD_CONTRAST)
 
   /**
@@ -6616,6 +6627,9 @@ void process_next_command() {
 
       case 241: // M241 - Dwell for a given amount of time in milliseconds (500 by default)
         gcode_M241();
+        break;
+      case: 242 // M242 - Output a detailed version description
+        gcode_M242();
         break;
 
       #if ENABLED(HAS_LCD_CONTRAST)
