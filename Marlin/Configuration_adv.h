@@ -18,7 +18,7 @@
  * Thermal Protection parameters
  */
 #if ENABLED(THERMAL_PROTECTION_HOTENDS)
-  #define THERMAL_PROTECTION_PERIOD 40        // Seconds
+  #define THERMAL_PROTECTION_PERIOD 100       // Seconds
   #define THERMAL_PROTECTION_HYSTERESIS 10    // Degrees Celsius
 
   /**
@@ -27,16 +27,16 @@
    * degrees, the machine is halted, requiring a hard reset. This test restarts with any M104/M109,
    * but only if the current temperature is far enough below the target for a reliable test.
    */
-  #define WATCH_TEMP_PERIOD 30                // Seconds
+  #define WATCH_TEMP_PERIOD 100               // Seconds
   #define WATCH_TEMP_INCREASE 10              // Degrees Celsius
 #endif
 
 #if ENABLED(THERMAL_PROTECTION_BED)
-  #define THERMAL_PROTECTION_BED_PERIOD 60    // Seconds
+  #define THERMAL_PROTECTION_BED_PERIOD 100   // Seconds
   #define THERMAL_PROTECTION_BED_HYSTERESIS 10// Degrees Celsius
 #endif
 
-#define TEMP_ERROR_INTERVAL 100       //ms between temp error checks
+#define TEMP_ERROR_INTERVAL 500       //ms between temp error checks
 #define TEMP_BED_ERROR_INTERVAL 1000
 
 #if ENABLED(PIDTEMP)
