@@ -2,7 +2,6 @@
 # Correct Syntax: ./build.sh [port [*upload | verify]]
 set -e
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-#HERE=$(echo $HERE | sed 's/ /\\ /g')
 VERSION='Voxel8 Marlin Build Script v1.0'
 
 # Begin build script
@@ -108,17 +107,16 @@ echo ""
 
 case "$(uname -s)"
   in Darwin)
-    ARDUINO_EXEC="/Applications/Arduino.app/Contents/MacOS/Arduino $COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
+    ARDUINO_EXEC="/Applications/Arduino.app/Contents/MacOS/Arduino $COMMAND \"$HERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
   ;; Linux)
     # Future support for Linux
   ;; CYGWIN*)
     CYGHERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cygpath -aw $(pwd) )"
-    CYGHERE=$(echo $CYGHERE | sed 's/ /\\ /g')
-    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
+    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;;MINGW32*|MINGW64*|MSYS*)
-    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$HERE/Marlin/Marlin.ino\" --pref \"build.path=$HERE/build/\" --pref board=rambo $PORT_ARG"
+    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$HERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;; *)
     echo 'This operating system is unfamiliar'
