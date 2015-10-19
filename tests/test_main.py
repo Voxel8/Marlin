@@ -74,7 +74,7 @@ class MarlinTestCase(unittest.TestCase):
         g.write('T0')
         response = g.write('M380 V', resp_needed=True)
         self.assertIn('Invalid solenoid', response)
-        
+
         # Assert Solenoid 1 Pin Status is High if Active Extruder is 1
         g.write('T1')
         response = g.write('M380 V', resp_needed=True)
@@ -101,6 +101,11 @@ class MarlinTestCase(unittest.TestCase):
         # Explicitly reset tool and solenoid status
         g.write('T0')
         g.write('M381')
+
+    def test_M852(self):
+        current_position = g.get_response('M114', resp_needed=True)
+        self.assertIn('X:0.00 Y:0.00 Z:0.00', current_position)
+
 
 if __name__ == '__main__':
     unittest.main()
