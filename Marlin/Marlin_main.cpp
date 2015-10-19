@@ -5971,7 +5971,7 @@ inline void gcode_M852() {
   current_position[Z_AXIS] = 0;
   sync_plan_position();
   Config_StoreSettings();
-  if (code_seen('V') {
+  if (code_seen('V')) {
     SERIAL_PROTOCOLPGM("New zprobe offset: ");
     SERIAL_PROTOCOLLN(zprobe_zoffset);
   }
