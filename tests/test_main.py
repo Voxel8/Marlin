@@ -118,8 +118,10 @@ class MarlinTestCase(unittest.TestCase):
         # Assert startup state is as expected.
         current_position = g.write('M114', resp_needed=True)
         self.assertIn('X:0.00 Y:0.00 Z:0.00', current_position)
-        zprobe_zoffset = g.write('M851', resp_needed=True)
-        self.assertIn('-3.0', zprobe_zoffset)
+        orig_offset = float(g.write('M851', resp_needed=True).strip()[16:21])
+        g.write('M851 Z-3')
+        offset = g.write('M851', resp_needed=True)
+        self.assertIn('-3.00', offset)
 
         # Move bed level position up 100 microns.
         g.write('G28')
@@ -141,9 +143,9 @@ class MarlinTestCase(unittest.TestCase):
         self.assertIn('Z:1.00', current_position)
 
         # Reset state
-        g.write('M851 Z-3')
+        g.write('M851 Z{}'.format(orig_offset))
         g.write('M500')
-        g.write('G28')
+        g.move(Z=5)
 
 
 if __name__ == '__main__':
