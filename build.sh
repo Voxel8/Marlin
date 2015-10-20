@@ -1,7 +1,7 @@
 #!/bin/bash
 # Correct Syntax: ./build.sh [port [*upload | verify]]
 set -e
-HERE=$(pwd)
+HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 VERSION='Voxel8 Marlin Build Script v1.0'
 
 # Begin build script
@@ -38,7 +38,7 @@ elif [ $1 = "--help" ] && [ ! -z "$2" ]; then
 else
   case "$(uname -s)"
     in Linux)
-      PORT="-P $1"
+      PORT_ARG="-P $1"
     ;; *)
       PORT_ARG="--port $1"
       if [ -z "$2" ]; then
@@ -79,12 +79,16 @@ echo "#define STRING_DISTRIBUTION_DATE" `date '+"%Y-%m-%d %H:%M"'` >>"$OUTFILE"
     BRANCH=" $BRANCH"
   fi
   VERSION=`git describe --tags --first-parent 2>/dev/null`
+  HASH=`git rev-parse --short HEAD`
   VERSION_NUM=`git describe --tags --abbrev=0`
+  VERSION_NUM=$(echo $VERSION_NUM | sed 's/-.*//g')
+  VERSION_MIDDLE=$(echo $VERSION | sed "s/$VERSION_NUM-\(.*\)-g$HASH/\1/")
+  VERSION_COMMITS=$(echo $VERSION_MIDDLE | sed "s/.*-//")
   BRANCH=$(echo $BRANCH | sed 's/\//\\\//g')
   if [ "x$VERSION" != "x" ] ; then
     echo "#define BUILD_VERSION_NUMERIC \"$VERSION_NUM\"" >>"$OUTFILE"
-    echo "#define SHORT_BUILD_VERSION \"$VERSION\"" | sed "s/-.*/ $BRANCH$VERSION_MODIFIED\"/" >>"$OUTFILE"
-    echo "#define DETAILED_BUILD_VERSION \"$VERSION$VERSION_MODIFIED\"" | sed "s/-/ $BRANCH-/" >>"$OUTFILE"
+    echo "#define SHORT_BUILD_VERSION \"$VERSION_NUM $BRANCH$VERSION_MODIFIED\"" >>"$OUTFILE"
+    echo "#define DETAILED_BUILD_VERSION \"$VERSION_NUM $BRANCH-$VERSION_COMMITS-$HASH$VERSION_MODIFIED\"" >>"$OUTFILE"
   else
     VERSION=`git describe --tags --first-parent --always 2>/dev/null`
     echo "#define BUILD_VERSION_NUMERIC \"$VERSION_NUM\"" >>"$OUTFILE"
@@ -110,18 +114,19 @@ echo ""
 
 case "$(uname -s)"
   in Darwin)
-    ARDUINO_EXEC="/Applications/Arduino.app/Contents/MacOS/Arduino $COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
+    ARDUINO_EXEC="/Applications/Arduino.app/Contents/MacOS/Arduino $COMMAND \"$HERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
   ;; Linux)
     ARDUINO_DEP="/usr/share/arduino/hardware/arduino/"
     ARDUINO_EXEC_COMPILE="ino build -m mega2560"
-    ARDUINO_EXEC_UPLOAD="/usr/share/arduino/hardware/tools/avrdude -q -q -C /usr/share/arduino/hardware/tools/avrdude.conf -U flash:w:firmware.hex:i -v -p atmega2560 -b 115200 -c stk500v2 $PORT -D"
+    ARDUINO_EXEC_UPLOAD="ino upload -m mega2560 -p /dev/ttyACM0"
+    #ARDUINO_EXEC_UPLOAD="/usr/share/arduino/hardware/tools/avrdude -q -q -C /usr/share/arduino/hardware/tools/avrdude.conf -U flash:w:firmware.hex:i -v -p atmega2560 -b 115200 -c stk500v2 $PORT_ARG -D"
   ;; CYGWIN*)
-    CYGHERE="$(cygpath -aw $(pwd))"
-    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
+    CYGHERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cygpath -aw $(pwd) )"
+    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;;MINGW32*|MINGW64*|MSYS*)
-    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND $HERE/Marlin/Marlin.ino --pref build.path=$HERE/build/ --pref board=rambo $PORT_ARG"
+    ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$HERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;; *)
     echo 'This operating system is unfamiliar'

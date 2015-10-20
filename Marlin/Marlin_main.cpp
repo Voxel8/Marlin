@@ -6628,7 +6628,7 @@ void process_next_command() {
       case 241: // M241 - Dwell for a given amount of time in milliseconds (500 by default)
         gcode_M241();
         break;
-      case: 242 // M242 - Output a detailed version description
+      case 242: // M242 - Output a detailed version description
         gcode_M242();
         break;
 
