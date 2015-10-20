@@ -54,6 +54,53 @@ else
   fi
 fi
 
+# For Linux Users, make sure they have installed libraries and src directory
+if [ "$OPERATING_SYSTEM" = "Linux" ]; then
+  if [ ! -d "./src/" ]; then
+    ln -s Marlin src
+  fi
+  mkdir ./libraries/
+  if [ ! -d "/usr/share/arduino/libraries/LiquidCrystal_I2C" ]; then
+    echo "Missing LiquidCrystal_I2C - Cloning..."
+    cd ./libraries/
+    git clone https://github.com/kiyoshigawa/LiquidCrystal_I2C.git
+    cd $HERE
+    rm -rf ./.build/
+  fi
+  if [ ! -d "/usr/share/arduino/libraries/LiquidTWI2" ]; then
+    echo "Missing LiquidTWI2 - Cloning..."
+    cd ./libraries/
+    git clone https://github.com/lincomatic/LiquidTWI2.git
+    cd $HERE
+    rm -rf ./.build/
+  fi
+  if [ ! -d "/usr/share/arduino/libraries/U8glib" ]; then
+    echo "Missing U8glib - Retrieving..."
+    wget -nv "https://bintray.com/artifact/download/olikraus/u8glib/u8glib_arduino_v1.18.1.zip"
+    sudo unzip u8glib_arduino_v1.18.1.zip -d /usr/share/arduino/libraries/
+    rm u8glib_arduino_v1.18.1.zip
+    rm -rf ./.build/
+  fi
+  if [ ! -d "/usr/share/arduino/libraries/L6470" ]; then
+    echo "Missing L6470 - Retrieving..."
+    sudo cp -r ./ArduinoAddons/Arduino_1.x.x/libraries/L6470 /usr/share/arduino/libraries/
+    rm -rf ./.build/
+  fi
+  if [ ! -d "/usr/share/arduino/libraries/TMC26XStepper" ]; then
+    echo "Missing TMC26XStepper - Retrieving..."
+    sudo cp -r ./ArduinoAddons/Arduino_1.x.x/libraries/TMC26XStepper /usr/share/arduino/libraries/
+    rm -rf ./.build/
+  fi
+  if [ -d "/usr/share/arduino/libraries/Robot_Control" ]; then
+    sudo rm -rf /usr/share/arduino/libraries/Robot_Control
+    rm -rf ./.build/
+  fi
+  cd ./libraries
+  sudo cp -r . /usr/share/arduino/libraries/
+  cd $HERE
+  rm -rf ./libraries/
+fi
+
 # Generate _Version.h using Git repo info
 # Could use git describe --dirty to append this, but we have more control here
 if ! git diff-index --quiet HEAD --; then

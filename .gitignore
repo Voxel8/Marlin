@@ -26,3 +26,4 @@ build/
 .build/
 lib/
 src/
+libraries/
