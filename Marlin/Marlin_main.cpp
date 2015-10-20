@@ -5968,7 +5968,7 @@ inline void gcode_M852() {
   // additional_offset is how high off the bed you are asserting you are
   float additional_offset = code_seen('Z') ? code_value() : 0;
   zprobe_zoffset += (current_position[Z_AXIS] - additional_offset);
-  current_position[Z_AXIS] = 0;
+  current_position[Z_AXIS] = additional_offset;
   sync_plan_position();
   Config_StoreSettings();
   if (code_seen('V')) {

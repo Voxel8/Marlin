@@ -131,6 +131,15 @@ class MarlinTestCase(unittest.TestCase):
         resp = g.write('M852 V', resp_needed=True)
         self.assertIn('-2.9', resp)
 
+        # Marlin should think it is at 0 right now.
+        current_position = g.write('M114', resp_needed=True)
+        self.assertIn('Z:0.00', current_position)
+
+        # Test the optional Z argument
+        g.write('M852 Z1')
+        current_position = g.write('M114', resp_needed=True)
+        self.assertIn('Z:1.00', current_position)
+
         # Reset state
         g.write('M851 Z-3')
         g.write('M500')
