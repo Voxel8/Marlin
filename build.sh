@@ -50,6 +50,7 @@ else
       echo "Invalid argument. Please use --help for more info."
       exit 1
     fi
+  fi
 fi
 
 # Generate _Version.h using Git repo info
