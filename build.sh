@@ -164,9 +164,9 @@ echo ""
 case "$OPERATING_SYSTEM"
   in Darwin)
     ARDUINO_EXEC="/Applications/Arduino.app/Contents/MacOS/Arduino $COMMAND \"$HERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
-    ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
+    ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr"
   ;; Linux)
-    ARDUINO_DEP="/usr/share/arduino/hardware/arduino/"
+    ARDUINO_DEP="/usr/share/arduino/hardware/arduino"
     ARDUINO_EXEC_COMPILE="ino build -m mega2560"
     ARDUINO_EXEC_UPLOAD="ino upload -m mega2560"
     #ARDUINO_EXEC_UPLOAD="/usr/share/arduino/hardware/tools/avrdude -q -q -C /usr/share/arduino/hardware/tools/avrdude.conf -U flash:w:firmware.hex:i -v -p atmega2560 -b 115200 -c stk500v2 -D"
