@@ -5749,7 +5749,6 @@ inline void gcode_M503() {
       float value = code_value();
       if (Z_PROBE_OFFSET_RANGE_MIN <= value && value <= Z_PROBE_OFFSET_RANGE_MAX) {
         zprobe_zoffset = value;
-        SERIAL_ECHOPGM(MSG_OK);
       }
       else {
         SERIAL_ECHOPGM(MSG_Z_MIN);
