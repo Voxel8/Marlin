@@ -11,16 +11,16 @@ if [ -z "$1" ]; then
     exit 1
   fi
 fi
-if [ $1 = "upload" ]; then
+if [ "$1" = "upload" ]; then
   echo "Syntax error: The device port must be specified before the 'upload' argument."
   echo "Please use --help for more info."
   exit 1
-elif [ $1 = "verify" ]; then
+elif [ "$1" = "verify" ]; then
   if [ ! "$(uname -s)" = "Linux" ]; then
     PORT_ARG=""
     COMMAND="--verify"
   fi
-elif [ $1 = "--help" ] && [ -z "$2" ]; then
+elif [ "$1" = "--help" ] && [ -z "$2" ]; then
   echo $VERSION
   echo "A star (*) represents a default value."
   echo ""
@@ -28,12 +28,12 @@ elif [ $1 = "--help" ] && [ -z "$2" ]; then
   echo ""
   echo "Type '--help name' to find out more about the argument 'name'."
   exit 1
-elif [ $1 = "--help" ] && [ ! -z "$2" ]; then
-  if [ $2 = "port" ]; then
+elif [ "$1" = "--help" ] && [ ! -z "$2" ]; then
+  if [ "$2" = "port" ]; then
     echo "This is the port of the device in which the sketch will be uploaded to. Can be omitted if just verifying."
-  elif [ $2 = "verify" ]; then
+  elif [ "$2"= "verify" ]; then
     echo "Specifying this argument will only compile the script. No uploading will be done."
-  elif [ $2 = "upload" ]; then
+  elif [ "$2" = "upload" ]; then
     echo "Specifying this argument will compile and upload the sketch to the given device port."
   else
     echo "This argument does not exist."
@@ -44,7 +44,7 @@ else
     PORT_ARG="--port $1"
     if [ -z "$2" ]; then
       COMMAND="--upload"
-    elif [ $2 = "verify" ] || [ $2 = "upload" ]; then
+    elif [ "$2" = "verify" ] || [ "$2" = "upload" ]; then
       COMMAND="--$2"
     else
       echo "Invalid argument. Please use --help for more info."
@@ -162,7 +162,7 @@ if [ ! "$(uname -s)" = "Linux" ]; then
 else
   #TODO ADD IF CHECK FOR VS VERIFY OR VERIFY AND BUILD
   eval $ARDUINO_EXEC_COMPILE
-  if [ ! $1 = "verify" ]; then
+  if [ ! "$1" = "verify" ]; then
     eval $ARDUINO_EXEC_UPLOAD
   fi
 fi
