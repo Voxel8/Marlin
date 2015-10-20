@@ -23,3 +23,7 @@ Marlin/Marlin.atsuo
 Marlin/Marlin.atsln
 Marlin/Release/
 build/
+.build/
+lib/
+libraries/
+src/
