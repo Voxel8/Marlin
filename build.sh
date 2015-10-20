@@ -6,16 +6,20 @@ VERSION='Voxel8 Marlin Build Script v1.0'
 
 # Begin build script
 if [ -z "$1" ]; then
-  echo "Please enter the port of the device or specify 'verify'"
-  exit 1
+  if [ ! "$(uname -s)" = "Linux" ]; then
+    echo "Please enter the port of the device or specify 'verify'"
+    exit 1
+  fi
 fi
 if [ $1 = "upload" ]; then
   echo "Syntax error: The device port must be specified before the 'upload' argument."
   echo "Please use --help for more info."
   exit 1
 elif [ $1 = "verify" ]; then
-  PORT_ARG=""
-  COMMAND="--verify"
+  if [ ! "$(uname -s)" = "Linux" ]; then
+    PORT_ARG=""
+    COMMAND="--verify"
+  fi
 elif [ $1 = "--help" ] && [ -z "$2" ]; then
   echo $VERSION
   echo "A star (*) represents a default value."
@@ -36,20 +40,16 @@ elif [ $1 = "--help" ] && [ ! -z "$2" ]; then
   fi
   exit 1
 else
-  case "$(uname -s)"
-    in Linux)
-      PORT_ARG="-P $1"
-    ;; *)
-      PORT_ARG="--port $1"
-      if [ -z "$2" ]; then
-        COMMAND="--upload"
-      elif [ $2 = "verify" ] || [ $2 = "upload" ]; then
-        COMMAND="--$2"
-      else
-        echo "Invalid argument. Please use --help for more info."
-        exit 1
-      fi   
-  esac
+  if [ ! "$(uname -s)" = "Linux" ]; then
+    PORT_ARG="--port $1"
+    if [ -z "$2" ]; then
+      COMMAND="--upload"
+    elif [ $2 = "verify" ] || [ $2 = "upload" ]; then
+      COMMAND="--$2"
+    else
+      echo "Invalid argument. Please use --help for more info."
+      exit 1
+    fi
 fi
 
 # Generate _Version.h using Git repo info
@@ -119,8 +119,7 @@ case "$(uname -s)"
   ;; Linux)
     ARDUINO_DEP="/usr/share/arduino/hardware/arduino/"
     ARDUINO_EXEC_COMPILE="ino build -m mega2560"
-    ARDUINO_EXEC_UPLOAD="ino upload -m mega2560 -p /dev/ttyACM0"
-    #ARDUINO_EXEC_UPLOAD="/usr/share/arduino/hardware/tools/avrdude -q -q -C /usr/share/arduino/hardware/tools/avrdude.conf -U flash:w:firmware.hex:i -v -p atmega2560 -b 115200 -c stk500v2 $PORT_ARG -D"
+    ARDUINO_EXEC_UPLOAD="/usr/share/arduino/hardware/tools/avrdude -q -q -C /usr/share/arduino/hardware/tools/avrdude.conf -U flash:w:firmware.hex:i -v -p atmega2560 -b 115200 -c stk500v2 -D"
   ;; CYGWIN*)
     CYGHERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cygpath -aw $(pwd) )"
     ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
@@ -130,6 +129,7 @@ case "$(uname -s)"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;; *)
     echo 'This operating system is unfamiliar'
+    exit 1
 esac
 
 # Prepare for build by copying in RAMBo boards.txt and pins files
@@ -162,7 +162,6 @@ else
   #TODO ADD IF CHECK FOR VS VERIFY OR VERIFY AND BUILD
   eval $ARDUINO_EXEC_COMPILE
   if [ ! $1 = "verify" ]; then
-    cd .build/mega2560/
     eval $ARDUINO_EXEC_UPLOAD
   fi
 fi
