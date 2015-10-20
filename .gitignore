@@ -23,3 +23,6 @@ Marlin/Marlin.atsuo
 Marlin/Marlin.atsln
 Marlin/Release/
 build/
+
+.ropeproject
+*.pyc
