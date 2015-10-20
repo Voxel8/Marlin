@@ -5,6 +5,31 @@ import numpy as np
 from mecode import G
 
 
+EXPECTED_SETTINGS = '''echo:Steps per unit:
+echo:  M92 X213.33 Y213.33 Z1600.00 E555.00
+echo:Maximum feedrates (mm/s):
+echo:  M203 X90.00 Y90.00 Z10.00 E25.00
+echo:Maximum Acceleration (mm/s2):
+echo:  M201 X5000 Y5000 Z100 E9000
+echo:Accelerations: P=printing, R=retract and T=travel
+echo:  M204 P1500.00 R1500.00 T1500.00
+echo:Advanced variables: S=Min feedrate (mm/s), T=Min travel feedrate (mm/s), B=minimum segment time (ms), X=maximum XY jerk (mm/s),  Z=maximum Z jerk (mm/s),  E=maximum E jerk (mm/s)
+echo:  M205 S0.00 T0.00 B20000 X20.00 Z0.40 E20.00
+echo:Home offset (mm):
+echo:  M206 X0.00 Y0.00 Z0.00
+echo:PID settings:
+echo:  M301 P18.37 I0.95 D67.89 C100.00 L20
+echo:  M304 P107.41 I21.29 D135.50
+echo:Filament settings: Disabled
+echo:  M200 D3.00
+echo:  M200 T1 D3.00
+echo:  M200 D0
+echo:Z-Probe Offset (mm):
+echo:  M851 Z-3.00
+ok
+'''
+
+
 class MarlinTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -33,6 +58,10 @@ class MarlinTestCase(unittest.TestCase):
             return None
         prof_val -= 5000
         return prof_val
+
+    def test_current_settings(self):
+        settings = self.g.write('M503', resp_needed=True)
+        self.assertEqual(settings, EXPECTED_SETTINGS)
 
     def test_M237(self):
         g = self.g
