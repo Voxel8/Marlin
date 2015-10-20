@@ -54,7 +54,7 @@ class MarlinTestCase(unittest.TestCase):
                 g.write('G4 P300')
                 measurements[j] = self.read_profilometer(samples=4)
             stdev = np.std(measurements)
-            msg = 'Bed level standard deviation was larger than 15 microns'
+            msg = 'Bed level standard deviation {} is larger than 15 microns'.format(stdev)
             self.assertLess(stdev, 15, msg)
 
         # Home printer after M237 test
