@@ -2,11 +2,12 @@
 # Correct Syntax: ./build.sh [port [*upload | verify]]
 set -e
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+OPERATING_SYSTEM="$(uname -s)"
 VERSION='Voxel8 Marlin Build Script v1.0'
 
 # Begin build script
 if [ -z "$1" ]; then
-  if [ ! "$(uname -s)" = "Linux" ]; then
+  if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
     echo "Please enter the port of the device or specify 'verify'"
     exit 1
   fi
@@ -16,7 +17,7 @@ if [ "$1" = "upload" ]; then
   echo "Please use --help for more info."
   exit 1
 elif [ "$1" = "verify" ]; then
-  if [ ! "$(uname -s)" = "Linux" ]; then
+  if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
     PORT_ARG=""
     COMMAND="--verify"
   fi
@@ -40,7 +41,7 @@ elif [ "$1" = "--help" ] && [ ! -z "$2" ]; then
   fi
   exit 1
 else
-  if [ ! "$(uname -s)" = "Linux" ]; then
+  if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
     PORT_ARG="--port $1"
     if [ -z "$2" ]; then
       COMMAND="--upload"
@@ -103,7 +104,7 @@ echo "#define STRING_DISTRIBUTION_DATE" `date '+"%Y-%m-%d %H:%M"'` >>"$OUTFILE"
 )
 
 # If /build/ exists, remove.
-if [ ! "$(uname -s)" = "Linux" ]; then
+if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
   if [ -d "$HERE/build/" ]; then
     echo "Build directory exists, removing..."
     rm -rf $HERE/build/
@@ -113,7 +114,7 @@ fi
 echo $VERSION
 echo ""
 
-case "$(uname -s)"
+case "$OPERATING_SYSTEM"
   in Darwin)
     ARDUINO_EXEC="/Applications/Arduino.app/Contents/MacOS/Arduino $COMMAND \"$HERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
     ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
@@ -135,7 +136,7 @@ case "$(uname -s)"
 esac
 
 # Prepare for build by copying in RAMBo boards.txt and pins files
-if [ ! "$(uname -s)" = "Linux" ]; then
+if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
   if [ -d "$ARDUINO_DEP/variants/rambo" ] && [ ! -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
     mv "$ARDUINO_DEP/variants/rambo/" "$ARDUINO_DEP/variants/rambo_backup/"
   fi
@@ -157,7 +158,7 @@ else
 fi
 
 # Create the build directory
-if [ ! "$(uname -s)" = "Linux" ]; then
+if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
   mkdir "$HERE/build/"
   eval $ARDUINO_EXEC
 else
@@ -181,7 +182,7 @@ case "$?" in
 esac
 
 # Clean Up
-if [ ! "$(uname -s)" = "Linux" ]; then
+if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
   rm -rf ./build/
   if [ -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
     rm -rf "$ARDUINO_DEP/variants/rambo/"
