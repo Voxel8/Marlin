@@ -138,7 +138,7 @@ const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
 	// -------------------------------------------
 	PE	, // PE 0 ** 0 ** USART0_RX
 	PE	, // PE 1 ** 1 ** USART0_TX
-    PE  , // PE 4 ** 2 ** PWM2
+	PE	, // PE 4 ** 2 ** PWM2
 	PE	, // PE 5 ** 3 ** PWM3
 	PG	, // PG 5 ** 4 ** PWM4
 	PE	, // PE 3 ** 5 ** PWM5
@@ -181,7 +181,7 @@ const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
 	PL	, // PL 7 ** 42 ** D42
 	PL	, // PL 6 ** 43 ** D43
 	PL	, // PL 5 ** 44 ** D44
-	PL  , // PL 4 ** 45 ** D45
+	PL	, // PL 4 ** 45 ** D45
 	PL	, // PL 3 ** 46 ** D46
 	PL	, // PL 2 ** 47 ** D47
 	PL	, // PL 1 ** 48 ** D48
@@ -229,7 +229,7 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
 	// -------------------------------------------
 	_BV( 0 )	, // PE 0 ** 0 ** USART0_RX
 	_BV( 1 )	, // PE 1 ** 1 ** USART0_TX
-	_BV( 4 )    , // PE 4 ** 2 ** PWM2
+	_BV( 4 )	, // PE 4 ** 2 ** PWM2
 	_BV( 5 )	, // PE 5 ** 3 ** PWM3
 	_BV( 5 )	, // PG 5 ** 4 ** PWM4
 	_BV( 3 )	, // PE 3 ** 5 ** PWM5
@@ -272,7 +272,7 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
 	_BV( 7 )	, // PL 7 ** 42 ** D42
 	_BV( 6 )	, // PL 6 ** 43 ** D43
 	_BV( 5 )	, // PL 5 ** 44 ** D44
-	_BV( 4 )    , // PL 4 ** 45 ** D45
+	_BV( 4 )	, // PL 4 ** 45 ** D45
 	_BV( 3 )	, // PL 3 ** 46 ** D46
 	_BV( 2 )	, // PL 2 ** 47 ** D47
 	_BV( 1 )	, // PL 1 ** 48 ** D48
@@ -320,7 +320,7 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 	// -------------------------------------------
 	NOT_ON_TIMER	, // PE 0 ** 0 ** USART0_RX
 	NOT_ON_TIMER	, // PE 1 ** 1 ** USART0_TX
-    TIMER3B     , // PE 4 ** 2 ** PWM2
+	TIMER3B		, // PE 4 ** 2 ** PWM2
 	TIMER3C		, // PE 5 ** 3 ** PWM3
 	TIMER0B		, // PG 5 ** 4 ** PWM4
 	TIMER3A		, // PE 3 ** 5 ** PWM5
@@ -363,7 +363,7 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 	NOT_ON_TIMER	, // PL 7 ** 42 ** D42
 	NOT_ON_TIMER	, // PL 6 ** 43 ** D43
 	TIMER5C		, // PL 5 ** 44 ** D44
-	TIMER5B     , // PL 4 ** 45 ** D45
+	TIMER5B		, // PL 4 ** 45 ** D45
 	TIMER5A		, // PL 3 ** 46 ** D46
 	NOT_ON_TIMER	, // PL 2 ** 47 ** D47
 	NOT_ON_TIMER	, // PL 1 ** 48 ** D48
