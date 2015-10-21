@@ -2,6 +2,7 @@
 # Correct Syntax: ./build.sh [port [*upload | verify]]
 set -e
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo $HERE
 OPERATING_SYSTEM="$(uname -s)"
 VERSION='Voxel8 Marlin Build Script v1.0'
 
