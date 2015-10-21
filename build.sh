@@ -58,7 +58,7 @@ fi
 # For Linux Users, make sure they have installed libraries and src directory
 if [ "$OPERATING_SYSTEM" = "Linux" ]; then
   if [ ! -d "./src/" ]; then
-    ln -s Marlin src
+    ln -s "$HERE/Marlin" "$HERE/src"
   fi
   mkdir ./libraries/
   if [ ! -d "/usr/share/arduino/libraries/LiquidCrystal_I2C" ]; then
