@@ -2,7 +2,7 @@
 # Correct Syntax: ./build.sh [port [*upload | verify]]
 set -e
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-echo $HERE
+cd $HERE
 OPERATING_SYSTEM="$(uname -s)"
 VERSION='Voxel8 Marlin Build Script v1.0'
 
@@ -157,6 +157,11 @@ if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
     echo "Build directory exists, removing..."
     rm -rf $HERE/build/
   fi
+else
+  if [ -d "$HERE/.build/" ]; then
+    echo "Build directory exists, removing..."
+    rm -rf $HERE/.build/
+  fi
 fi
 
 echo $VERSION
@@ -192,7 +197,7 @@ if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
     mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
   fi
   cp "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/boards.txt" "$ARDUINO_DEP/"
-  cp -r "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/" "$ARDUINO_DEP/variants/rambo/"
+  cp -r "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/." "$ARDUINO_DEP/variants/rambo/"
 else
   if [ -d "$ARDUINO_DEP/variants/standard" ] && [ ! -d "$ARDUINO_DEP/variants/standard_backup" ]; then
     sudo mv "$ARDUINO_DEP/variants/standard/" "$ARDUINO_DEP/variants/standard_backup/"
@@ -201,7 +206,7 @@ else
     sudo mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
   fi
   sudo cp "$HERE/ArduinoAddons/Arduino_1.0.x/hardware/rambo/boards.txt" "$ARDUINO_DEP/"
-  sudo cp -r "$HERE/ArduinoAddons/Arduino_1.0.x/hardware/rambo/variants/standard/" "$ARDUINO_DEP/variants/standard/"
+  sudo cp -r "$HERE/ArduinoAddons/Arduino_1.0.x/hardware/rambo/variants/standard/." "$ARDUINO_DEP/variants/standard/"
 fi
 
 # Create the build directory
@@ -239,6 +244,7 @@ if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
     mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
   fi
 else 
+  rm -rf ./.build/
   if [ -d "$ARDUINO_DEP/variants/standard_backup" ]; then
     sudo rm -rf "$ARDUINO_DEP/variants/standard/"
     sudo mv "$ARDUINO_DEP/variants/standard_backup/" "$ARDUINO_DEP/variants/standard/"
