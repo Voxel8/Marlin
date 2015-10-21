@@ -65,21 +65,21 @@ if [ "$OPERATING_SYSTEM" = "Linux" ]; then
   if [ ! -d "/usr/share/arduino/libraries/LiquidCrystal_I2C" ]; then
     echo "Missing LiquidCrystal_I2C - Cloning..."
     cd ./libraries/
-    git clone https://github.com/kiyoshigawa/LiquidCrystal_I2C.git
+    git clone -q https://github.com/kiyoshigawa/LiquidCrystal_I2C.git
     cd $HERE
     rm -rf ./.build/
   fi
   if [ ! -d "/usr/share/arduino/libraries/LiquidTWI2" ]; then
     echo "Missing LiquidTWI2 - Cloning..."
     cd ./libraries/
-    git clone https://github.com/lincomatic/LiquidTWI2.git
+    git clone -q https://github.com/lincomatic/LiquidTWI2.git
     cd $HERE
     rm -rf ./.build/
   fi
   if [ ! -d "/usr/share/arduino/libraries/U8glib" ]; then
     echo "Missing U8glib - Retrieving..."
     wget -nv "https://bintray.com/artifact/download/olikraus/u8glib/u8glib_arduino_v1.18.1.zip"
-    sudo unzip u8glib_arduino_v1.18.1.zip -d /usr/share/arduino/libraries/
+    sudo unzip -q u8glib_arduino_v1.18.1.zip -d /usr/share/arduino/libraries/
     rm u8glib_arduino_v1.18.1.zip
     rm -rf ./.build/
   fi
