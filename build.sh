@@ -7,6 +7,7 @@ VERSION='Voxel8 Marlin Build Script v1.0'
 
 # Begin build script
 if [ -z "$1" ]; then
+  # Since ino can automatically detect the serial port, an argument is not necessary on Linux
   if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
     echo "Please enter the port of the device or specify 'verify'"
     exit 1
@@ -102,7 +103,6 @@ if [ "$OPERATING_SYSTEM" = "Linux" ]; then
 fi
 
 # Generate _Version.h using Git repo info
-# Could use git describe --dirty to append this, but we have more control here
 if ! git diff-index --quiet HEAD --; then
   VERSION_MODIFIED="-modified"
 else
@@ -169,7 +169,6 @@ case "$OPERATING_SYSTEM"
     ARDUINO_DEP="/usr/share/arduino/hardware/arduino"
     ARDUINO_EXEC_COMPILE="ino build -m mega2560"
     ARDUINO_EXEC_UPLOAD="ino upload -m mega2560"
-    #ARDUINO_EXEC_UPLOAD="/usr/share/arduino/hardware/tools/avrdude -q -q -C /usr/share/arduino/hardware/tools/avrdude.conf -U flash:w:firmware.hex:i -v -p atmega2560 -b 115200 -c stk500v2 -D"
   ;; CYGWIN*)
     CYGHERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cygpath -aw $(pwd) )"
     ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
@@ -209,7 +208,6 @@ if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
   mkdir "$HERE/build/"
   eval $ARDUINO_EXEC
 else
-  #TODO ADD IF CHECK FOR VS VERIFY OR VERIFY AND BUILD
   eval $ARDUINO_EXEC_COMPILE
   if [ ! "$1" = "verify" ]; then
     eval $ARDUINO_EXEC_UPLOAD
