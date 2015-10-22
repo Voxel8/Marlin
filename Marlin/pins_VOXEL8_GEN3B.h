@@ -9,7 +9,7 @@
 #define LARGE_FLASH             true
 
 // Servo support
-#ifdef NUM_SERVOS
+#if HAS_SERVOS
   #define SERVO0_PIN            22  //motor header MX1
   #if NUM_SERVOS > 1
     #define SERVO1_PIN          23  //Motor header MX2
@@ -101,7 +101,7 @@
 /*************************
 	  PNEUMATIC PINS
 *************************/
-#ifdef PNEUMATICS
+#if ENABLED(PNEUMATICS)
     #define PNEUMATIC_PUMP_PIN  7   // Pump driver
     #define PNEUMATIC_PIN       3   // A3 Input analog pressure reading
     #define PNEUMATIC_CART0_PIN 5   // A5 Cartridge 1 analog pressure reading
@@ -151,7 +151,7 @@
 /*************************
 	  FILAMENT SENSE PINS
 *************************/
-#ifdef FILAMENT_SENSOR
+#if ENABLED(FILAMENT_SENSOR)
   //Filip added pin for Filament sensor analog input 
   #define FILMNT_SENS_PIN       80  //! Monitor filament low
 #endif

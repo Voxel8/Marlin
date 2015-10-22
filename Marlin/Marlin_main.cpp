@@ -52,17 +52,16 @@
 #include "math.h"
 #include "buzzer.h"
 
-#ifdef EXT_ADC
+#if ENABLED(EXT_ADC)
   #include "ADC.h"
 #endif
 
-#ifdef DAC_I2C
+#if ENABLED(DAC_I2C)
   #include "MCP4725.h"
 #endif
 
-#ifdef E_REGULATOR
+#if ENABLED(E_REGULATOR)
   #include "Regulator.h"
-
 #endif
 
 #if ENABLED(BLINKM)
@@ -237,6 +236,8 @@
  * ************ Custom codes - This can change to suit future G-code regulations
  * M100 - Watch Free Memory (For Debugging Only)
  * M851 - Set Z probe's Z offset (mm above extruder -- The value will always be negative)
+                                     *
+ * M852 - Automaticaly adjust the Z probe's Z offset so that the current position is set to 0.
 
 
  * M928 - Start SD logging (M928 filename.g) - ended by M29
@@ -730,11 +731,11 @@ void setup() {
     enableStepperDrivers();
   #endif
 
-  #ifdef DAC_I2C
+  #if ENABLED(DAC_I2C)
     DAC_i2c_init();
   #endif
 
-  #ifdef EXT_ADC
+  #if ENABLED(EXT_ADC)
     ADC_i2c_init();
   #endif
 
@@ -1435,7 +1436,7 @@ static void setup_for_endstop_move() {
   inline void do_blocking_move_to_z(float z) { do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], z); }
   inline void raise_z_after_probing() { do_blocking_move_to_z(current_position[Z_AXIS] + Z_RAISE_AFTER_PROBING); }
 
-  #ifdef EXT_ADC
+  #if ENABLED(EXT_ADC)
     /*
      * Bed leveling probe - returns a uint16_t with ADC height value
      */
@@ -3998,7 +3999,7 @@ inline void gcode_M105() {
     SERIAL_ERRORLNPGM(MSG_ERR_NO_THERMISTORS);
   #endif
 
-  #ifdef PNEUMATICS
+  #if ENABLED(PNEUMATICS)
     SERIAL_PROTOCOLPGM(" P:");
     SERIAL_PROTOCOL_F(pressurePneumatic(), 1);
     SERIAL_PROTOCOLPGM(" /");
@@ -4526,7 +4527,7 @@ inline void gcode_M120() { enable_endstops(true); }
  */
 inline void gcode_M121() { enable_endstops(false); }
 
-#ifdef PNEUMATICS
+#if ENABLED(PNEUMATICS)
   /**
    * M125 - Set pneumatics pressure
    */
@@ -4896,7 +4897,7 @@ inline void gcode_M226() {
   } // code_seen('P')
 }
 
-#ifdef EXT_ADC
+#if ENABLED(EXT_ADC)
   /**
    * M234 - Return raw external ADC value
    */
@@ -4946,7 +4947,7 @@ inline void gcode_M226() {
   }
 #endif
  
-#ifdef E_REGULATOR
+#if ENABLED(E_REGULATOR)
   /**
    * M236 - Send Value to ADC w/ no EEPROM write
    */
@@ -5084,7 +5085,7 @@ inline void gcode_M226() {
   }
 #endif
 
-#ifdef EXT_ADC
+#if ENABLED(EXT_ADC)
   /*
   * M238 - Return ADC value from laser sensor (get distance)
   */
@@ -5747,7 +5748,6 @@ inline void gcode_M503() {
       float value = code_value();
       if (Z_PROBE_OFFSET_RANGE_MIN <= value && value <= Z_PROBE_OFFSET_RANGE_MAX) {
         zprobe_zoffset = value;
-        SERIAL_ECHOPGM(MSG_OK);
       }
       else {
         SERIAL_ECHOPGM(MSG_Z_MIN);
@@ -5951,6 +5951,29 @@ inline void gcode_M503() {
   }
 
 #endif // DUAL_X_CARRIAGE
+
+/*
+* M852 - Set new bed zero point. This mcode modifies the zprobe offset to make
+*        the current position 0 after homing. The new offset is stored in
+*        EEPROM.
+*
+* Optional arguments:
+*
+*   Z - How high off the bed in mm you are asserting the hotend is.
+*   V - Verbose mode (echo the new zprobe offset)
+*/
+inline void gcode_M852() {
+  // additional_offset is how high off the bed you are asserting you are
+  float additional_offset = code_seen('Z') ? code_value() : 0;
+  zprobe_zoffset += (current_position[Z_AXIS] - additional_offset);
+  current_position[Z_AXIS] = additional_offset;
+  sync_plan_position();
+  Config_StoreSettings();
+  if (code_seen('V')) {
+    SERIAL_PROTOCOLPGM("New zprobe offset: ");
+    SERIAL_PROTOCOLLN(zprobe_zoffset);
+  }
+}
 
 /**
  * M907: Set digital trimpot motor current using axis codes X, Y, Z, E, B, S
@@ -6452,7 +6475,7 @@ void process_next_command() {
         gcode_M119();
         break;
 
-      #ifdef PNEUMATICS
+      #if ENABLED(PNEUMATICS)
         case 125: // M125: Set pneumatics target pressure
           gcode_M125();
           break;
@@ -6551,7 +6574,7 @@ void process_next_command() {
           break;
       #endif // EXT_ADC
 
-      #ifdef E_REGULATOR
+      #if ENABLED(E_REGULATOR)
           case 236: // Send value to DAC; return current output pressure if no S parameter
           gcode_M236();
           break;
@@ -6762,6 +6785,10 @@ void process_next_command() {
           break;
 
       #endif // HAS_MICROSTEPS
+
+      case 852:
+        gcode_M852(); // M852 - Set new bed zero point
+        break;
 
       case 999: // M999: Restart after being Stopped
         gcode_M999();

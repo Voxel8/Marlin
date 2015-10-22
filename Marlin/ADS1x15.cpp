@@ -6,7 +6,7 @@
 ***********************************************************************************/
 #include "Configuration.h"
 
-#ifdef EXT_ADC
+#if ENABLED(EXT_ADC)
 
 #include "ADC.h"
 

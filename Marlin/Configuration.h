@@ -375,7 +375,7 @@ Here are some standard links for getting your machine calibrated:
 // Define this if you are using the electro-pneumatic regulator
 #define E_REGULATOR
 
-#ifdef E_REGULATOR
+#if ENABLED(E_REGULATOR)
  // Set E-regulator Sensor Type HERE:
  // ---------------------------------
  // 0 - No Pressure Sensor Used
@@ -388,7 +388,7 @@ Here are some standard links for getting your machine calibrated:
   #define OUTPUT_PSI_MIN       0.0
 #endif
 
-#ifdef PNEUMATICS
+#if ENABLED(PNEUMATICS)
 
 // Set Pressure Sensor Type HERE:
 // -----------------------------
@@ -737,7 +737,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 // M501 - reads parameters from EEPROM (if you need reset them after you changed them temporarily).
 // M502 - reverts to the default "factory settings".  You still need to store them in EEPROM afterwards if you want to.
 //define this to enable EEPROM support
-//#define EEPROM_SETTINGS
+#define EEPROM_SETTINGS
 
 #if ENABLED(EEPROM_SETTINGS)
   // To disable EEPROM Serial responses and decrease program space by ~1700 byte: comment this out:
