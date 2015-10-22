@@ -190,7 +190,6 @@
  * M239 - Homing and bed leveling combination
  * M240 - Trigger a camera to take a photograph
  * M241 - Dwell for a given amount of time in milliseconds (500 by default)
- * M242 - Output a detailed version description
  * M250 - Set LCD contrast C<contrast value> (value 0..63)
  * M280 - Set servo position absolute. P: servo index, S: angle or microseconds
  * M300 - Play beep sound S<frequency Hz> P<duration ms>
@@ -5036,11 +5035,7 @@ inline void gcode_M226() {
       #ifdef DELTA
         reset_bed_level();
       #else
-        //vector_3 corrected_position = plan_get_position_mm();
-        //if (verbose_level > 3) corrected_position.debug("position before M237");
         vector_3 uncorrected_position = plan_get_position();
-        if (verbose_level > 3) uncorrected_position.debug("position during M237");
-        
         current_position[X_AXIS] = uncorrected_position.x;
         current_position[Y_AXIS] = uncorrected_position.y;
         current_position[Z_AXIS] = uncorrected_position.z;
@@ -5325,16 +5320,6 @@ void gcode_M241(long num_milliseconds) {
     manage_inactivity();
     lcd_update();
   }
-}
-
-/*
-* M242 - Output a detailed version description
-*/
-void gcode_M242() {
-  SERIAL_PROTOCOLPGM("Version: ");
-  SERIAL_PROTOCOLLN(DETAILED_BUILD_VERSION);
-  SERIAL_PROTOCOLPGM("Build date: ");
-  SERIAL_PROTOCOLLN(STRING_DISTRIBUTION_DATE);
 }
 
 #if ENABLED(HAS_LCD_CONTRAST)
@@ -6256,7 +6241,6 @@ void process_next_command() {
         case 29: // Auto bed leveling
           #if ENABLED(EXT_ADC) 
             gcode_M237(); // M237: Auto bed leveling function using profilometer data
-            //gcode_G29();
           #else
             gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more points
           #endif
@@ -6627,9 +6611,6 @@ void process_next_command() {
 
       case 241: // M241 - Dwell for a given amount of time in milliseconds (500 by default)
         gcode_M241();
-        break;
-      case 242: // M242 - Output a detailed version description
-        gcode_M242();
         break;
 
       #if ENABLED(HAS_LCD_CONTRAST)
