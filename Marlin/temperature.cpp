@@ -63,7 +63,7 @@ millis_t time_since_last_err_bed = 0;
   float redundant_temperature = 0.0;
 #endif
 
-#ifdef PNEUMATICS
+#if ENABLED(PNEUMATICS)
   volatile uint8_t pneumatic_error_flag = 0;
 #endif
 
@@ -141,11 +141,11 @@ static volatile bool temp_meas_ready = false;
 #endif //PIDTEMPBED
   static unsigned char soft_pwm[EXTRUDERS];
 
-#ifdef PNEUMATICS
+#if ENABLED(PNEUMATICS)
   static unsigned long previous_millis_pneumatic_value;
 #endif
 
-#ifdef E_REGULATOR
+#if ENABLED(E_REGULATOR)
   static unsigned long previous_millis_regulator_value;
 #endif
 
@@ -187,12 +187,12 @@ static int maxttemp[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(16383);
   static int bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
 #endif
 
-#ifdef PNEUMATICS
+#if ENABLED(PNEUMATICS)
   static int pneumatic_min_raw = PNEUMATIC_RAW_LO;
   static int pneumatic_max_raw = PNEUMATIC_RAW_HI;
 #endif
 
-#ifdef E_REGULATOR
+#if ENABLED(E_REGULATOR)
   static int regulator_min_raw = REGULATOR_RAW_LO;
   static int regulator_max_raw = REGULATOR_RAW_HI;
 #endif
@@ -538,7 +538,7 @@ void bed_max_temp_error(void) {
   }
 }
 
-#ifdef PNEUMATICS
+#if ENABLED(PNEUMATICS)
   void pneumatic_value_error(void) {
     #if HAS_PNEUMATIC_PUMP
       WRITE(PNEUMATIC_PUMP_PIN, 0);
@@ -754,7 +754,7 @@ void manage_heater() {
     }
   #endif //FILAMENT_SENSOR
 
-  #ifdef PNEUMATICS
+  #if ENABLED(PNEUMATICS)
   if (millis() - previous_millis_pneumatic_value > PNEUMATIC_CHECK_INTERVAL) {
 
     previous_millis_pneumatic_value = millis();
@@ -779,7 +779,7 @@ void manage_heater() {
   #endif // PNEUMATICS
 
   // ELECTRO-PNEUMATIC REGULATOR CONTROL
-  #ifdef E_REGULATOR
+  #if ENABLED(E_REGULATOR)
   if (millis() - previous_millis_regulator_value > REGULATOR_CHECK_INTERVAL) {
     
     previous_millis_regulator_value = millis();
@@ -917,7 +917,7 @@ static float analog2tempBed(int raw) {
   #endif
 }
 
-#ifdef PNEUMATICS
+#if ENABLED(PNEUMATICS)
 static float analog2valPneumatic(int raw) {
     float psi = 0;
     uint8_t i;
@@ -942,7 +942,7 @@ static float analog2valPneumatic(int raw) {
 #endif // PNEUMATICS
 
 // Get pressure reading from raw (internal) ADC value
-#ifdef E_REGULATOR
+#if ENABLED(E_REGULATOR)
 static float analog2valRegulator(int raw) {
     float psi = 0;
     uint8_t i;
@@ -976,10 +976,10 @@ static void updateTemperaturesFromRawValues() {
     current_temperature[e] = analog2temp(current_temperature_raw[e], e);
   }
   current_temperature_bed = analog2tempBed(current_temperature_bed_raw);
-  #ifdef PNEUMATICS
+  #if ENABLED(PNEUMATICS)
     current_pneumatic = analog2valPneumatic(current_pneumatic_raw);
   #endif
-  #ifdef E_REGULATOR
+  #if ENABLED(E_REGULATOR)
     current_regulator = analog2valRegulator(current_regulator_raw);
   #endif
   #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)

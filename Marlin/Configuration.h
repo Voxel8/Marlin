@@ -375,7 +375,7 @@ Here are some standard links for getting your machine calibrated:
 // Define this if you are using the electro-pneumatic regulator
 #define E_REGULATOR
 
-#ifdef E_REGULATOR
+#if ENABLED(E_REGULATOR)
  // Set E-regulator Sensor Type HERE:
  // ---------------------------------
  // 0 - No Pressure Sensor Used
@@ -388,7 +388,7 @@ Here are some standard links for getting your machine calibrated:
   #define OUTPUT_PSI_MIN       0.0
 #endif
 
-#ifdef PNEUMATICS
+#if ENABLED(PNEUMATICS)
 
 // Set Pressure Sensor Type HERE:
 // -----------------------------
