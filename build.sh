@@ -2,21 +2,28 @@
 # Correct Syntax: ./build.sh [port [*upload | verify]]
 set -e
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $HERE
+OPERATING_SYSTEM="$(uname -s)"
 VERSION='Voxel8 Marlin Build Script v1.0'
 
 # Begin build script
 if [ -z "$1" ]; then
-  echo "Please enter the port of the device or specify 'verify'"
-  exit 1
+  # Since ino can automatically detect the serial port, an argument is not necessary on Linux
+  if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
+    echo "Please enter the port of the device or specify 'verify'"
+    exit 1
+  fi
 fi
-if [ $1 = "upload" ]; then
+if [ "$1" = "upload" ]; then
   echo "Syntax error: The device port must be specified before the 'upload' argument."
   echo "Please use --help for more info."
   exit 1
-elif [ $1 = "verify" ]; then
-  PORT_ARG=""
-  COMMAND="--verify"
-elif [ $1 = "--help" ] && [ -z "$2" ]; then
+elif [ "$1" = "verify" ]; then
+  if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
+    PORT_ARG=""
+    COMMAND="--verify"
+  fi
+elif [ "$1" = "--help" ] && [ -z "$2" ]; then
   echo $VERSION
   echo "A star (*) represents a default value."
   echo ""
@@ -24,31 +31,79 @@ elif [ $1 = "--help" ] && [ -z "$2" ]; then
   echo ""
   echo "Type '--help name' to find out more about the argument 'name'."
   exit 1
-elif [ $1 = "--help" ] && [ ! -z "$2" ]; then
-  if [ $2 = "port" ]; then
+elif [ "$1" = "--help" ] && [ ! -z "$2" ]; then
+  if [ "$2" = "port" ]; then
     echo "This is the port of the device in which the sketch will be uploaded to. Can be omitted if just verifying."
-  elif [ $2 = "verify" ]; then
+  elif [ "$2"= "verify" ]; then
     echo "Specifying this argument will only compile the script. No uploading will be done."
-  elif [ $2 = "upload" ]; then
+  elif [ "$2" = "upload" ]; then
     echo "Specifying this argument will compile and upload the sketch to the given device port."
   else
     echo "This argument does not exist."
   fi
   exit 1
 else
-  PORT_ARG="--port $1"
-  if [ -z "$2" ]; then
-    COMMAND="--upload"
-  elif [ $2 = "verify" ] || [ $2 = "upload" ]; then
-    COMMAND="--$2"
-  else
-    echo "Invalid argument. Please use --help for more info."
-    exit 1
-  fi   
+  if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
+    PORT_ARG="--port $1"
+    if [ -z "$2" ]; then
+      COMMAND="--upload"
+    elif [ "$2" = "verify" ] || [ "$2" = "upload" ]; then
+      COMMAND="--$2"
+    else
+      echo "Invalid argument. Please use --help for more info."
+      exit 1
+    fi
+  fi
+fi
+
+# For Linux Users, make sure they have installed libraries and src directory
+if [ "$OPERATING_SYSTEM" = "Linux" ]; then
+  if [ ! -d "./src/" ]; then
+    ln -s "$HERE/Marlin" "$HERE/src"
+  fi
+  mkdir ./libraries/
+  if [ ! -d "/usr/share/arduino/libraries/LiquidCrystal_I2C" ]; then
+    echo "Missing LiquidCrystal_I2C - Cloning..."
+    cd ./libraries/
+    git clone -q https://github.com/kiyoshigawa/LiquidCrystal_I2C.git
+    cd $HERE
+    rm -rf ./.build/
+  fi
+  if [ ! -d "/usr/share/arduino/libraries/LiquidTWI2" ]; then
+    echo "Missing LiquidTWI2 - Cloning..."
+    cd ./libraries/
+    git clone -q https://github.com/lincomatic/LiquidTWI2.git
+    cd $HERE
+    rm -rf ./.build/
+  fi
+  if [ ! -d "/usr/share/arduino/libraries/U8glib" ]; then
+    echo "Missing U8glib - Retrieving..."
+    wget -nv "https://bintray.com/artifact/download/olikraus/u8glib/u8glib_arduino_v1.18.1.zip"
+    sudo unzip -q u8glib_arduino_v1.18.1.zip -d /usr/share/arduino/libraries/
+    rm u8glib_arduino_v1.18.1.zip
+    rm -rf ./.build/
+  fi
+  if [ ! -d "/usr/share/arduino/libraries/L6470" ]; then
+    echo "Missing L6470 - Retrieving..."
+    sudo cp -r ./ArduinoAddons/Arduino_1.x.x/libraries/L6470 /usr/share/arduino/libraries/
+    rm -rf ./.build/
+  fi
+  if [ ! -d "/usr/share/arduino/libraries/TMC26XStepper" ]; then
+    echo "Missing TMC26XStepper - Retrieving..."
+    sudo cp -r ./ArduinoAddons/Arduino_1.x.x/libraries/TMC26XStepper /usr/share/arduino/libraries/
+    rm -rf ./.build/
+  fi
+  if [ -d "/usr/share/arduino/libraries/Robot_Control" ]; then
+    sudo rm -rf /usr/share/arduino/libraries/Robot_Control
+    rm -rf ./.build/
+  fi
+  cd ./libraries
+  sudo cp -r . /usr/share/arduino/libraries/
+  cd $HERE
+  rm -rf ./libraries/
 fi
 
 # Generate _Version.h using Git repo info
-# Could use git describe --dirty to append this, but we have more control here
 if ! git diff-index --quiet HEAD --; then
   VERSION_MODIFIED="-modified"
 else
@@ -97,20 +152,29 @@ echo "#define STRING_DISTRIBUTION_DATE" `date '+"%Y-%m-%d %H:%M"'` >>"$OUTFILE"
 )
 
 # If /build/ exists, remove.
-if [ -d "$HERE/build/" ]; then
-  echo "Build directory exists, removing..."
-  rm -rf $HERE/build/
+if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
+  if [ -d "$HERE/build/" ]; then
+    echo "Build directory exists, removing..."
+    rm -rf $HERE/build/
+  fi
+else
+  if [ -d "$HERE/.build/" ]; then
+    echo "Build directory exists, removing..."
+    rm -rf $HERE/.build/
+  fi
 fi
 
 echo $VERSION
 echo ""
 
-case "$(uname -s)"
+case "$OPERATING_SYSTEM"
   in Darwin)
     ARDUINO_EXEC="/Applications/Arduino.app/Contents/MacOS/Arduino $COMMAND \"$HERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
-    ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/"
+    ARDUINO_DEP="/Applications/Arduino.app/Contents/Java/hardware/arduino/avr"
   ;; Linux)
-    # Future support for Linux
+    ARDUINO_DEP="/usr/share/arduino/hardware/arduino"
+    ARDUINO_EXEC_COMPILE="ino build -m mega2560"
+    ARDUINO_EXEC_UPLOAD="ino upload -m mega2560"
   ;; CYGWIN*)
     CYGHERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cygpath -aw $(pwd) )"
     ARDUINO_EXEC="C:/Program\ Files\ \(x86\)/Arduino/arduino_debug.exe $COMMAND \"$CYGHERE/Marlin/Marlin.ino\" --pref build.path=\"$HERE/build/\" --pref board=rambo $PORT_ARG"
@@ -120,23 +184,41 @@ case "$(uname -s)"
     ARDUINO_DEP="C:/Program Files (x86)/Arduino/hardware/arduino/avr"
   ;; *)
     echo 'This operating system is unfamiliar'
+    exit 1
 esac
 
 # Prepare for build by copying in RAMBo boards.txt and pins files
-
-if [ -d "$ARDUINO_DEP/variants/rambo" ] && [ ! -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
-  mv "$ARDUINO_DEP/variants/rambo/" "$ARDUINO_DEP/variants/rambo_backup/"
+if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
+  if [ -d "$ARDUINO_DEP/variants/rambo" ] && [ ! -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
+    mv "$ARDUINO_DEP/variants/rambo/" "$ARDUINO_DEP/variants/rambo_backup/"
+  fi
+  # Even if a user doesn't have a rambo folder, they should have a boards.txt
+  if [ -f "$ARDUINO_DEP/boards.txt" ]; then
+    mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
+  fi
+  cp "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/boards.txt" "$ARDUINO_DEP/"
+  cp -r "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/." "$ARDUINO_DEP/variants/rambo/"
+else
+  if [ -d "$ARDUINO_DEP/variants/standard" ] && [ ! -d "$ARDUINO_DEP/variants/standard_backup" ]; then
+    sudo mv "$ARDUINO_DEP/variants/standard/" "$ARDUINO_DEP/variants/standard_backup/"
+  fi
+  if [ -f "$ARDUINO_DEP/boards.txt" ]; then
+    sudo mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
+  fi
+  sudo cp "$HERE/ArduinoAddons/Arduino_1.0.x/hardware/rambo/boards.txt" "$ARDUINO_DEP/"
+  sudo cp -r "$HERE/ArduinoAddons/Arduino_1.0.x/hardware/rambo/variants/standard/." "$ARDUINO_DEP/variants/standard/"
 fi
-# Even if a user doesn't have a rambo folder, they should have a boards.txt
-if [ -f "$ARDUINO_DEP/boards.txt" ]; then
-  mv "$ARDUINO_DEP/boards.txt" "$ARDUINO_DEP/boards_backup.txt"
-fi
-cp "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/boards.txt" "$ARDUINO_DEP/"
-cp -r "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/variants/rambo/" "$ARDUINO_DEP/variants/rambo/"
 
 # Create the build directory
-mkdir "$HERE/build/"
-eval $ARDUINO_EXEC
+if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
+  mkdir "$HERE/build/"
+  eval $ARDUINO_EXEC
+else
+  eval $ARDUINO_EXEC_COMPILE
+  if [ ! "$1" = "verify" ]; then
+    eval $ARDUINO_EXEC_UPLOAD
+  fi
+fi
 case "$?" in
   0) echo "The action has been performed successfully."
   ;;
@@ -151,12 +233,24 @@ case "$?" in
 esac
 
 # Clean Up
-rm -rf ./build/
-if [ -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
-  rm -rf "$ARDUINO_DEP/variants/rambo/"
-  mv "$ARDUINO_DEP/variants/rambo_backup/" "$ARDUINO_DEP/variants/rambo/"
-fi
-if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
-  rm "$ARDUINO_DEP/boards.txt"
-  mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
+if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
+  rm -rf ./build/
+  if [ -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
+    rm -rf "$ARDUINO_DEP/variants/rambo/"
+    mv "$ARDUINO_DEP/variants/rambo_backup/" "$ARDUINO_DEP/variants/rambo/"
+  fi
+  if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
+    rm "$ARDUINO_DEP/boards.txt"
+    mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
+  fi
+else 
+  rm -rf ./.build/
+  if [ -d "$ARDUINO_DEP/variants/standard_backup" ]; then
+    sudo rm -rf "$ARDUINO_DEP/variants/standard/"
+    sudo mv "$ARDUINO_DEP/variants/standard_backup/" "$ARDUINO_DEP/variants/standard/"
+  fi
+  if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
+    sudo rm "$ARDUINO_DEP/boards.txt"
+    sudo mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
+  fi
 fi
