@@ -158,9 +158,9 @@ if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
     rm -rf $HERE/build/
   fi
 else
-  if [ -d "$HERE/.build/" ]; then
-    echo "Build directory exists, removing..."
-    rm -rf $HERE/.build/
+  if [ -f "$HERE/.build/mega2560/firmware.hex" ]; then
+    echo "Firmware file exists, removing..."
+    rm $HERE/.build/mega2560/firmware.hex
   fi
 fi
 
@@ -244,7 +244,7 @@ if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
     mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
   fi
 else 
-  rm -rf ./.build/
+  rm ./.build/mega2560/firmware.hex
   if [ -d "$ARDUINO_DEP/variants/standard_backup" ]; then
     sudo rm -rf "$ARDUINO_DEP/variants/standard/"
     sudo mv "$ARDUINO_DEP/variants/standard_backup/" "$ARDUINO_DEP/variants/standard/"
