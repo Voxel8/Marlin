@@ -2,7 +2,7 @@
 # Correct Syntax: ./build.sh [port [*upload | verify]]
 set -e
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $HERE
+cd "$HERE"
 OPERATING_SYSTEM="$(uname -s)"
 VERSION='Voxel8 Marlin Build Script v1.0'
 
@@ -66,14 +66,14 @@ if [ "$OPERATING_SYSTEM" = "Linux" ]; then
     echo "Missing LiquidCrystal_I2C - Cloning..."
     cd ./libraries/
     git clone -q https://github.com/kiyoshigawa/LiquidCrystal_I2C.git
-    cd $HERE
+    cd "$HERE"
     rm -rf ./.build/
   fi
   if [ ! -d "/usr/share/arduino/libraries/LiquidTWI2" ]; then
     echo "Missing LiquidTWI2 - Cloning..."
     cd ./libraries/
     git clone -q https://github.com/lincomatic/LiquidTWI2.git
-    cd $HERE
+    cd "$HERE"
     rm -rf ./.build/
   fi
   if [ ! -d "/usr/share/arduino/libraries/U8glib" ]; then
@@ -99,7 +99,7 @@ if [ "$OPERATING_SYSTEM" = "Linux" ]; then
   fi
   cd ./libraries
   sudo cp -r . /usr/share/arduino/libraries/
-  cd $HERE
+  cd "$HERE"
   rm -rf ./libraries/
 fi
 
@@ -155,12 +155,12 @@ echo "#define STRING_DISTRIBUTION_DATE" `date '+"%Y-%m-%d %H:%M"'` >>"$OUTFILE"
 if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
   if [ -d "$HERE/build/" ]; then
     echo "Build directory exists, removing..."
-    rm -rf $HERE/build/
+    rm -rf "$HERE/build/"
   fi
 else
   if [ -f "$HERE/.build/mega2560/firmware.hex" ]; then
     echo "Firmware file exists, removing..."
-    rm $HERE/.build/mega2560/firmware.hex
+    rm "$HERE/.build/mega2560/firmware.hex"
   fi
 fi
 
