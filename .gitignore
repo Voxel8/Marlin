@@ -29,3 +29,4 @@ libraries/
 src/
 .ropeproject
 *.pyc
+.build_log
