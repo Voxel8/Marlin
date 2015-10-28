@@ -26,6 +26,7 @@ build/
 .build/
 lib/
 libraries/
-src/
+src
 .ropeproject
 *.pyc
+.build_log
