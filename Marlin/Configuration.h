@@ -405,7 +405,7 @@ Here are some standard links for getting your machine calibrated:
   // If the pressure goes above this value the pump will be turned off. This prevents
   // the tank from being overpressurized. This value has units of PSI * 10 (to eliminate
   // floating point numbers in the lookup table).
-  #define PNEUMATIC_MAX 500
+  #define PNEUMATIC_MAX 1000 // 100 psi
 #endif
 
 //===========================================================================
