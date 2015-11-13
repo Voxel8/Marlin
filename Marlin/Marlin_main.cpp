@@ -5044,8 +5044,8 @@ inline void gcode_M226() {
     feedrate = homing_feedrate[Z_AXIS];
   
     // Adjust z-axis to specified height
-    destination[Z_AXIS] = BED_LEVEL_PROBE_Z;
-    prepare_move();
+    do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], BED_LEVEL_PROBE_Z);
+    sync_plan_position();
   
     float levelProbe_1 = bed_level_probe_pt(ABL_PROBE_PT_1_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_1_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
           levelProbe_2 = bed_level_probe_pt(ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level),
