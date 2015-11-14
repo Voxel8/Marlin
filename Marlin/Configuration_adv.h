@@ -130,6 +130,9 @@
 
 #if ENABLED(E_REGULATOR)
   #define REGULATOR_CHECK_INTERVAL 2500 // in ms
+
+  // If tank pressure is greater than this number, house air is assumed
+  #define HOUSE_AIR_THRESH    42 // 42 psi
 #endif
 
 //===========================================================================
