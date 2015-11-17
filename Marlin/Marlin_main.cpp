@@ -4954,46 +4954,72 @@ inline void gcode_M226() {
   inline void gcode_M236() {
     uint8_t current_tank = (uint8_t)pressurePneumatic();
     uint8_t current_tank_target = (uint8_t)targetPneumatic();
-
+    uint8_t house_air = FALSE;
+    // Check for house air
+    if(current_tank > HOUSE_AIR_THRESH) {
+      house_air = TRUE;
+    }
     if(code_seen('S')) {
       float psi = code_value();
-      // Desired pressure is more than maximum allowed output pressure
-      if(psi > OUTPUT_PSI_MAX) {
-        SERIAL_PROTOCOLPGM("WARNING: Desired Pressure Above Max Allowed Pressure (");
+      }
+      // Desired pressure outside allowed range?
+      if((psi > OUTPUT_PSI_MAX) || (psi < OUTPUT_PSI_MIN)) {
+        SERIAL_PROTOCOLPGM("WARNING: Desired Pressure Outside Allowed Pressure Range (");
+        SERIAL_PROTOCOL(OUTPUT_PSI_MIN);
+        SERIAL_PROTOCOLPGM(" - ");
         SERIAL_PROTOCOL(OUTPUT_PSI_MAX);
         SERIAL_PROTOCOLPGM(" psi)");
       }
-      // Desired pressure is less than minimum allowed output pressure
-      else if(psi < OUTPUT_PSI_MIN) {
-        SERIAL_PROTOCOLPGM("WARNING: Desired Pressure Below Min Allowed Pressure (");
-        SERIAL_PROTOCOL(OUTPUT_PSI_MIN);
-        SERIAL_PROTOCOLPGM(" psi)");
+      // Using house air?
+      else if(house_air) {
+        // Desired pressure is available
+        if(psi <= (current_tank - PNEUMATIC_HYSTERESIS_PSI)) {
+          setOutputPressure(psi);
+        }
+        // If tank is near zero, can set output to zero
+        else if((psi == 0) && (current_tank <= REGULATOR_LOW_P)) {
+          setOutputPressure(psi);
+        }
+        // Desired pressure NOT available
+        else {
+          uint16_t available_output_pressure = (current_tank - PNEUMATIC_HYSTERESIS_PSI);
+          // Tank pressure is ~0 psi
+          if(current_tank <= REGULATOR_LOW_P) {
+            available_output_pressure = 0;
+          }
+          // Display available pressure
+          SERIAL_PROTOCOLLNPGM("WARNING: Insufficient tank pressure");
+          SERIAL_PROTOCOLPGM("Available Pressure: ");
+          SERIAL_PROTOCOL(available_output_pressure);
+          SERIAL_PROTOCOLPGM(" psi");
+        }
       }
-      // Desired pressure is available
-      else if((psi <= (current_tank - PNEUMATIC_HYSTERESIS_PSI))  && (psi <= (current_tank_target - PNEUMATIC_HYSTERESIS_PSI))) {
-        setOutputPressure(psi);
-      }
-      // Tank pressure is near zero, can set output to near zero
-      else if(((psi == 0) && (current_tank <= REGULATOR_LOW_P)) || ((psi == 0) && (current_tank_target <= REGULATOR_LOW_P))) {     
-        setOutputPressure(psi);
-      }
-      // Desired pressure not available
+      // Not using house air (internal pump)
       else {
-        uint16_t available_output_pressure = 0;
-        
-        if ((current_tank <= REGULATOR_LOW_P) || (current_tank_target <= REGULATOR_LOW_P)) {
-          available_output_pressure = 0;
+      // Desired pressure is available
+        if((psi <= (current_tank - PNEUMATIC_HYSTERESIS_PSI))  && (psi <= (current_tank_target - PNEUMATIC_HYSTERESIS_PSI))) {
+          setOutputPressure(psi);
         }
-        else if (current_tank <= current_tank_target) {
-          available_output_pressure = (current_tank - PNEUMATIC_HYSTERESIS_PSI);
+        // Tank pressure is near zero, can set output to near zero
+        else if( (psi == 0) && ((current_tank <= REGULATOR_LOW_P) || (current_tank_target <= REGULATOR_LOW_P)) ) {
+          setOutputPressure(psi);
         }
-        else if (current_tank_target < current_tank) {
-          available_output_pressure = (current_tank_target - PNEUMATIC_HYSTERESIS_PSI);
+        // Desired pressure not available
+        else {
+          uint16_t available_output_pressure = (current_tank - PNEUMATIC_HYSTERESIS_PSI);
+          // Tank pressure is ~0 psi
+          if ((current_tank <= REGULATOR_LOW_P) || (current_tank_target <= REGULATOR_LOW_P)) {
+            available_output_pressure = 0;
+          }
+          // 
+          else if (current_tank_target < current_tank) {
+            available_output_pressure = (current_tank_target - PNEUMATIC_HYSTERESIS_PSI);
+          }
+          SERIAL_PROTOCOLLNPGM("WARNING: Insufficient tank pressure");
+          SERIAL_PROTOCOLPGM("Available Tank Pressure: ");
+          SERIAL_PROTOCOL(available_output_pressure);
+          SERIAL_PROTOCOLPGM(" psi");
         }
-        SERIAL_PROTOCOLLNPGM("WARNING: Cannot output desired pressure due to insufficient tank pressure");
-        SERIAL_PROTOCOLPGM("Available Tank Pressure: ");
-        SERIAL_PROTOCOL(available_output_pressure);
-        SERIAL_PROTOCOLPGM(" psi");
       }
       SERIAL_EOL;
     }
