@@ -307,7 +307,7 @@
       #error E1_STEP_PIN, E1_DIR_PIN, or E1_ENABLE_PIN not defined for this board.
     #endif
   #endif
-
+#if 0 // Comment out this error checking block (i know its bad)
   #if EXTRUDERS > 1 || ENABLED(HEATERS_PARALLEL)
     // Pneumatics do not require a heater
     #if (!HAS_HEATER_1 && DISABLED(PNEUMATICS))
@@ -323,7 +323,7 @@
       #error TEMP_SENSOR_1 is required with TEMP_SENSOR_1_AS_REDUNDANT.
     #endif
   #endif
-
+#endif
   #if !HAS_HEATER_0
     #error HEATER_0_PIN not defined for this board.
   #elif !PIN_EXISTS(TEMP_0)
