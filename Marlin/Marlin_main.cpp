@@ -4961,7 +4961,6 @@ inline void gcode_M226() {
     }
     if(code_seen('S')) {
       float psi = code_value();
-      }
       // Desired pressure outside allowed range?
       if((psi > OUTPUT_PSI_MAX) || (psi < OUTPUT_PSI_MIN)) {
         SERIAL_PROTOCOLPGM("WARNING: Desired Pressure Outside Allowed Pressure Range (");
