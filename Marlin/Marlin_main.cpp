@@ -4954,10 +4954,10 @@ inline void gcode_M226() {
   inline void gcode_M236() {
     uint8_t current_tank = (uint8_t)pressurePneumatic();
     uint8_t current_tank_target = (uint8_t)targetPneumatic();
-    uint8_t house_air = FALSE;
+    uint8_t house_air = false;
     // Check for house air
     if(current_tank > HOUSE_AIR_THRESH) {
-      house_air = TRUE;
+      house_air = true;
     }
     if(code_seen('S')) {
       float psi = code_value();
