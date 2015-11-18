@@ -4963,7 +4963,7 @@ inline void gcode_M226() {
       float psi = code_value();
       // Desired pressure outside allowed range?
       if((psi > OUTPUT_PSI_MAX) || (psi < OUTPUT_PSI_MIN)) {
-        SERIAL_PROTOCOLPGM("WARNING: Desired Pressure Outside Allowed Pressure Range (");
+        SERIAL_PROTOCOLPGM("ERROR: Desired Pressure Outside Allowed Pressure Range (");
         SERIAL_PROTOCOL(OUTPUT_PSI_MIN);
         SERIAL_PROTOCOLPGM(" - ");
         SERIAL_PROTOCOL(OUTPUT_PSI_MAX);
@@ -4987,7 +4987,7 @@ inline void gcode_M226() {
             available_output_pressure = 0;
           }
           // Display available pressure
-          SERIAL_PROTOCOLLNPGM("WARNING: Insufficient tank pressure");
+          SERIAL_PROTOCOLLNPGM("ERROR: Insufficient tank pressure");
           SERIAL_PROTOCOLPGM("Available Pressure: ");
           SERIAL_PROTOCOL(available_output_pressure);
           SERIAL_PROTOCOLPGM(" psi");
@@ -5014,7 +5014,7 @@ inline void gcode_M226() {
           else if (current_tank_target < current_tank) {
             available_output_pressure = (current_tank_target - PNEUMATIC_HYSTERESIS_PSI);
           }
-          SERIAL_PROTOCOLLNPGM("WARNING: Insufficient tank pressure");
+          SERIAL_PROTOCOLLNPGM("ERROR: Insufficient tank pressure");
           SERIAL_PROTOCOLPGM("Available Tank Pressure: ");
           SERIAL_PROTOCOL(available_output_pressure);
           SERIAL_PROTOCOLPGM(" psi");
