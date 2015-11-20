@@ -34,6 +34,7 @@ Here are some standard links for getting your machine calibrated:
 //===========================================================================
 // For a Scara printer replace the configuration files with the files in the
 // example_configurations/SCARA directory.
+// just testing this computer
 //
 
 // @section info
@@ -724,7 +725,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 #if ENABLED(CUSTOM_M_CODES)
   #if ENABLED(AUTO_BED_LEVELING_FEATURE)
     #define CUSTOM_M_CODE_SET_Z_PROBE_OFFSET 851
-    #define Z_PROBE_OFFSET_RANGE_MIN -20
+    #define Z_PROBE_OFFSET_RANGE_MIN -20	
     #define Z_PROBE_OFFSET_RANGE_MAX 20
   #endif
 #endif
