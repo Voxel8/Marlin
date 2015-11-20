@@ -112,8 +112,10 @@ DIGITAL POTENTIOMETER PINS
 /*************************
     SOLENOID PINS
 *************************/
-#define SOL0_PIN                -1 // Set to CART0_SIG0_PIN for pneumatics in CART0
-#define SOL1_PIN                CART1_SIG0_PIN
+#if ENABLED(PNEUMATICS)
+  #define SOL0_PIN                -1 // Set to CART0_SIG0_PIN for pneumatics in CART0
+  #define SOL1_PIN                CART1_SIG0_PIN
+#endif
 
 
 #define E0_STEP_PIN             34
