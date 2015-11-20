@@ -34,7 +34,7 @@ Here are some standard links for getting your machine calibrated:
 //===========================================================================
 // For a Scara printer replace the configuration files with the files in the
 // example_configurations/SCARA directory.
-// just testing this computer
+// just testing 
 //
 
 // @section info
