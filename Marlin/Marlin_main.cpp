@@ -5032,7 +5032,6 @@ inline void gcode_M226() {
     }
     // Return current output pressure if no desired pressure given
     else {
-      SERIAL_PROTOCOLPGM("ok ");
       SERIAL_PROTOCOL(actual_output_pressure);
     }
     SERIAL_EOL;
