@@ -3,6 +3,7 @@
 import unittest
 import numpy as np
 from mecode import G
+from time import sleep
 
 
 class MarlinTestCase(unittest.TestCase):
@@ -24,6 +25,12 @@ class MarlinTestCase(unittest.TestCase):
         self.g.teardown()
         self.g = None
 
+    ###########################################################################
+    #
+    #                          Function Definitions
+    #
+    ###########################################################################
+
     def read_profilometer(self, samples=1):
         g = self.g
         samples = np.floor(np.log2(samples))
@@ -33,6 +40,33 @@ class MarlinTestCase(unittest.TestCase):
             return None
         prof_val -= 5000
         return prof_val
+
+    def set_tank_pressure(self, desired_pressure):
+        g = self.g
+        timeout = 60
+        time_passed = 0
+
+        g.write('M125 S' + str(desired_pressure))
+        # Wait for pressurization
+        while (True):
+            resp = g.write('M105', resp_needed=True)
+            # String returned is of the form:
+            # ok T:25.0 /0.0 B:0.0 /0.0 T0:25.0 /0.0 T1:0.0 /0.0 P:35.7 /0.0 ...
+            if (float(resp.split('P:')[1].split()[0]) >= desired_pressure):
+                break
+            else if(time_passed >= timeout):
+                print('ERROR: Timeout while waiting for pressurization')
+                break
+            else:
+                sleep(1)
+                time_passed += 1
+
+
+    ###########################################################################
+    #
+    #                               Tests
+    #
+    ###########################################################################
 
     def test_M237(self):
         g = self.g
@@ -146,6 +180,66 @@ class MarlinTestCase(unittest.TestCase):
         g.write('M851 Z{}'.format(orig_offset))
         g.write('M500')
         g.move(Z=5)
+
+    # REQUIRES PRINTER CONNECTION
+    def test_M236(self):
+        g = self.g
+
+        # Pressure Definitions
+        pressure_setpoint = 10
+        pressure_buffer = 2
+        pressure_upper_bound = 131
+        pressure_lower_bound = -1
+        pressure_near_zero = 2
+
+        # Assert that available output pressure is 0 psi when tank near 0 psi
+        status = g.write('M236 V', resp_needed=True)
+
+        # Check that tank is near 0 psi first
+        if (status.split()[7] <= pressure_near_zero):
+            # Assert that available tank pressure is 0 psi when tank near 0 psi
+            resp = g.write('M236 S' + str(pressure_setpoint), resp_needed=True)
+            self.assertIn('Available Tank Pressure: 0 psi', resp)
+
+            status = g.write('M236 V', resp_needed=True)
+            self.assertIn('Output Pressure Set Point: 0.00',status)
+
+            # Assert that setpoint of 0 psi is valid when tank near 0 psi
+            resp = g.write('M236 S0', resp_needed=True)
+            self.assertNotIn('ERROR: Insufficient tank pressure', resp)
+        else:
+            print('WARNING: Tests requiring pressure near zero skipped')
+
+        # Set tank pressure with internal pump
+        self.set_tank_pressure(desired_pressure=pressure_setpoint)
+
+        # Assert that airsource identified as internal pump
+        status = g.write('M236 V', resp_needed=True)
+        self.assertIn('Internal Pump', status)
+
+        # Assert that setpoint must be <= (tank_target - 2 psi)
+        for i in range(0, pressure_buffer):
+            resp = g.write('M236 S' + str(pressure_setpoint - i)),
+                           resp_needed=True)
+            self.assertIn('ERROR: Insufficient tank pressure', resp)
+
+        # (Setpoint - buffer) should be valid output pressure
+        resp = g.write('M236 S' + str(pressure_setpoint - pressure_buffer),
+                       resp_needed=True)
+        self.assertNotIn('ERROR: Insufficient tank pressure', resp)
+
+        status = g.write('M236 V', resp_needed=True)
+        self.assertIn('Output Pressure Set Point: ' +
+                      str(pressure_setpoint - pressure_buffer))
+
+        # Assert that pressure range cannot be exceeded without errors
+        resp = g.write('M236 S' + str(pressure_lower_bound), resp_needed=True)
+        self.assertIn('Outside Allowed Pressure Range', resp)
+
+        resp = g.write('M236 S' + str(pressure_upper_bound), resp_needed=True)
+        self.assertIn('Outside Allowed Pressure Range', resp)
+
+        #
 
 
 if __name__ == '__main__':
