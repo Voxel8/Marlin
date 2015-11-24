@@ -54,7 +54,7 @@ class MarlinTestCase(unittest.TestCase):
             # ok T:25.0 /0.0 B:0.0 /0.0 T0:25.0 /0.0 T1:0.0 /0.0 P:35.7 /0.0 ...
             if (float(resp.split('P:')[1].split()[0]) >= desired_pressure):
                 break
-            else if(time_passed >= timeout):
+            elif (time_passed >= timeout):
                 print('ERROR: Timeout while waiting for pressurization')
                 break
             else:
@@ -187,6 +187,7 @@ class MarlinTestCase(unittest.TestCase):
 
         # Pressure Definitions
         pressure_setpoint = 10
+        pressure_house_air = 45
         pressure_buffer = 2
         pressure_upper_bound = 131
         pressure_lower_bound = -1
@@ -219,7 +220,7 @@ class MarlinTestCase(unittest.TestCase):
 
         # Assert that setpoint must be <= (tank_target - 2 psi)
         for i in range(0, pressure_buffer):
-            resp = g.write('M236 S' + str(pressure_setpoint - i)),
+            resp = g.write('M236 S' + str(pressure_setpoint - i),
                            resp_needed=True)
             self.assertIn('ERROR: Insufficient tank pressure', resp)
 
@@ -239,7 +240,12 @@ class MarlinTestCase(unittest.TestCase):
         resp = g.write('M236 S' + str(pressure_upper_bound), resp_needed=True)
         self.assertIn('Outside Allowed Pressure Range', resp)
 
-        #
+        # Imitate house air with ~45 psi
+        self.set_tank_pressure(pressure_house_air)
+
+        # Assert that airsource identified as house air
+        status = g.write('M236 V', resp_needed=True)
+        self.assertIn('House Air', resp)
 
 
 if __name__ == '__main__':
