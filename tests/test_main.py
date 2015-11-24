@@ -247,6 +247,10 @@ class MarlinTestCase(unittest.TestCase):
         status = g.write('M236 V', resp_needed=True)
         self.assertIn('House Air', resp)
 
+        # Reset printer to previous state
+        g.write('M236 S0')
+        g.write('M125 S0')
+
 
 if __name__ == '__main__':
     unittest.main()
