@@ -145,6 +145,7 @@ DIGITAL POTENTIOMETER PINS
 	  ADMINISTRATIVE PINS
 *************************/
 #define V_MONITOR_PIN           79  //! Monitor voltage to print engine
+#define PS_FORCE_ON_LL          70  // Enable 24V to system - Logic Low
 #define PS_ON_PIN               4
 #define KILL_PIN                -1  //80 with Smart Controller LCD
 #define SUICIDE_PIN             -1  //PIN that has to be turned on right after start, to keep power flowing.

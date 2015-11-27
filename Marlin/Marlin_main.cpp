@@ -596,6 +596,28 @@ void setup_powerhold() {
   #endif
 }
 
+/*
+  Enable 24V to fans, E-reg, Cartridge Holder, Cartridges
+  if no short circuit is detected on line
+  40ms, blocking time
+  Requires serial to be enabled to generate error condition
+*/
+void enable_24V() {
+  delay(40);  // 40ms delay for line to settle
+  int V_Monitor_Result = analogRead(V_MONITOR_PIN);
+  if (V_Monitor_Result > 205)   // 2^10 * 1V/5V = 205 TODO: better define V_Monitor_Result states
+  {
+    digitalWrite(PS_FORCE_ON_LL,LOW); // Pull Power Supply enable low to force on
+    pinMode(PS_FORCE_ON_LL, OUTPUT);  //
+    delayMicroseconds(100);           // 100us minimum delay to register on
+    pinMode(PS_FORCE_ON_LL, INPUT);   // Release Power Supply enable to allow current limiting
+  }  
+  else // Handle error case (short circuit or open circuit?)
+  {
+    SERIAL_PROTOCOLLNPGM("Error turning on 24V power...");  // TODO: Add to error handling
+  }
+}
+
 void suicide() {
   #if HAS_SUICIDE
     OUT_WRITE(SUICIDE_PIN, LOW);
@@ -670,6 +692,9 @@ void setup() {
   MYSERIAL.begin(BAUDRATE);
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
+  
+  // Turn on downstream power
+  enable_24V();
   
   // Turn on all chassis fans
   pinMode(FAN_CHASSIS_BOT_PIN, OUTPUT);
