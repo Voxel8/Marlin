@@ -51,7 +51,7 @@ class MarlinTestCase(unittest.TestCase):
         while (True):
             resp = g.write('M105', resp_needed=True)
             # String returned is of the form:
-            # ok T:25.0 /0.0 B:0.0 /0.0 T0:25.0 /0.0 T1:0.0 /0.0 P:35.7 /0.0 ...
+            # ok T:25.0 /0.0 B:0.0 /0.0 T0:25.0 /0.0 T1:0.0 /0.0 P:35.7 /0.0...
             if (float(resp.split('P:')[1].split()[0]) >= desired_pressure):
                 break
             elif (time_passed >= timeout):
@@ -60,7 +60,7 @@ class MarlinTestCase(unittest.TestCase):
             else:
                 sleep(1)
                 time_passed += 1
-
+        return None
 
     ###########################################################################
     #
@@ -203,7 +203,7 @@ class MarlinTestCase(unittest.TestCase):
             self.assertIn('Available Tank Pressure: 0 psi', resp)
 
             status = g.write('M236 V', resp_needed=True)
-            self.assertIn('Output Pressure Set Point: 0.00',status)
+            self.assertIn('Output Pressure Set Point: 0.00', status)
 
             # Assert that setpoint of 0 psi is valid when tank near 0 psi
             resp = g.write('M236 S0', resp_needed=True)
