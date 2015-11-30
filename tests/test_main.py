@@ -14,8 +14,8 @@ class MarlinTestCase(unittest.TestCase):
             aerotech_include=False,
             direct_write=True,
             direct_write_mode='serial',
-            printer_port="/dev/tty.usbmodem1421",
-            #printer_port="COM14",
+            #printer_port="/dev/tty.usbmodem1421",
+            printer_port="COM4",
         )
 
     def tearDown(self):
@@ -43,7 +43,7 @@ class MarlinTestCase(unittest.TestCase):
 
     def set_tank_pressure(self, desired_pressure):
         g = self.g
-        timeout = 60
+        timeout = 90
         time_passed = 0
 
         g.write('M125 S' + str(desired_pressure))
@@ -231,7 +231,7 @@ class MarlinTestCase(unittest.TestCase):
 
         status = g.write('M236 V', resp_needed=True)
         self.assertIn('Output Pressure Set Point: ' +
-                      str(pressure_setpoint - pressure_buffer))
+                      str(pressure_setpoint - pressure_buffer), status)
 
         # Assert that pressure range cannot be exceeded without errors
         resp = g.write('M236 S' + str(pressure_lower_bound), resp_needed=True)
@@ -245,7 +245,7 @@ class MarlinTestCase(unittest.TestCase):
 
         # Assert that airsource identified as house air
         status = g.write('M236 V', resp_needed=True)
-        self.assertIn('House Air', resp)
+        self.assertIn('House Air', status)
 
         # Reset printer to previous state
         g.write('M236 S0')
