@@ -602,10 +602,10 @@ void setup_powerhold() {
   ~200us, blocking time
   Requires serial to be enabled to generate error condition
 */
-void enable_24V() {
+void enable_power_supply() {
   // delay(40);  // 40ms delay for line to settle. NOT NEEDED. Fuse set to 65ms startup delay by default.
-  analogRead(V_MONITOR_PIN);  // Throw out first reading
-  int V_Monitor_Result = analogRead(V_MONITOR_PIN);
+  analogRead(PS_MONITOR_PIN);  // Throw out first reading
+  int V_Monitor_Result = analogRead(PS_MONITOR_PIN);
   if (V_Monitor_Result > PS_ENABLE_LOWER_LIMIT)   // Test for 24V short to gnd
   {
     if (V_Monitor_Result <= PS_ENABLE_UPPER_LIMIT) // Test for 24V short to 5V
@@ -704,7 +704,7 @@ void setup() {
   SERIAL_ECHO_START;
   
   // Turn on downstream power
-  enable_24V();
+  enable_power_supply();
   
   // Turn on all chassis fans
   pinMode(FAN_CHASSIS_BOT_PIN, OUTPUT);
