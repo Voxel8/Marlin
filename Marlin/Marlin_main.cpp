@@ -603,22 +603,32 @@ void setup_powerhold() {
 /*
   Enable 24V to fans, E-reg, Cartridge Holder, Cartridges
   if no short circuit is detected on line
-  40ms, blocking time
+  ~200us, blocking time
   Requires serial to be enabled to generate error condition
 */
 void enable_24V() {
-  delay(40);  // 40ms delay for line to settle
+  // delay(40);  // 40ms delay for line to settle. NOT NEEDED. Fuse set to 65ms startup delay by default.
+  analogRead(V_MONITOR_PIN);  // Throw out first reading
   int V_Monitor_Result = analogRead(V_MONITOR_PIN);
-  if (V_Monitor_Result > 205)   // 2^10 * 1V/5V = 205 TODO: better define V_Monitor_Result states
+  if (V_Monitor_Result > PS_ENABLE_LOWER_LIMIT)   // Test for 24V short to gnd
   {
-    digitalWrite(PS_FORCE_ON_LL,LOW); // Pull Power Supply enable low to force on
-    pinMode(PS_FORCE_ON_LL, OUTPUT);  //
-    delayMicroseconds(100);           // 100us minimum delay to register on
-    pinMode(PS_FORCE_ON_LL, INPUT);   // Release Power Supply enable to allow current limiting
+    if (V_Monitor_Result <= PS_ENABLE_UPPER_LIMIT) // Test for 24V short to 5V
+    {
+      digitalWrite(PS_FORCE_ON_LL,LOW); // Pull Power Supply enable low to force on
+      pinMode(PS_FORCE_ON_LL, OUTPUT);  //
+      delayMicroseconds(100);           // 100us minimum delay to register on
+      pinMode(PS_FORCE_ON_LL, INPUT);   // Release Power Supply enable to allow current limiting
+    }
+    else 
+    {
+      // TODO: Add to error handling protocol
+      SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
+    }
   }  
   else // Handle error case (short circuit or open circuit?)
   {
-    SERIAL_PROTOCOLLNPGM("Error turning on 24V power...");  // TODO: Add to error handling
+    // TODO: Add to error handling protocol
+    SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/gnd short... PLEASE CHECK HARDWARE...");  
   }
 }
 
