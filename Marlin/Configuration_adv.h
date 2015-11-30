@@ -282,6 +282,10 @@
 // Microstep setting (Only functional when stepper driver microstep pins are connected to MCU.
 #define MICROSTEP_MODES {16,16,16,16,16} // [1,2,4,8,16]
 
+//===========================================================================
+//=============================Electrical Features===========================
+//===========================================================================
+
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
 /*VRef = ITripMAX * 0.8
 Note the A4982 is set to be limited to 2A. This means the adjustable voltage range is 0 to 1.66 volts. The following formula will yield the 8-bit binary value,
@@ -296,6 +300,12 @@ Wv = (VRef / 1.66) * 255
 #define DIGIPOT_I2C_NUM_CHANNELS 8
 // actual motor currents in Amps, need as many here as DIGIPOT_I2C_NUM_CHANNELS
 #define DIGIPOT_I2C_MOTOR_CURRENTS {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}
+  
+// Power supply enable
+// defines the voltage above which there is determined no short circuit
+#define PS_ENABLE_LOWER_LIMIT 205  // 2^10 * ([Rl/(499 + Rl)] + 200mV/5V), Rl = 100 Ohm
+// defines the voltage below which there is determined no open circuit or short to 5V line
+#define PS_ENABLE_UPPER_LIMIT 930  // 2^10 * ([Rl/(499 + Rl)] + 200mV/5V), Rl = 5k
 
 //===========================================================================
 //=============================Additional Features===========================
