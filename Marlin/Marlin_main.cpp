@@ -4956,7 +4956,7 @@ inline void gcode_M226() {
    * M236 - Send Value to ADC w/ no EEPROM write
    */
   inline void gcode_M236() {
-    uint8_t current_tank = (uint8_t)pressurePneumatic();
+    uint16_t current_tank = (uint8_t)pressurePneumatic();
     uint8_t current_tank_target = (uint8_t)targetPneumatic();
     uint16_t available_output_pressure = (current_tank - PNEUMATIC_HYSTERESIS_PSI);
     float actual_output_pressure = pressureRegulator();
@@ -5019,7 +5019,11 @@ inline void gcode_M226() {
       else {
         SERIAL_PROTOCOLLNPGM("Internal Pump");
       }
-      // Display available pressure
+      // Display actual tank pressure
+      SERIAL_PROTOCOLPGM("Actual Tank Pressure: ");
+      SERIAL_PROTOCOL(current_tank);
+      SERIAL_PROTOCOLLNPGM(" psi");
+      // Display available tank pressure
       SERIAL_PROTOCOLPGM("Available Tank Pressure: ");
       SERIAL_PROTOCOL(available_output_pressure);
       SERIAL_PROTOCOLLNPGM(" psi");
