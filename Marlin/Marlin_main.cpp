@@ -4956,7 +4956,7 @@ inline void gcode_M226() {
    * M236 - Send Value to ADC w/ no EEPROM write
    */
   inline void gcode_M236() {
-    uint16_t current_tank = (uint8_t)pressurePneumatic();
+    uint16_t current_tank = (uint16_t)pressurePneumatic();
     uint8_t current_tank_target = (uint8_t)targetPneumatic();
     uint16_t available_output_pressure = (current_tank - PNEUMATIC_HYSTERESIS_PSI);
     float actual_output_pressure = pressureRegulator();
