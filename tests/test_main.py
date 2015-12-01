@@ -27,7 +27,7 @@ class MarlinTestCase(unittest.TestCase):
 
     ###########################################################################
     #
-    #                          Function Definitions
+    #                                 Methods
     #
     ###########################################################################
 
@@ -55,12 +55,10 @@ class MarlinTestCase(unittest.TestCase):
             if (float(resp.split('P:')[1].split()[0]) >= desired_pressure):
                 break
             elif (time_passed >= timeout):
-                print('ERROR: Timeout while waiting for pressurization')
-                break
+                raise RuntimeError('Timeout while waiting for pressurization')
             else:
                 sleep(1)
                 time_passed += 1
-        return None
 
     ###########################################################################
     #
@@ -197,7 +195,7 @@ class MarlinTestCase(unittest.TestCase):
         status = g.write('M236 V', resp_needed=True)
 
         # Check that tank is near 0 psi first
-        if (status.split()[7] <= pressure_near_zero):
+        if (int(status.split()[7]) <= pressure_near_zero):
             # Assert that available tank pressure is 0 psi when tank near 0 psi
             resp = g.write('M236 S' + str(pressure_setpoint), resp_needed=True)
             self.assertIn('Available Tank Pressure: 0 psi', resp)
