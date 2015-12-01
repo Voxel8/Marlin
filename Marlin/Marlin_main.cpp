@@ -607,7 +607,11 @@ void setup_powerhold() {
   Requires serial to be enabled to generate error condition
 */
 void enable_power_supply() {
-  // delay(40);  // 40ms delay for line to settle. NOT NEEDED. Fuse set to 65ms startup delay by default.
+  // Turn on FAN first so that 24V does not have a path to 24V_SW through the Rambo. TODO: Disconnect these two circuits.
+  pinMode(FAN_CHASSIS_TOP_PIN, OUTPUT);
+  digitalWrite(FAN_CHASSIS_TOP_PIN, HIGH);
+  delay(6);  // 40ms delay for line to settle. NOT NEEDED. Fuse set to 65ms startup delay by default.
+  
   analogRead(PS_MONITOR_PIN);  // Throw out first reading
   int V_Monitor_Result = analogRead(PS_MONITOR_PIN);
   if (V_Monitor_Result > PS_ENABLE_LOWER_LIMIT)   // Test for 24V short to gnd
@@ -622,7 +626,8 @@ void enable_power_supply() {
     else 
     {
       // TODO: Add to error handling protocol
-      SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
+      // TODO: Figure out if coming up from power-down state or reset condition
+      //SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
     }
   }  
   else // Handle error case (short circuit or open circuit?)
