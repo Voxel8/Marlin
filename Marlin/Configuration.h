@@ -3,6 +3,8 @@
 
 #include "boards.h"
 #include "macros.h"
+#include "Configuration_adv.h"
+#include "thermistortables.h"
 
 //===========================================================================
 //============================= Getting Started =============================
@@ -112,13 +114,13 @@ Here are some standard links for getting your machine calibrated:
 // 1 = Texas Instruments ADS1115 (16-bit)
 // 2 = Texas Instruments ADS1015 (12-bit)
 //
-// Define this to allow the use of an external ADC 
+// Define this to allow the use of an external ADC
 #define EXT_ADC 1
 
 // Define ADC mode of operation (Single-ended or Differential) for the TI chips
 // ** This definition ONLY affects code that refers to EXT_ADC_RAW_x.
 // ** Even if a mode is defined here, both single-ended and differential readings
-// ** can be taken by using the functions defind in ADS1x15.cpp 
+// ** can be taken by using the functions defind in ADS1x15.cpp
 
 // 1 = Single-Ended Mode
 // 2 = Differential Mode
@@ -258,7 +260,7 @@ Here are some standard links for getting your machine calibrated:
 //  #define  DEFAULT_Kp 22.66
 //  #define  DEFAULT_Ki 1.92
 //  #define  DEFAULT_Kd 66.91
-    
+
 // E3D V6 24V with PT100
     #define  DEFAULT_Kp 19.96
     #define  DEFAULT_Ki 1.24
@@ -273,7 +275,7 @@ Here are some standard links for getting your machine calibrated:
 //    #define  DEFAULT_Kp 10.95
   //  #define  DEFAULT_Ki 0.45
     //#define  DEFAULT_Kd 69.97
-    
+
 //D3D 7/28 ada prints
 //#define  DEFAULT_Kp 12.06
 //#define  DEFAULT_Ki 0.48
@@ -384,7 +386,7 @@ Here are some standard links for getting your machine calibrated:
   #define E_REGULATOR_SENSOR 1
   #define DAC_I2C
  // 130 psi is max settable pressure for e-regulator
-  #define OUTPUT_PSI_MAX     130.0 
+  #define OUTPUT_PSI_MAX     130.0
   #define OUTPUT_PSI_MIN       0.0
 #endif
 
@@ -401,7 +403,7 @@ Here are some standard links for getting your machine calibrated:
 
   // 0 is a valid pressure reading
   #define PNEUMATIC_MIN -1
-  
+
   // If the pressure goes above this value the pump will be turned off. This prevents
   // the tank from being overpressurized. This value has units of PSI * 10 (to eliminate
   // floating point numbers in the lookup table).
@@ -697,10 +699,16 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 #define HOMING_FEEDRATE {50*60, 50*60, 15*60, 0}  // set the homing speeds (mm/min)
 
 // default settings
-// XY motors: (steps * microsteps)/ (tooth-pitch * tooth-count) --> (200steps * 16) / (2mm * 15 teeth) = 106.66666666666667
-// Z motor: (steps * microsteps) / (leadscrew pitch) --> (200steps * 4) / 2mm = 800
-// E motor: 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {106.6666666666667*2,106.6666666666667*2,1600,555}  // default steps per unit for Voxel8 gen3
+// XY motors: (steps * microsteps)/ (tooth-pitch * tooth-count)
+// Z motor: (steps * microsteps) / (leadscrew pitch)
+// E motor:
+#define XY_MOTOR_STEPS  400
+#define XY_STEPS_PER_MM (XY_MOTOR_STEPS * MICROSTEP_MODES[0]) / 30.0
+
+#define Z_MOTOR_STEPS   200
+#define Z_STEPS_PER_MM  (Z_MOTOR_STEPS * MICROSTEP_MODES[2]) / 2.0
+
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {XY_STEPS_PER_MM, XY_STEPS_PER_MM, Z_STEPS_PER_MM, 555}  // default steps per unit for Voxel8 gen3
 #define DEFAULT_MAX_FEEDRATE          {90, 90, 10, 25}        // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {5000,5000,100,9000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
 
@@ -855,7 +863,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 
 // Panucatt VIKI LCD with status LEDs, integrated click & L/R/U/P buttons, separate encoder inputs
 //#define LCD_I2C_VIKI
-  
+
 // SSD1306 OLED generic display support
 // ==> REMEMBER TO INSTALL U8glib to your ARDUINO library folder: http://code.google.com/p/u8glib/wiki/u8glib
 //#define U8GLIB_SSD1306
@@ -964,13 +972,5 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 
 //When using an LCD, uncomment the line below to display the Filament sensor data on the last line instead of status.  Status will appear for 5 sec.
 //#define FILAMENT_LCD_DISPLAY
-
-
-
-
-
-
-#include "Configuration_adv.h"
-#include "thermistortables.h"
 
 #endif //CONFIGURATION_H
