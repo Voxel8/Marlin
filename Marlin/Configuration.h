@@ -698,16 +698,26 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 
 #define HOMING_FEEDRATE {50*60, 50*60, 15*60, 0}  // set the homing speeds (mm/min)
 
-// default settings
-// XY motors: (steps * microsteps)/ (tooth-pitch * tooth-count)
-// Z motor: (steps * microsteps) / (leadscrew pitch)
-// E motor:
+// XY motors: (steps * microsteps)/ (tooth-pitch (mm) * tooth-count)
 #define XY_MOTOR_STEPS  400
-#define XY_STEPS_PER_MM (XY_MOTOR_STEPS * MICROSTEP_MODES[0]) / 30.0
+#define XY_TOOTH_PITCH  2.0
+#define XY_TOOTH_COUNT  15
+#define XY_STEPS_PER_MM (XY_MOTOR_STEPS * MICROSTEP_MODES[0]) / (XY_TOOTH_PITCH * XY_TOOTH_COUNT)
 
+// Z motor: (steps * microsteps) / (leadscrew pitch (mm))
 #define Z_MOTOR_STEPS   200
-#define Z_STEPS_PER_MM  (Z_MOTOR_STEPS * MICROSTEP_MODES[2]) / 2.0
+#define Z_LS_PITCH      2.0
+#define Z_STEPS_PER_MM  (Z_MOTOR_STEPS * MICROSTEP_MODES[2]) / Z_LS_PITCH
 
+// E motor: (steps * microsteps * gear_ratio) / (filament driver circumfrence (mm))
+#define E_MOTOR_STEPS   200
+#define E_GEAR_RATIO    2     // 2:1
+#define FIL_DRIVER_CIR  14.043
+#define E_STEPS_PER_MM  (E_MOTOR_STEPS * MICROSTEP_MODES[3] * E_GEAR_RATIO) / FIL_DRIVER_CIR
+
+// NOTE: E_STEPS_PER_MM is not used below. It's a mystery how it was calculated.
+
+// Default Settings
 #define DEFAULT_AXIS_STEPS_PER_UNIT   {XY_STEPS_PER_MM, XY_STEPS_PER_MM, Z_STEPS_PER_MM, 555}  // default steps per unit for Voxel8 gen3
 #define DEFAULT_MAX_FEEDRATE          {90, 90, 10, 25}        // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {5000,5000,100,9000}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for Skeinforge 40+, for older versions raise them a lot.
