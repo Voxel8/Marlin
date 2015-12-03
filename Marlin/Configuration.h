@@ -3,8 +3,6 @@
 
 #include "boards.h"
 #include "macros.h"
-#include "Configuration_adv.h"
-#include "thermistortables.h"
 
 //===========================================================================
 //============================= Getting Started =============================
@@ -700,20 +698,23 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 
 // XY motors: (steps * microsteps)/ (tooth-pitch (mm) * tooth-count)
 #define XY_MOTOR_STEPS  400
+#define XY_MICROSTEPS   16
 #define XY_TOOTH_PITCH  2.0
 #define XY_TOOTH_COUNT  15
-#define XY_STEPS_PER_MM (XY_MOTOR_STEPS * MICROSTEP_MODES[0]) / (XY_TOOTH_PITCH * XY_TOOTH_COUNT)
+#define XY_STEPS_PER_MM (XY_MOTOR_STEPS * XY_MICROSTEPS) / (XY_TOOTH_PITCH * XY_TOOTH_COUNT)
 
 // Z motor: (steps * microsteps) / (leadscrew pitch (mm))
 #define Z_MOTOR_STEPS   200
+#define Z_MICROSTEPS    16
 #define Z_LS_PITCH      2.0
-#define Z_STEPS_PER_MM  (Z_MOTOR_STEPS * MICROSTEP_MODES[2]) / Z_LS_PITCH
+#define Z_STEPS_PER_MM  (Z_MOTOR_STEPS * Z_MICROSTEPS) / Z_LS_PITCH
 
 // E motor: (steps * microsteps * gear_ratio) / (filament driver circumfrence (mm))
 #define E_MOTOR_STEPS   200
+#define E_MICROSTEPS    16
 #define E_GEAR_RATIO    2     // 2:1
 #define FIL_DRIVER_CIR  14.043
-#define E_STEPS_PER_MM  (E_MOTOR_STEPS * MICROSTEP_MODES[3] * E_GEAR_RATIO) / FIL_DRIVER_CIR
+#define E_STEPS_PER_MM  (E_MOTOR_STEPS * E_MICROSTEPS * E_GEAR_RATIO) / FIL_DRIVER_CIR
 
 // NOTE: E_STEPS_PER_MM is not used below. It's a mystery how it was calculated.
 
@@ -982,5 +983,8 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 
 //When using an LCD, uncomment the line below to display the Filament sensor data on the last line instead of status.  Status will appear for 5 sec.
 //#define FILAMENT_LCD_DISPLAY
+
+#include "Configuration_adv.h"
+#include "thermistortables.h"
 
 #endif //CONFIGURATION_H
