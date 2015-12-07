@@ -606,7 +606,7 @@ void enable_power_supply() {
   // Turn on FAN first so that 24V does not have a path to 24V_SW through the Rambo. TODO: Disconnect these two circuits.
   pinMode(FAN_CHASSIS_TOP_PIN, OUTPUT);
   digitalWrite(FAN_CHASSIS_TOP_PIN, HIGH);
-  delay(6);  // 40ms delay for line to settle. NOT NEEDED. Fuse set to 65ms startup delay by default.
+  delay(6);  // Delay for line to settle. 
   
   analogRead(PS_MONITOR_PIN);  // Throw out first reading
   int V_Monitor_Result = analogRead(PS_MONITOR_PIN);
