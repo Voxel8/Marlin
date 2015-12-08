@@ -38,8 +38,8 @@
  
 #define X_STEP_PIN              37  // Actuate X stepper driver
 #define X_DIR_PIN               48  // X Stepper driver direction
-#define X_MIN_PIN               24  // X min limit switch
-#define X_MAX_PIN               76  // X max limit switch
+#define X_MIN_PIN               76  // X min limit switch
+#define X_MAX_PIN               24  // X max limit switch
 #define X_ENABLE_PIN            29  // Enable X stepper driver
 #define X_MS1_PIN               40  // X stepper driver microstep select 1
 #define X_MS2_PIN               41  // X stepper driver microstep select 2
