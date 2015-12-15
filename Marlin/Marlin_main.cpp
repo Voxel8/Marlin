@@ -4930,8 +4930,8 @@ inline void gcode_M226() {
       SERIAL_PROTOCOL(sample_avg);
     }
     else {
-    SERIAL_PROTOCOLPGM("ok ");
-    SERIAL_PROTOCOL(EXT_ADC_RAW_0);
+      SERIAL_PROTOCOLPGM("ok ");
+      SERIAL_PROTOCOL(EXT_ADC_RAW_0);
     }
     SERIAL_EOL;
   }
@@ -5476,25 +5476,99 @@ inline void gcode_M303() {
   /**
    * M380: Enable solenoid on the active extruder
    */
-  inline void gcode_M380() { 
+  inline void gcode_M380() {
+
     int8_t current_solenoid_pin = -1;
     uint8_t tool = active_extruder;
+
+    bool wait = false;
+    uint8_t window_percent; // Tolerance (Percent of setpoint +/-)
+    float window_val = 0;
+
     // Tool number provided
     if (code_seen('T')) {
       tool = code_value();
     }
+
+    // Wait option specified
+    if (code_seen('W')) {
+      wait = true;
+      if (code_value() == 0) {
+        // Default value
+        window_percent = 5;
+      }
+      else {
+        window_percent = code_value();
+      }
+      window_val = regulator_setpoint * window_percent * 0.01;
+    }
+
     switch(tool) {
       #if HAS_SOLENOID_0
         case 0:
           OUT_WRITE(SOL0_PIN, HIGH);
           current_solenoid_pin = SOL0_PIN;
+          if (wait = true) {
+            _delay_ms(500);
+            // Wait for pressure to reach setpoint
+            float current_output_psi = pressureRegulator();
+            volatile uint32_t timeout = 0;
+            //DEBUGGING
+            SERIAL_PROTOCOLLN(current_output_psi);
+            while ((current_output_psi < (regulator_setpoint - window_val)) ||
+                  (current_output_psi > (regulator_setpoint + window_val))) {
+              manage_heater();
+              manage_inactivity();
+              timeout++;
+              current_output_psi = pressureRegulator();
+
+              if (timeout >= PNEUM_TIMEOUT) {
+                SERIAL_PROTOCOLLNPGM("WARNING: Desired pressure not reached (timeout)");
+                break;
+              }
+              else {
+                SERIAL_PROTOCOLLN(current_output_psi);
+              }
+            }
+            SERIAL_PROTOCOLLN(current_output_psi);
+            SERIAL_PROTOCOLLNPGM("Out of loop");
+          }
           break;
       #endif
       #if HAS_SOLENOID_1
         case 1:
           OUT_WRITE(SOL1_PIN, HIGH);
           current_solenoid_pin = SOL1_PIN;
+          if (wait = true) {
+            _delay_ms(500);
+            // Wait for pressure to reach setpoint
+            float current_output_psi = pressureRegulator();
+            volatile uint32_t timeout = 0;
+            //DEBUGGING
+            SERIAL_PROTOCOLLN(current_output_psi);
+            while ((current_output_psi < (regulator_setpoint - window_val)) ||
+                  (current_output_psi > (regulator_setpoint + window_val))) {
+              manage_heater();
+              manage_inactivity();
+              timeout++;
+              current_output_psi = pressureRegulator();
+
+              if (timeout >= PNEUM_TIMEOUT) {
+                SERIAL_PROTOCOLLNPGM("WARNING: Desired pressure not reached (timeout)");
+                break;
+              }
+              else {
+                SERIAL_PROTOCOLLN(current_output_psi);
+              }
+            }
+            SERIAL_PROTOCOLLN(current_output_psi);
+            SERIAL_PROTOCOLLNPGM("Out of loop");
+          }
           break;
+
+          // TO DO
+          // Check if solenoid is already open!
+
       #endif
       // Invalid Tool Number
       default:
@@ -5505,6 +5579,7 @@ inline void gcode_M303() {
         SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
         break;
     }
+
     // Verbosity Handling
     if (code_seen('V')) {
       if (current_solenoid_pin != -1) {
