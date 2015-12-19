@@ -606,6 +606,7 @@ void setup_powerhold() {
   ~200us, blocking time
   Requires serial to be enabled to generate error condition
 */
+#if ENABLED(CURRENT_LIMIT)
 void enable_power_supply() {
 	
   // Turn on FAN first so that 24V does not have a path to 24V_SW through the Rambo. 
@@ -631,11 +632,11 @@ void enable_power_supply() {
 	//   1) The power supply is already enabled (result: do nothing)
 	//   2) The 24V line is electrically shorted to 5V (result: kill printer)
     else {
-	  if (MCUSR & PORF) {	// Coming up from power-up reset?
-		SERIAL_ERROR_START;
-		SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
-		kill(PSTR("ERR:Please Reset"));
-	  }
+	    if (MCUSR & PORF) {	// Coming up from power-up reset?
+		    SERIAL_ERROR_START;
+		    SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
+		    kill(PSTR("ERR:Please Reset"));
+	    }
     }
   }  
   
@@ -645,6 +646,7 @@ void enable_power_supply() {
     kill(PSTR("ERR:Please Reset"));
   }
 }
+#endif // DEFINED(CURRENT_LIMIT)
 
 void suicide() {
   #if HAS_SUICIDE
@@ -721,8 +723,10 @@ void setup() {
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
   
-  // Turn on downstream power
-  enable_power_supply();
+  #if ENABLED(CURRENT_LIMIT)
+    // Turn on downstream power
+    enable_power_supply();
+  #endif
   
   // Turn on all chassis fans
   pinMode(FAN_CHASSIS_BOT_PIN, OUTPUT);

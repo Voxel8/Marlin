@@ -305,12 +305,14 @@ Wv = (VRef / 1.66) * 255
 #define DIGIPOT_I2C_NUM_CHANNELS 8
 // actual motor currents in Amps, need as many here as DIGIPOT_I2C_NUM_CHANNELS
 #define DIGIPOT_I2C_MOTOR_CURRENTS {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}
-  
-// Power supply enable
-// defines the voltage above which there is determined no short circuit
-#define PS_ENABLE_LOWER_LIMIT 220  // 2^10 * ([Rl/(499 + Rl)] + 250mV/5V), Rl = 100 Ohm
-// defines the voltage below which there is determined no open circuit or short to 5V line
-#define PS_ENABLE_UPPER_LIMIT 980  // 2^10 * ([Rl/(499 + Rl)] + 250mV/5V), Rl = 5k
+
+#if ENABLED(CURRENT_LIMIT)
+  // Power supply enable
+  // defines the voltage above which there is determined no short circuit
+  #define PS_ENABLE_LOWER_LIMIT 220  // 2^10 * ([Rl/(499 + Rl)] + 250mV/5V), Rl = 100 Ohm
+  // defines the voltage below which there is determined no open circuit or short to 5V line
+  #define PS_ENABLE_UPPER_LIMIT 980  // 2^10 * ([Rl/(499 + Rl)] + 250mV/5V), Rl = 5k
+#endif
 
 //===========================================================================
 //=============================Additional Features===========================
