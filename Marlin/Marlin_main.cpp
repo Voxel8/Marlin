@@ -607,33 +607,42 @@ void setup_powerhold() {
   Requires serial to be enabled to generate error condition
 */
 void enable_power_supply() {
-  // Turn on FAN first so that 24V does not have a path to 24V_SW through the Rambo. TODO: Disconnect these two circuits.
+	
+  // Turn on FAN first so that 24V does not have a path to 24V_SW through the Rambo. 
+  // TODO: Disconnect these two circuits.
   pinMode(FAN_CHASSIS_TOP_PIN, OUTPUT);
   digitalWrite(FAN_CHASSIS_TOP_PIN, HIGH);
-  delay(6);  // Delay for line to settle. 
+  delay(20);  //ms delay for line to settle. 4*RC = 4*499*10uF = 20ms
   
+  // Read 24V_SW line voltage with pull-up resistor reference
   analogRead(PS_MONITOR_PIN);  // Throw out first reading
   int V_Monitor_Result = analogRead(PS_MONITOR_PIN);
-  if (V_Monitor_Result > PS_ENABLE_LOWER_LIMIT)   // Test for 24V short to gnd
-  {
-    if (V_Monitor_Result <= PS_ENABLE_UPPER_LIMIT) // Test for 24V short to 5V
-    {
+  
+  if (V_Monitor_Result > PS_ENABLE_LOWER_LIMIT) {     // Test for 24V short to gnd
+    if (V_Monitor_Result <= PS_ENABLE_UPPER_LIMIT) {  // Test for 24V short to 5V
+	  // Test passed - enable power supply
       digitalWrite(PS_FORCE_ON_LL,LOW); // Pull Power Supply enable low to force on
       pinMode(PS_FORCE_ON_LL, OUTPUT);  //
       delayMicroseconds(100);           // 100us minimum delay to register on
-      pinMode(PS_FORCE_ON_LL, INPUT);   // Release Power Supply enable to allow current limiting
+      pinMode(PS_FORCE_ON_LL, INPUT);   // Release Power Supply to allow current limit
     }
-    else 
-    {
-      // TODO: Add to error handling protocol
-      // TODO: Figure out if coming up from power-down state or reset condition
-      //SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
+	
+	// There are two cases that will cause Marlin to enter this block:
+	//   1) The power supply is already enabled (result: do nothing)
+	//   2) The 24V line is electrically shorted to 5V (result: kill printer)
+    else {
+	  if (MCUSR & PORF) {	// Coming up from power-up reset?
+		SERIAL_ERROR_START;
+		SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
+		kill(PSTR("ERR:Please Reset"));
+	  }
     }
   }  
-  else // Handle error case (short circuit or open circuit?)
-  {
-    // TODO: Add to error handling protocol
-    SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/gnd short... PLEASE CHECK HARDWARE...");  
+  
+  else { // Handle error case - short circuit
+    SERIAL_ERROR_START;
+    SERIAL_ERRORLNPGM("ERROR TURNING ON 24V POWER. Detected 24V/gnd short... PLEASE CHECK HARDWARE...");
+    kill(PSTR("ERR:Please Reset"));
   }
 }
 
