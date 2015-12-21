@@ -617,7 +617,7 @@ void enable_power_supply() {
   
   // Read 24V_SW line voltage with pull-up resistor reference
   analogRead(PS_MONITOR_PIN);  // Throw out first reading
-  int V_Monitor_Result = analogRead(PS_MONITOR_PIN);
+  uint16_t V_Monitor_Result = analogRead(PS_MONITOR_PIN);
   
   if (V_Monitor_Result > PS_ENABLE_LOWER_LIMIT) {     // Test for 24V short to gnd
     if (V_Monitor_Result <= PS_ENABLE_UPPER_LIMIT) {  // Test for 24V short to 5V
