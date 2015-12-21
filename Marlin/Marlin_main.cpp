@@ -628,9 +628,9 @@ void enable_power_supply() {
       pinMode(PS_FORCE_ON_LL, INPUT);   // Release Power Supply to allow current limit
     }
 	
-	// There are two cases that will cause Marlin to enter this block:
-	//   1) The power supply is already enabled (result: do nothing)
-	//   2) The 24V line is electrically shorted to 5V (result: kill printer)
+	  // There are two cases that will cause Marlin to enter this block:
+	  //   1) The power supply is already enabled (result: do nothing)
+	  //   2) The 24V line is electrically shorted to 5V (result: kill printer)
     else {
 	    if (MCUSR & PORF) {	// Coming up from power-up reset?
 		    SERIAL_ERROR_START;
