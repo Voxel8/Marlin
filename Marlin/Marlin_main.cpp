@@ -323,6 +323,7 @@ bool target_direction;
 
 #if ENABLED(E_REGULATOR)
   float regulator_setpoint = 0;
+  bool solenoid_open[EXTRUDERS] = {false};
 #endif
 
 // Extruder offsets
@@ -5462,7 +5463,8 @@ inline void gcode_M303() {
 
 #endif // SCARA
 
-#if ENABLED(PNEUMATICS)
+// E-regulator required for this M code.
+#if ENABLED(E_REGULATOR)
 
   void disable_all_solenoids() {
     #if HAS_SOLENOID_0
@@ -5474,7 +5476,13 @@ inline void gcode_M303() {
   }
 
   /**
-   * M380: Enable solenoid on the active extruder
+   * M380: Enable solenoid on the active extruder. Provide a T parameter to
+   *       specify a tool. If no tool is specified, the active tool is used.
+   *       Provide a W parameter to specify a tolerance window (in percent).
+   *
+   *       For example, M380 T1 W5 specifies tool 1, and waits until the
+   *       pressure behind the material is within 5% of the current setpoint
+   *       before returning 'ok'
    */
   inline void gcode_M380() {
 
@@ -5502,72 +5510,74 @@ inline void gcode_M303() {
       }
       window_val = regulator_setpoint * window_percent * 0.01;
     }
-
     switch(tool) {
       #if HAS_SOLENOID_0
         case 0:
-          OUT_WRITE(SOL0_PIN, HIGH);
-          current_solenoid_pin = SOL0_PIN;
-          if (wait = true) {
-            _delay_ms(500);
-            // Wait for pressure to reach setpoint
-            float current_output_psi = pressureRegulator();
-            volatile uint32_t timeout = 0;
-            //DEBUGGING
-            SERIAL_PROTOCOLLN(current_output_psi);
-            while ((current_output_psi < (regulator_setpoint - window_val)) ||
-                  (current_output_psi > (regulator_setpoint + window_val))) {
-              manage_heater();
-              manage_inactivity();
-              timeout++;
-              current_output_psi = pressureRegulator();
+          if (solenoid_open[0] == false) {
+            OUT_WRITE(SOL0_PIN, HIGH);
+            current_solenoid_pin = SOL0_PIN;
+            solenoid_open[0] = true;
+            if (wait = true) {
+              _delay_ms(500);
+              // Wait for pressure to reach setpoint
+              float current_output_psi = pressureRegulator();
+              volatile uint32_t timeout = 0;
+              //DEBUGGING
+              SERIAL_PROTOCOLLN(current_output_psi);
+              while ((current_output_psi < (regulator_setpoint - window_val)) ||
+                    (current_output_psi > (regulator_setpoint + window_val))) {
+                manage_heater();
+                manage_inactivity();
+                timeout++;
+                current_output_psi = pressureRegulator();
 
-              if (timeout >= PNEUM_TIMEOUT) {
-                SERIAL_PROTOCOLLNPGM("WARNING: Desired pressure not reached (timeout)");
-                break;
+                if (timeout >= PNEUM_TIMEOUT) {
+                  SERIAL_PROTOCOLLNPGM("WARNING: Desired pressure not reached (timeout)");
+                  break;
+                }
+                else {
+                  SERIAL_PROTOCOLLN(current_output_psi);
+                }
               }
-              else {
-                SERIAL_PROTOCOLLN(current_output_psi);
-              }
+              SERIAL_PROTOCOLLN(current_output_psi);
+              SERIAL_PROTOCOLLNPGM("Out of loop");
             }
-            SERIAL_PROTOCOLLN(current_output_psi);
-            SERIAL_PROTOCOLLNPGM("Out of loop");
           }
           break;
       #endif
       #if HAS_SOLENOID_1
         case 1:
-          OUT_WRITE(SOL1_PIN, HIGH);
-          current_solenoid_pin = SOL1_PIN;
-          if (wait = true) {
-            _delay_ms(500);
-            // Wait for pressure to reach setpoint
-            float current_output_psi = pressureRegulator();
-            volatile uint32_t timeout = 0;
-            //DEBUGGING
-            SERIAL_PROTOCOLLN(current_output_psi);
-            while ((current_output_psi < (regulator_setpoint - window_val)) ||
-                  (current_output_psi > (regulator_setpoint + window_val))) {
-              manage_heater();
-              manage_inactivity();
-              timeout++;
-              current_output_psi = pressureRegulator();
+          if (solenoid_open[1] == false) {
+            OUT_WRITE(SOL1_PIN, HIGH);
+            current_solenoid_pin = SOL1_PIN;
+            solenoid_open[1] = true;
+            if (wait = true) {
+              _delay_ms(500);
+              // Wait for pressure to reach setpoint
+              float current_output_psi = pressureRegulator();
+              volatile uint32_t timeout = 0;
+              //DEBUGGING
+              SERIAL_PROTOCOLLN(current_output_psi);
+              while ((current_output_psi < (regulator_setpoint - window_val)) ||
+                    (current_output_psi > (regulator_setpoint + window_val))) {
+                manage_heater();
+                manage_inactivity();
+                timeout++;
+                current_output_psi = pressureRegulator();
 
-              if (timeout >= PNEUM_TIMEOUT) {
-                SERIAL_PROTOCOLLNPGM("WARNING: Desired pressure not reached (timeout)");
-                break;
+                if (timeout >= PNEUM_TIMEOUT) {
+                  SERIAL_PROTOCOLLNPGM("WARNING: Desired pressure not reached (timeout)");
+                  break;
+                }
+                else {
+                  SERIAL_PROTOCOLLN(current_output_psi);
+                }
               }
-              else {
-                SERIAL_PROTOCOLLN(current_output_psi);
-              }
+              SERIAL_PROTOCOLLN(current_output_psi);
+              SERIAL_PROTOCOLLNPGM("Out of loop");
             }
-            SERIAL_PROTOCOLLN(current_output_psi);
-            SERIAL_PROTOCOLLNPGM("Out of loop");
           }
           break;
-
-          // TO DO
-          // Check if solenoid is already open!
 
       #endif
       // Invalid Tool Number
@@ -5579,7 +5589,6 @@ inline void gcode_M303() {
         SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
         break;
     }
-
     // Verbosity Handling
     if (code_seen('V')) {
       if (current_solenoid_pin != -1) {
@@ -5597,6 +5606,11 @@ inline void gcode_M303() {
    */
   inline void gcode_M381() {
     disable_all_solenoids();
+    // reset 'solenoid open' states
+    for (uint8_t i = 0; i < EXTRUDERS; i++) {
+      solenoid_open[i] = false;
+    }
+
     if (code_seen('V')) {
       bool pin_status;
       #if HAS_SOLENOID_0
@@ -5612,7 +5626,7 @@ inline void gcode_M303() {
     }
   }
 
-#endif // PNEUMATICS
+#endif // E_REGULATOR
 
 /**
   M399: Pause command
