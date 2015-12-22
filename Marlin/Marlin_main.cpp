@@ -618,7 +618,7 @@ void enable_power_supply() {
   // Read 24V_SW line voltage with pull-up resistor reference
   analogRead(PS_MONITOR_PIN);  // Throw out first reading
   uint16_t V_Monitor_Result = analogRead(PS_MONITOR_PIN);
-  
+
   if (V_Monitor_Result > PS_ENABLE_LOWER_LIMIT) {     // Test for 24V short to gnd
     if (V_Monitor_Result <= PS_ENABLE_UPPER_LIMIT) {  // Test for 24V short to 5V
 	  // Test passed - enable power supply
@@ -631,12 +631,11 @@ void enable_power_supply() {
 	  // There are two cases that will cause Marlin to enter this block:
 	  //   1) The power supply is already enabled (result: do nothing)
 	  //   2) The 24V line is electrically shorted to 5V (result: kill printer)
-    else {
-	    if (MCUSR & PORF) {	// Coming up from power-up reset?
-		    SERIAL_ERROR_START;
-		    SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
-		    kill(PSTR("ERR:Please Reset"));
-	    }
+    // MCUSR set to 0 in bootloader. TODO: resolve
+    else if (MCUSR & (1 << PORF)) {	// Coming up from power-up reset?
+		  SERIAL_ERROR_START;
+		  SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
+		  kill(PSTR("ERR:Please Reset"));
     }
   }  
   
