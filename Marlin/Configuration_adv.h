@@ -518,7 +518,7 @@ const unsigned int dropsegments=5; //everything with less than this number of st
   #define Y2_MICROSTEPS 16     //number of microsteps 
   
 //#define Z_IS_TMC
-  #define Z_MAX_CURRENT 600  //in mA
+  #define Z_MAX_CURRENT 500  //in mA
   #define Z_SENSE_RESISTOR 91 //in mOhms
   #define Z_MICROSTEPS 16     //number of microsteps
   
