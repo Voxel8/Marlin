@@ -137,7 +137,7 @@ DIGITAL POTENTIOMETER PINS
   Fan_2 2
 ***********************************************************/
 #define LED_PIN                 13
-#define FAN_PIN                 CART0_SIG2_PIN  // FFF fan toggle
+#define FAN_PIN                 -1  // Not used in 3C2 (commands sent over I2C)
 #define FAN_CHASSIS_TOP_PIN     2
 #define FAN_CHASSIS_BOT_PIN     44
 
