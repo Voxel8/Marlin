@@ -314,6 +314,17 @@ Wv = (VRef / 1.66) * 255
   #define PS_ENABLE_UPPER_LIMIT 980  // 2^10 * ([Rl/(499 + Rl)] + 250mV/5V), Rl = 5k
 #endif
 
+// Cartridge and Cartridge Holder Settings/Commands
+#define CART_HOLDER_ADDR        0x3F
+
+// I2C Commands
+#define SET_FAN_DRIVE_0_PWM     0x01
+#define SET_LED_WHITE_0_PWM     0x02
+#define SET_LED_WHITE_1_PWM     0x03
+#define SET_LED_RED_0_PWM       0x04
+#define SET_LED_UV_0_PWM        0x05
+
+
 //===========================================================================
 //=============================Additional Features===========================
 //===========================================================================

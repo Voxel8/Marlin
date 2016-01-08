@@ -51,6 +51,7 @@
 #include "pins_arduino.h"
 #include "math.h"
 #include "buzzer.h"
+#include "Wire.h"
 
 #if ENABLED(EXT_ADC)
   #include "ADC.h"
@@ -66,7 +67,6 @@
 
 #if ENABLED(BLINKM)
   #include "blinkm.h"
-  #include "Wire.h"
 #endif
 
 #if HAS_SERVOS
@@ -4110,7 +4110,7 @@ inline void gcode_M105() {
   SERIAL_EOL;
 }
 
-#if HAS_FAN
+#if HAS_FAN // Uses FAN_PIN
 
   /**
    * M106: Set Fan Speed
@@ -4121,6 +4121,32 @@ inline void gcode_M105() {
    * M107: Fan Off
    */
   inline void gcode_M107() { fanSpeed = 0; }
+
+#else // Uses I2C
+
+  inline void gcode_M106() {
+    // Desired speed given
+    if (code_seen('S')) {
+      fanSpeed = code_value();
+    }
+    // No speed given, defaults to 0 (off)
+    else {
+      fanSpeed = 0;
+    }
+    Wire.beginTransmission(CART_HOLDER_ADDR);
+    Wire.write(SET_FAN_DRIVE_0_PWM);
+    Wire.write(fanSpeed);
+    Wire.endTransmission();
+  }
+
+  inline void gcode_M107() {
+    fanSpeed = 0;
+
+    Wire.beginTransmission(CART_HOLDER_ADDR);
+    Wire.write(SET_FAN_DRIVE_0_PWM);
+    Wire.write(fanSpeed);
+    Wire.endTransmission();
+  }
 
 #endif // HAS_FAN
 
