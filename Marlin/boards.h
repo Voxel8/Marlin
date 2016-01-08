@@ -57,7 +57,8 @@
 #define BOARD_BAM_DICE          401  // 2PrintBeta BAM&DICE with STK drivers
 #define BOARD_BAM_DICE_DUE      402  // 2PrintBeta BAM&DICE Due with STK drivers
 #define BOARD_VOXEL8_GEN3B      801  // Voxel8 Gen3B Printer
-#define BOARD_VOXEL8_GEN3C2     802  // Voxel8 Gen3C2 Printer
+#define BOARD_VOXEL8_GEN3C      802  // Voxel8 Gen3C Printer
+#define BOARD_VOXEL8_GEN3C2     803  // Voxel8 Gen3C2 Printer
 
 #define BOARD_99                99   // This is in pins.h but...?
 
