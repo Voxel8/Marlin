@@ -315,7 +315,7 @@ Wv = (VRef / 1.66) * 255
 #endif
 
 // Cartridge and Cartridge Holder Settings/Commands
-#define CART_HOLDER_ADDR        0x3F
+#define CART_HOLDER_ADDR        0x2F
 
 // I2C Commands
 #define SET_FAN_DRIVE_0_PWM     0x01
