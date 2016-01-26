@@ -4110,7 +4110,7 @@ inline void gcode_M105() {
   SERIAL_EOL;
 }
 
-#if HAS_FAN // Uses FAN_PIN
+#if HAS_FAN // Uses dedicated FAN_PIN
 
   /**
    * M106: Set Fan Speed
@@ -4123,15 +4123,17 @@ inline void gcode_M105() {
   inline void gcode_M107() { fanSpeed = 0; }
 
 #else // Uses I2C
+  // 127 (50%) is maxy duty cycle for 12V fans
+  #define MAX_FAN_DUTY  127
 
   inline void gcode_M106() {
     // Desired speed given
-    if (code_seen('S')) {
+    if ((code_seen('S')) && (code_value() <= MAX_FAN_DUTY)) {
       fanSpeed = code_value();
     }
-    // No speed given, defaults to 0 (off)
+    // No speed given, defaults to MAX_FAN_DUTY
     else {
-      fanSpeed = 0;
+      fanSpeed = MAX_FAN_DUTY;
     }
     Wire.beginTransmission(CART_HOLDER_ADDR);
     Wire.write(SET_FAN_DRIVE_0_PWM);
