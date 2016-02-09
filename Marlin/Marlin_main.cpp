@@ -266,6 +266,8 @@ float current_position[NUM_AXIS] = { 0.0 };
 static float destination[NUM_AXIS] = { 0.0 };
 static uint16_t bedlevelprobes[9] = { 0.0 };
 bool axis_known_position[3] = { false };
+bool min_software_endstops_enabled[Z_AXIS + 1] = { false };
+bool max_software_endstops_enabled[Z_AXIS + 1] = { false };
 
 static long gcode_N, gcode_LastN, Stopped_gcode_LastN = 0;
 
@@ -814,7 +816,17 @@ void setup() {
   #ifdef STAT_LED_BLUE
     pinMode(STAT_LED_BLUE, OUTPUT);
     digitalWrite(STAT_LED_BLUE, LOW); // turn it off
-  #endif
+  #endif  
+  
+  if (min_software_endstops) {
+    for (int i = 0; i <= Z_AXIS; i++)
+      min_software_endstops_enabled[i] = true;
+  }
+  
+  if (max_software_endstops) {
+    for (int i = 0; i <= Z_AXIS; i++)
+      max_software_endstops_enabled[i] = true;
+  }
 }
 
 /**
@@ -4857,6 +4869,52 @@ inline void gcode_M206() {
 
 #endif // FWRETRACT
 
+inline void gcode_M211() {
+  if (code_seen('S')) {
+    bool endstop_on = code_value() > 0;
+        
+    if (code_seen('X')) {
+      bool is_max = code_value() > 0;
+      
+      if (is_max)
+        max_software_endstops_enabled[X_AXIS] = endstop_on;
+      else
+        min_software_endstops_enabled[X_AXIS] = endstop_on;
+    }
+    
+    if (code_seen('Y')) {
+      bool is_max = code_value() > 0;
+      
+      if (is_max)
+        max_software_endstops_enabled[Y_AXIS] = endstop_on;
+      else
+        min_software_endstops_enabled[Y_AXIS] = endstop_on;
+    }
+    
+    if (code_seen('Z')) {
+      bool is_max = code_value() > 0;
+      
+      if (is_max)
+        max_software_endstops_enabled[Z_AXIS] = endstop_on;
+      else
+        min_software_endstops_enabled[Z_AXIS] = endstop_on;
+    }
+  } 
+  
+  SERIAL_PROTOCOLPGM("Min X: ");
+  SERIAL_PROTOCOL(min_software_endstops_enabled[X_AXIS] ? "yes" : "no");  
+  SERIAL_PROTOCOLPGM(" Max X: ");
+  SERIAL_PROTOCOL(max_software_endstops_enabled[X_AXIS] ? "yes" : "no");
+  SERIAL_PROTOCOLPGM(" Min Y: ");
+  SERIAL_PROTOCOL(min_software_endstops_enabled[Y_AXIS] ? "yes" : "no");  
+  SERIAL_PROTOCOLPGM(" Max Y: ");
+  SERIAL_PROTOCOL(max_software_endstops_enabled[Y_AXIS] ? "yes" : "no");
+  SERIAL_PROTOCOLPGM(" Min Z: ");
+  SERIAL_PROTOCOL(min_software_endstops_enabled[Z_AXIS] ? "yes" : "no");  
+  SERIAL_PROTOCOLPGM(" Max Z: ");
+  SERIAL_PROTOCOLLN(max_software_endstops_enabled[Z_AXIS] ? "yes" : "no");
+}
+
 #if EXTRUDERS > 1
 
   /**
@@ -6628,7 +6686,11 @@ void process_next_command() {
           gcode_M209();
           break;
       #endif // FWRETRACT
-
+      
+      case 211:
+        gcode_M211();
+        break;
+      
       #if EXTRUDERS > 1
         case 218: // M218 - set hotend offset (in mm), T<extruder_number> X<offset_on_X> Y<offset_on_Y>
           gcode_M218();
@@ -6918,13 +6980,15 @@ void ok_to_send() {
 }
 
 void clamp_to_software_endstops(float target[3]) {
-  if (min_software_endstops) {
+  if (min_software_endstops_enabled[X_AXIS])
     NOLESS(target[X_AXIS], min_pos[X_AXIS]);
+  
+  if (min_software_endstops_enabled[Y_AXIS])  
     NOLESS(target[Y_AXIS], min_pos[Y_AXIS]);
 
+  if (min_software_endstops_enabled[Z_AXIS]) {
     float negative_z_offset = 0;
     #if ENABLED(AUTO_BED_LEVELING_FEATURE)
-      if (zprobe_zoffset < 0) negative_z_offset += zprobe_zoffset;
       if (home_offset[Z_AXIS] < 0) {
         #if ENABLED(DEBUG_LEVELING_FEATURE)
           if (marlin_debug_flags & DEBUG_LEVELING) {
@@ -6938,11 +7002,14 @@ void clamp_to_software_endstops(float target[3]) {
     NOLESS(target[Z_AXIS], min_pos[Z_AXIS] + negative_z_offset);
   }
 
-  if (max_software_endstops) {
+  if (max_software_endstops_enabled[X_AXIS])
     NOMORE(target[X_AXIS], max_pos[X_AXIS]);
+    
+  if (max_software_endstops_enabled[Y_AXIS])
     NOMORE(target[Y_AXIS], max_pos[Y_AXIS]);
+    
+  if (max_software_endstops_enabled[Z_AXIS])
     NOMORE(target[Z_AXIS], max_pos[Z_AXIS]);
-  }
 }
 
 #if ENABLED(DELTA)
