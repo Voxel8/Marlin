@@ -4953,8 +4953,7 @@ inline void gcode_M220() {
   // Display feedrate multiplier
   else {
     SERIAL_PROTOCOLPGM("Feedrate multiplier: ");
-    SERIAL_PROTOCOL(feedrate_multiplier);
-    SERIAL_EOL;
+    SERIAL_PROTOCOLLN(feedrate_multiplier);
   }
 }
 
