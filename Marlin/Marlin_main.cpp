@@ -4946,7 +4946,15 @@ inline void gcode_M211() {
  * M220: Set speed percentage factor, aka "Feed Rate" (M220 S95)
  */
 inline void gcode_M220() {
-  if (code_seen('S')) feedrate_multiplier = code_value();
+  // Set feedrate multiplier
+  if (code_seen('S')) {
+    feedrate_multiplier = code_value();
+  }
+  // Display feedrate multiplier
+  else {
+    SERIAL_PROTOCOLPGM("Feedrate multiplier: ");
+    SERIAL_PROTOCOLLN(feedrate_multiplier);
+  }
 }
 
 /**
