@@ -283,36 +283,6 @@ static void lcd_implementation_status_screen() {
 
   // Symbols menu graphics, animated fan
   u8g.drawBitmapP(9,1,STATUS_SCREENBYTEWIDTH,STATUS_SCREENHEIGHT, (blink % 2) && fanSpeed ? status_screen0_bmp : status_screen1_bmp);
- 
-  #if ENABLED(SDSUPPORT)
-    // SD Card Symbol
-    u8g.drawBox(42, 42 - TALL_FONT_CORRECTION, 8, 7);
-    u8g.drawBox(50, 44 - TALL_FONT_CORRECTION, 2, 5);
-    u8g.drawFrame(42, 49 - TALL_FONT_CORRECTION, 10, 4);
-    u8g.drawPixel(50, 43 - TALL_FONT_CORRECTION);
-
-    // Progress bar frame
-    u8g.drawFrame(54, 49, 73, 4 - TALL_FONT_CORRECTION);
-
-    // SD Card Progress bar and clock
-    lcd_setFont(FONT_STATUSMENU);
- 
-    if (IS_SD_PRINTING) {
-      // Progress bar solid part
-      u8g.drawBox(55, 50, (unsigned int)(71.f * card.percentDone() / 100.f), 2 - TALL_FONT_CORRECTION);
-    }
-
-    u8g.setPrintPos(80,48);
-    if (print_job_start_ms != 0) {
-      uint16_t time = (millis() - print_job_start_ms) / 60000;
-      lcd_print(itostr2(time/60));
-      lcd_print(':');
-      lcd_print(itostr2(time%60));
-    }
-    else {
-      lcd_printPGM(PSTR("--:--"));
-    }
-  #endif
 
   // Extruders
   for (int i=0; i<EXTRUDERS; i++) _draw_heater_status(6 + i * 25, i);
@@ -503,32 +473,6 @@ void lcd_implementation_drawedit(const char* pstr, char* value) {
   u8g.setPrintPos((lcd_width - 1 - vallen) * char_width, rows * rowHeight + kHalfChar);
   lcd_print(value);
 }
-
-#if ENABLED(SDSUPPORT)
-
-  static void _drawmenu_sd(bool isSelected, uint8_t row, const char* pstr, const char* filename, char * const longFilename, bool isDir) {
-    char c;
-    uint8_t n = LCD_WIDTH - 1;
-
-    if (longFilename[0]) {
-      filename = longFilename;
-      longFilename[n] = '\0';
-    }
-
-    lcd_implementation_mark_as_selected(row, isSelected);
-
-    if (isDir) lcd_print(LCD_STR_FOLDER[0]);
-    while ((c = *filename)) {
-      n -= lcd_print(c);
-      filename++;
-    }
-    while (n--) lcd_print(' ');
-  }
-
-  #define lcd_implementation_drawmenu_sdfile(sel, row, pstr, filename, longFilename) _drawmenu_sd(sel, row, pstr, filename, longFilename, false)
-  #define lcd_implementation_drawmenu_sddirectory(sel, row, pstr, filename, longFilename) _drawmenu_sd(sel, row, pstr, filename, longFilename, true)
-
-#endif //SDSUPPORT
 
 #define lcd_implementation_drawmenu_back(sel, row, pstr, data) lcd_implementation_drawmenu_generic(sel, row, pstr, LCD_STR_UPLEVEL[0], LCD_STR_UPLEVEL[0])
 #define lcd_implementation_drawmenu_submenu(sel, row, pstr, data) lcd_implementation_drawmenu_generic(sel, row, pstr, '>', LCD_STR_ARROW_RIGHT[0])

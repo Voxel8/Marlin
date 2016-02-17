@@ -44,7 +44,6 @@
 #include "planner.h"
 #include "stepper.h"
 #include "temperature.h"
-#include "cardreader.h"
 #include "watchdog.h"
 #include "configuration_store.h"
 #include "language.h"
@@ -253,10 +252,6 @@
   void gcode_M100();
 #endif
 
-#if ENABLED(SDSUPPORT)
-  CardReader card;
-#endif
-
 bool Running = true;
 
 uint8_t marlin_debug_flags = DEBUG_INFO|DEBUG_ERRORS;
@@ -441,9 +436,6 @@ bool target_direction;
    static bool filrunoutEnqueued = false;
 #endif
 
-#if ENABLED(SDSUPPORT)
-  static bool fromsd[BUFSIZE];
-#endif
 
 #if HAS_SERVOS
   Servo servo[NUM_SERVOS];
@@ -478,27 +470,25 @@ void serial_echopair_P(const char *s_P, unsigned long v) { serialprintPGM(s_P); 
   float extrude_min_temp = EXTRUDE_MINTEMP;
 #endif
 
-#if ENABLED(SDSUPPORT)
-  #include "SdFatUtil.h"
-  int freeMemory() { return SdFatUtil::FreeRam(); }
-#else
-  extern "C" {
-    extern unsigned int __bss_end;
-    extern unsigned int __heap_start;
-    extern void *__brkval;
+/*
+  * Assign Free Memory
+  */
+extern "C" {
+  extern unsigned int __bss_end;
+  extern unsigned int __heap_start;
+  extern void *__brkval;
 
-    int freeMemory() {
-      int free_memory;
+  int freeMemory() {
+    int free_memory;
 
-      if ((int)__brkval == 0)
-        free_memory = ((int)&free_memory) - ((int)&__bss_end);
-      else
-        free_memory = ((int)&free_memory) - ((int)__brkval);
+    if ((int)__brkval == 0)
+      free_memory = ((int)&free_memory) - ((int)&__bss_end);
+    else
+      free_memory = ((int)&free_memory) - ((int)__brkval);
 
-      return free_memory;
-    }
+    return free_memory;
   }
-#endif //!SDSUPPORT
+}
 
 /**
  * Inject the next command from the command queue, when possible
@@ -765,9 +755,6 @@ void setup() {
   SERIAL_ECHOPGM(MSG_PLANNER_BUFFER_BYTES);
   SERIAL_ECHOLN((int)sizeof(block_t)*BLOCK_BUFFER_SIZE);
 
-  #if ENABLED(SDSUPPORT)
-    for (int8_t i = 0; i < BUFSIZE; i++) fromsd[i] = false;
-  #endif
 
   // loads data from EEPROM if available else uses defaults (and resets step acceleration rate)
   Config_RetrieveSettings();
@@ -842,38 +829,9 @@ void setup() {
 void loop() {
   if (commands_in_queue < BUFSIZE - 1) get_command();
 
-  #if ENABLED(SDSUPPORT)
-    card.checkautostart(false);
-  #endif
-
   if (commands_in_queue) {
 
-    #if ENABLED(SDSUPPORT)
-
-      if (card.saving) {
-        char *command = command_queue[cmd_queue_index_r];
-        if (strstr_P(command, PSTR("M29"))) {
-          // M29 closes the file
-          card.closefile();
-          SERIAL_PROTOCOLLNPGM(MSG_FILE_SAVED);
-        }
-        else {
-          // Write the string from the read buffer to SD
-          card.write_command(command);
-          if (card.logging)
-            process_next_command(); // The card is saving because it's logging
-          else
-            SERIAL_PROTOCOLLNPGM(MSG_OK);
-        }
-      }
-      else
-        process_next_command();
-
-    #else
-
       process_next_command();
-
-    #endif // SDSUPPORT
 
     commands_in_queue--;
     cmd_queue_index_r = (cmd_queue_index_r + 1) % BUFSIZE;
@@ -934,11 +892,6 @@ void get_command() {
 
       char *command = command_queue[cmd_queue_index_w];
       command[serial_count] = 0; // terminate string
-
-      // this item in the queue is not from sd
-      #if ENABLED(SDSUPPORT)
-        fromsd[cmd_queue_index_w] = false;
-      #endif
 
       char *npos = strchr(command, 'N');
       char *apos = strchr(command, '*');
@@ -1020,59 +973,6 @@ void get_command() {
     }
   }
 
-  #if ENABLED(SDSUPPORT)
-
-    if (!card.sdprinting || serial_count) return;
-
-    // '#' stops reading from SD to the buffer prematurely, so procedural macro calls are possible
-    // if it occurs, stop_buffering is triggered and the buffer is ran dry.
-    // this character _can_ occur in serial com, due to checksums. however, no checksums are used in SD printing
-
-    static bool stop_buffering = false;
-    if (commands_in_queue == 0) stop_buffering = false;
-
-    while (!card.eof() && commands_in_queue < BUFSIZE && !stop_buffering) {
-      int16_t n = card.get();
-      serial_char = (char)n;
-      if (serial_char == '\n' || serial_char == '\r' ||
-          ((serial_char == '#' || serial_char == ':') && !comment_mode) ||
-          serial_count >= (MAX_CMD_SIZE - 1) || n == -1
-      ) {
-        if (card.eof()) {
-          SERIAL_PROTOCOLLNPGM(MSG_FILE_PRINTED);
-          print_job_stop_ms = millis();
-          char time[30];
-          millis_t t = (print_job_stop_ms - print_job_start_ms) / 1000;
-          int hours = t / 60 / 60, minutes = (t / 60) % 60;
-          sprintf_P(time, PSTR("%i " MSG_END_HOUR " %i " MSG_END_MINUTE), hours, minutes);
-          SERIAL_ECHO_START;
-          SERIAL_ECHOLN(time);
-          lcd_setstatus(time, true);
-          card.printingHasFinished();
-          card.checkautostart(true);
-        }
-        if (serial_char == '#') stop_buffering = true;
-
-        if (!serial_count) {
-          comment_mode = false; //for new command
-          return; //if empty line
-        }
-        command_queue[cmd_queue_index_w][serial_count] = 0; //terminate string
-        // if (!comment_mode) {
-        fromsd[cmd_queue_index_w] = true;
-        commands_in_queue += 1;
-        cmd_queue_index_w = (cmd_queue_index_w + 1) % BUFSIZE;
-        // }
-        comment_mode = false; //for new command
-        serial_count = 0; //clear buffer
-      }
-      else {
-        if (serial_char == ';') comment_mode = true;
-        if (!comment_mode) command_queue[cmd_queue_index_w][serial_count++] = serial_char;
-      }
-    }
-
-  #endif // SDSUPPORT
 }
 
 bool code_has_value() {
@@ -3570,95 +3470,6 @@ inline void gcode_M17() {
   enable_all_steppers();
 }
 
-#if ENABLED(SDSUPPORT)
-
-  /**
-   * M20: List SD card to serial output
-   */
-  inline void gcode_M20() {
-    SERIAL_PROTOCOLLNPGM(MSG_BEGIN_FILE_LIST);
-    card.ls();
-    SERIAL_PROTOCOLLNPGM(MSG_END_FILE_LIST);
-  }
-
-  /**
-   * M21: Init SD Card
-   */
-  inline void gcode_M21() {
-    card.initsd();
-  }
-
-  /**
-   * M22: Release SD Card
-   */
-  inline void gcode_M22() {
-    card.release();
-  }
-
-  /**
-   * M23: Select a file
-   */
-  inline void gcode_M23() {
-    card.openFile(current_command_args, true);
-  }
-
-  /**
-   * M24: Start SD Print
-   */
-  inline void gcode_M24() {
-    card.startFileprint();
-    print_job_start_ms = millis();
-  }
-
-  /**
-   * M25: Pause SD Print
-   */
-  inline void gcode_M25() {
-    card.pauseSDPrint();
-  }
-
-  /**
-   * M26: Set SD Card file index
-   */
-  inline void gcode_M26() {
-    if (card.cardOK && code_seen('S'))
-      card.setIndex(code_value_short());
-  }
-
-  /**
-   * M27: Get SD Card status
-   */
-  inline void gcode_M27() {
-    card.getStatus();
-  }
-
-  /**
-   * M28: Start SD Write
-   */
-  inline void gcode_M28() {
-    card.openFile(current_command_args, false);
-  }
-
-  /**
-   * M29: Stop SD Write
-   * Processed in write to file routine above
-   */
-  inline void gcode_M29() {
-    // card.saving = false;
-  }
-
-  /**
-   * M30 <filename>: Delete SD Card file
-   */
-  inline void gcode_M30() {
-    if (card.cardOK) {
-      card.closefile();
-      card.removeFile(current_command_args);
-    }
-  }
-
-#endif
-
 /**
  * M31: Get the time since the start of SD Print (or last M109)
  */
@@ -3673,64 +3484,6 @@ inline void gcode_M31() {
   lcd_setstatus(time);
   autotempShutdown();
 }
-
-#if ENABLED(SDSUPPORT)
-
-  /**
-   * M32: Select file and start SD Print
-   */
-  inline void gcode_M32() {
-    if (card.sdprinting)
-      st_synchronize();
-
-    char* namestartpos = strchr(current_command_args, '!');  // Find ! to indicate filename string start.
-    if (!namestartpos)
-      namestartpos = current_command_args; // Default name position, 4 letters after the M
-    else
-      namestartpos++; //to skip the '!'
-
-    bool call_procedure = code_seen('P') && (seen_pointer < namestartpos);
-
-    if (card.cardOK) {
-      card.openFile(namestartpos, true, !call_procedure);
-
-      if (code_seen('S') && seen_pointer < namestartpos) // "S" (must occur _before_ the filename!)
-        card.setIndex(code_value_short());
-
-      card.startFileprint();
-      if (!call_procedure)
-        print_job_start_ms = millis(); //procedure calls count as normal print time.
-    }
-  }
-
-  #if ENABLED(LONG_FILENAME_HOST_SUPPORT)
-
-    /**
-     * M33: Get the long full path of a file or folder
-     *
-     * Parameters:
-     *   <dospath> Case-insensitive DOS-style path to a file or folder
-     *
-     * Example:
-     *   M33 miscel~1/armchair/armcha~1.gco
-     *
-     * Output:
-     *   /Miscellaneous/Armchair/Armchair.gcode
-     */
-    inline void gcode_M33() {
-      card.printLongPath(current_command_args);
-    }
-
-  #endif
-
-  /**
-   * M928: Start SD Write
-   */
-  inline void gcode_M928() {
-    card.openLogFile(current_command_args);
-  }
-
-#endif // SDSUPPORT
 
 /**
  * M42: Change pin status via GCode
@@ -6460,43 +6213,6 @@ void process_next_command() {
         gcode_M17();
         break;
 
-      #if ENABLED(SDSUPPORT)
-
-        case 20: // M20 - list SD card
-          gcode_M20(); break;
-        case 21: // M21 - init SD card
-          gcode_M21(); break;
-        case 22: //M22 - release SD card
-          gcode_M22(); break;
-        case 23: //M23 - Select file
-          gcode_M23(); break;
-        case 24: //M24 - Start SD print
-          gcode_M24(); break;
-        case 25: //M25 - Pause SD print
-          gcode_M25(); break;
-        case 26: //M26 - Set SD index
-          gcode_M26(); break;
-        case 27: //M27 - Get SD status
-          gcode_M27(); break;
-        case 28: //M28 - Start SD write
-          gcode_M28(); break;
-        case 29: //M29 - Stop SD write
-          gcode_M29(); break;
-        case 30: //M30 <filename> Delete File
-          gcode_M30(); break;
-        case 32: //M32 - Select file and start SD print
-          gcode_M32(); break;
-
-        #if ENABLED(LONG_FILENAME_HOST_SUPPORT)
-          case 33: //M33 - Get the long full path to a file or folder
-            gcode_M33(); break;
-        #endif // LONG_FILENAME_HOST_SUPPORT
-
-        case 928: //M928 - Start SD write
-          gcode_M928(); break;
-
-      #endif //SDSUPPORT
-
       case 31: //M31 take time since the start of the SD print or an M109 command
         gcode_M31();
         break;
@@ -6975,9 +6691,6 @@ void FlushSerialRequestResend() {
 
 void ok_to_send() {
   refresh_cmd_timeout();
-  #if ENABLED(SDSUPPORT)
-    if (fromsd[cmd_queue_index_r]) return;
-  #endif
   SERIAL_PROTOCOLPGM(MSG_OK);
   #if ENABLED(ADVANCED_OK)
     SERIAL_PROTOCOLPGM(" N"); SERIAL_PROTOCOL(gcode_LastN);

@@ -2,7 +2,6 @@
 #if ENABLED(ULTRA_LCD)
 #include "Marlin.h"
 #include "language.h"
-#include "cardreader.h"
 #include "temperature.h"
 #include "stepper.h"
 #include "configuration_store.h"
@@ -98,12 +97,6 @@ static void lcd_status_screen();
   static void menu_action_setting_edit_callback_float51(const char* pstr, float* ptr, float minValue, float maxValue, menuFunc_t callbackFunc);
   static void menu_action_setting_edit_callback_float52(const char* pstr, float* ptr, float minValue, float maxValue, menuFunc_t callbackFunc);
   static void menu_action_setting_edit_callback_long5(const char* pstr, unsigned long* ptr, unsigned long minValue, unsigned long maxValue, menuFunc_t callbackFunc);
-
-  #if ENABLED(SDSUPPORT)
-    static void lcd_sdcard_menu();
-    static void menu_action_sdfile(const char* filename, char* longFilename);
-    static void menu_action_sddirectory(const char* filename, char* longFilename);
-  #endif
 
   #define ENCODER_FEEDRATE_DEADZONE 10
 
@@ -288,25 +281,7 @@ static void lcd_status_screen() {
     #if PROGRESS_MSG_EXPIRE > 0
       // Handle message expire
       if (expire_status_ms > 0) {
-        #if ENABLED(SDSUPPORT)
-          if (card.isFileOpen()) {
-            // Expire the message when printing is active
-            if (IS_SD_PRINTING) {
-              if (ms >= expire_status_ms) {
-                lcd_status_message[0] = '\0';
-                expire_status_ms = 0;
-              }
-            }
-            else {
-              expire_status_ms += LCD_UPDATE_INTERVAL;
-            }
-          }
-          else {
-            expire_status_ms = 0;
-          }
-        #else
           expire_status_ms = 0;
-        #endif //SDSUPPORT
       }
     #endif
   #endif //LCD_PROGRESS_BAR
@@ -375,23 +350,6 @@ static void lcd_status_screen() {
 
 static void lcd_return_to_status() { lcd_goto_menu(lcd_status_screen); }
 
-#if ENABLED(SDSUPPORT)
-
-  static void lcd_sdcard_pause() { card.pauseSDPrint(); }
-
-  static void lcd_sdcard_resume() { card.startFileprint(); }
-
-  static void lcd_sdcard_stop() {
-    quickStop();
-    card.sdprinting = false;
-    card.closefile();
-    autotempShutdown();
-    cancel_heatup = true;
-    lcd_setstatus(MSG_PRINT_ABORTED, true);
-  }
-
-#endif //SDSUPPORT
-
 /**
  *
  * "Main" menu
@@ -412,40 +370,8 @@ static void lcd_main_menu() {
   }
   MENU_ITEM(submenu, MSG_CONTROL, lcd_control_menu);
 
-  #if ENABLED(SDSUPPORT)
-    if (card.cardOK) {
-      if (card.isFileOpen()) {
-        if (card.sdprinting)
-          MENU_ITEM(function, MSG_PAUSE_PRINT, lcd_sdcard_pause);
-        else
-          MENU_ITEM(function, MSG_RESUME_PRINT, lcd_sdcard_resume);
-        MENU_ITEM(function, MSG_STOP_PRINT, lcd_sdcard_stop);
-      }
-      else {
-        MENU_ITEM(submenu, MSG_CARD_MENU, lcd_sdcard_menu);
-        #if !PIN_EXISTS(SD_DETECT)
-          MENU_ITEM(gcode, MSG_CNG_SDCARD, PSTR("M21"));  // SD-card changed by user
-        #endif
-      }
-    }
-    else {
-      MENU_ITEM(submenu, MSG_NO_CARD, lcd_sdcard_menu);
-      #if !PIN_EXISTS(SD_DETECT)
-        MENU_ITEM(gcode, MSG_INIT_SDCARD, PSTR("M21")); // Manually initialize the SD-card via user interface
-      #endif
-    }
-  #endif //SDSUPPORT
-
   END_MENU();
 }
-
-#if ENABLED(SDSUPPORT) && ENABLED(MENU_ADDAUTOSTART)
-  static void lcd_autostart_sd() {
-    card.autostart_index = 0;
-    card.setroot();
-    card.checkautostart(true);
-  }
-#endif
 
 /**
  * Set the home offset based on the current_position
@@ -760,9 +686,6 @@ static void lcd_prepare_menu() {
   //
   // Autostart
   //
-  #if ENABLED(SDSUPPORT) && ENABLED(MENU_ADDAUTOSTART)
-    MENU_ITEM(function, MSG_AUTOSTART, lcd_autostart_sd);
-  #endif
 
   END_MENU();
 }
@@ -1269,62 +1192,6 @@ static void lcd_control_volumetric_menu() {
   }
 #endif // FWRETRACT
 
-#if ENABLED(SDSUPPORT)
-
-  #if !PIN_EXISTS(SD_DETECT)
-    static void lcd_sd_refresh() {
-      card.initsd();
-      currentMenuViewOffset = 0;
-    }
-  #endif
-
-  static void lcd_sd_updir() {
-    card.updir();
-    currentMenuViewOffset = 0;
-  }
-
-  /**
-   *
-   * "Print from SD" submenu
-   *
-   */
-  void lcd_sdcard_menu() {
-    if (lcdDrawUpdate == 0 && LCD_CLICKED == 0) return;	// nothing to do (so don't thrash the SD card)
-    uint16_t fileCnt = card.getnrfilenames();
-    START_MENU();
-    MENU_ITEM(back, MSG_MAIN, lcd_main_menu);
-    card.getWorkDirName();
-    if (card.filename[0] == '/') {
-      #if !PIN_EXISTS(SD_DETECT)
-        MENU_ITEM(function, LCD_STR_REFRESH MSG_REFRESH, lcd_sd_refresh);
-      #endif
-    }
-    else {
-      MENU_ITEM(function, LCD_STR_FOLDER "..", lcd_sd_updir);
-    }
-
-    for (uint16_t i = 0; i < fileCnt; i++) {
-      if (_menuItemNr == _lineNr) {
-        card.getfilename(
-          #if ENABLED(SDCARD_RATHERRECENTFIRST)
-            fileCnt-1 -
-          #endif
-          i
-        );
-        if (card.filenameIsDir)
-          MENU_ITEM(sddirectory, MSG_CARD_MENU, card.filename, card.longFilename);
-        else
-          MENU_ITEM(sdfile, MSG_CARD_MENU, card.filename, card.longFilename);
-      }
-      else {
-        MENU_ITEM_DUMMY();
-      }
-    }
-    END_MENU();
-  }
-
- #endif //SDSUPPORT
-
 /**
  *
  * Functions for editing single values
@@ -1468,25 +1335,6 @@ static void menu_action_submenu(menuFunc_t func) { lcd_goto_menu(func); }
 static void menu_action_gcode(const char* pgcode) { enqueuecommands_P(pgcode); }
 static void menu_action_function(menuFunc_t func) { (*func)(); }
 
-#if ENABLED(SDSUPPORT)
-
-  static void menu_action_sdfile(const char* filename, char* longFilename) {
-    char cmd[30];
-    char* c;
-    sprintf_P(cmd, PSTR("M23 %s"), filename);
-    for(c = &cmd[4]; *c; c++) *c = tolower(*c);
-    enqueuecommand(cmd);
-    enqueuecommands_P(PSTR("M24"));
-    lcd_return_to_status();
-  }
-
-  static void menu_action_sddirectory(const char* filename, char* longFilename) {
-    card.chdir(filename);
-    encoderPosition = 0;
-  }
-
-#endif //SDSUPPORT
-
 static void menu_action_setting_edit_bool(const char* pstr, bool* ptr) { *ptr = !(*ptr); }
 static void menu_action_setting_edit_callback_bool(const char* pstr, bool* ptr, menuFunc_t callback) {
   menu_action_setting_edit_bool(pstr, ptr);
@@ -1530,12 +1378,6 @@ void lcd_init() {
      WRITE(SHIFT_EN,LOW);
   #endif // SR_LCD_2W_NL
 #endif//!NEWPANEL
-
-  #if ENABLED(SDSUPPORT) && PIN_EXISTS(SD_DETECT)
-    pinMode(SD_DETECT_PIN, INPUT);
-    WRITE(SD_DETECT_PIN, HIGH);
-    lcd_sd_status = 2; // UNKNOWN
-  #endif
 
   #if ENABLED(LCD_HAS_SLOW_BUTTONS)
     slow_buttons = 0;
@@ -1590,31 +1432,6 @@ void lcd_update() {
 
   lcd_buttons_update();
 
-  #if ENABLED(SDSUPPORT) && PIN_EXISTS(SD_DETECT)
-
-    bool sd_status = IS_SD_INSERTED;
-    if (sd_status != lcd_sd_status && lcd_detected()) {
-      lcdDrawUpdate = 2;
-      lcd_implementation_init( // to maybe revive the LCD if static electricity killed it.
-        #if ENABLED(LCD_PROGRESS_BAR)
-          currentMenu == lcd_status_screen
-        #endif
-      );
-
-      if (sd_status) {
-        card.initsd();
-        if (lcd_sd_status != 2) LCD_MESSAGEPGM(MSG_SD_INSERTED);
-      }
-      else {
-        card.release();
-        if (lcd_sd_status != 2) LCD_MESSAGEPGM(MSG_SD_REMOVED);
-      }
-
-      lcd_sd_status = sd_status;
-    }
-
-  #endif //SDSUPPORT && SD_DETECT_PIN
-  
   millis_t ms = millis();
   if (ms > next_lcd_update_ms) {
 

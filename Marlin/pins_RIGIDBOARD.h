@@ -61,11 +61,7 @@
 
 // SPI for Max6675 Thermocouple
 #undef MAX6675_SS
-#if ENABLED(SDSUPPORT)
-  #define MAX6675_SS       49 // Don't use pin 49 as this is tied to the switch inside the SD card socket to detect if there is an SD card present
-#else
-  #define MAX6675_SS       53 // Don't use pin 53 if there is even the remote possibility of using Display/SD card
-#endif
+#define MAX6675_SS       53 // Don't use pin 53 if there is even the remote possibility of using Display/SD card
 
 // RigidBot swaps E0 / E1 plugs vs RAMPS 1.3
 
