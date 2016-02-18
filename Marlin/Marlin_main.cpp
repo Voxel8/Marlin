@@ -6595,14 +6595,12 @@ void process_next_command() {
           break;
       #endif // HAS_TEMP_BED
 
-      //#if HAS_FAN
-        case 106: // M106: Fan On
-          gcode_M106();
-          break;
-        case 107: // M107: Fan Off
-          gcode_M107();
-          break;
-      //#endif // HAS_FAN
+      case 106: // M106: Fan On
+        gcode_M106();
+        break;
+      case 107: // M107: Fan Off
+        gcode_M107();
+        break;
 
       #if ENABLED(BARICUDA)
         // PWM for HEATER_1_PIN
