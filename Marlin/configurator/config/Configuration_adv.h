@@ -288,6 +288,48 @@
 
 // @section lcd
 
+#if ENABLED(SDSUPPORT)
+
+  // Some RAMPS and other boards don't detect when an SD card is inserted. You can work
+  // around this by connecting a push button or single throw switch to the pin defined
+  // as SD_DETECT_PIN in your board's pins definitions.
+  // This setting should be disabled unless you are using a push button, pulling the pin to ground.
+  // Note: This is always disabled for ULTIPANEL (except ELB_FULL_GRAPHIC_CONTROLLER).
+  #define SD_DETECT_INVERTED
+
+  #define SD_FINISHED_STEPPERRELEASE true  //if sd support and the file is finished: disable steppers?
+  #define SD_FINISHED_RELEASECOMMAND "M84 X Y Z E" // You might want to keep the z enabled so your bed stays in place.
+
+  #define SDCARD_RATHERRECENTFIRST  //reverse file order of sd card menu display. Its sorted practically after the file system block order.
+  // if a file is deleted, it frees a block. hence, the order is not purely chronological. To still have auto0.g accessible, there is again the option to do that.
+  // using:
+  //#define MENU_ADDAUTOSTART
+
+  // Show a progress bar on HD44780 LCDs for SD printing
+  //#define LCD_PROGRESS_BAR
+
+  #if ENABLED(LCD_PROGRESS_BAR)
+    // Amount of time (ms) to show the bar
+    #define PROGRESS_BAR_BAR_TIME 2000
+    // Amount of time (ms) to show the status message
+    #define PROGRESS_BAR_MSG_TIME 3000
+    // Amount of time (ms) to retain the status message (0=forever)
+    #define PROGRESS_MSG_EXPIRE   0
+    // Enable this to show messages for MSG_TIME then hide them
+    //#define PROGRESS_MSG_ONCE
+  #endif
+
+  // This allows hosts to request long names for files and folders with M33
+  //#define LONG_FILENAME_HOST_SUPPORT
+
+  // This option allows you to abort SD printing when any endstop is triggered.
+  // This feature must be enabled with "M540 S1" or from the LCD menu.
+  // To have any effect, endstops must be enabled during SD printing.
+  // With ENDSTOPS_ONLY_FOR_HOMING you must send "M120" to enable endstops.
+  //#define ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED
+
+#endif // SDSUPPORT
+
 // for dogm lcd displays you can choose some additional fonts:
 #if ENABLED(DOGLCD)
   // save 3120 bytes of PROGMEM by commenting out #define USE_BIG_EDIT_FONT
@@ -361,7 +403,11 @@ const unsigned int dropsegments=5; //everything with less than this number of st
 
 // The number of linear motions that can be in the plan at any give time.
 // THE BLOCK_BUFFER_SIZE NEEDS TO BE A POWER OF 2, i.g. 8,16,32 because shifts and ors are used to do the ring-buffering.
-#define BLOCK_BUFFER_SIZE 16 // maximize block buffer
+#if ENABLED(SDSUPPORT)
+  #define BLOCK_BUFFER_SIZE 16   // SD,LCD,Buttons take more memory, block buffer needs to be smaller
+#else
+  #define BLOCK_BUFFER_SIZE 16 // maximize block buffer
+#endif
 
 // @section more
 
