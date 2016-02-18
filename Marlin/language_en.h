@@ -429,6 +429,9 @@
 #ifndef MSG_ERR_MINTEMP_BED
 #define MSG_ERR_MINTEMP_BED                 "Err: MINTEMP BED"
 #endif
+#ifndef MSG_ERR_CARTRIDGE_REMOVED
+#define MSG_ERR_CARTRIDGE_REMOVED           "Err: CARTRIDGE REMOVED"
+#endif
 #ifndef MSG_ERR_PNEUMATIC
 #define MSG_ERR_PNEUMATIC                   "Err: Pressure value out of Range"
 #endif

@@ -508,6 +508,24 @@ inline void _temp_error(int e, const char *serial_msg, const char *lcd_msg) {
   #endif
 }
 
+inline void _cartridge_removed_error(int e, const char *serial_msg, const char *lcd_msg) {
+  static bool killed = false;
+  if (isRunning()) {
+    SERIAL_ERROR_START;
+    serialprintPGM(serial_msg);
+    SERIAL_ERRORPGM(MSG_STOPPED_HEATER);
+    if (e >= 0) SERIAL_ERRORLN((int)e); else SERIAL_ERRORLNPGM(MSG_HEATER_BED);
+  }
+    if (!killed) {
+      Running = false;
+      killed = true;
+      kill(lcd_msg);
+      enable_z();
+    }
+    else
+      disable_all_heaters(); // paranoia
+}
+
 void max_temp_error(uint8_t e) {
 // Temp error has been reset
   if (time_since_last_err[e] == 0) {
@@ -515,9 +533,13 @@ void max_temp_error(uint8_t e) {
   }
 // There has been a recent error, if was more than a second ago, it is probably an error
   else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
-    _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
+    if(READ(CART0_SIG2_PIN) == LOW || READ(CART1_SIG2_PIN) == HIGH )
+      _cartridge_removed_error(e, PSTR(MSG_T_CARTRIDGE_REMOVED),PSTR(MSG_ERR_CARTRIDGE_REMOVED))
+    else
+      _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
   }
 }
+
 void min_temp_error(uint8_t e) {
   if (time_since_last_err[e] == 0) {
     time_since_last_err[e] = millis();
@@ -526,6 +548,7 @@ void min_temp_error(uint8_t e) {
     _temp_error(e, PSTR(MSG_T_MINTEMP), PSTR(MSG_ERR_MINTEMP));
   }
 }
+
 void bed_max_temp_error(void) {
   if (time_since_last_err_bed == 0) {
     time_since_last_err_bed = millis();

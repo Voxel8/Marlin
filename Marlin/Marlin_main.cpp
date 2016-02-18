@@ -602,6 +602,13 @@ void setup_powerhold() {
   #endif
 }
 
+void setup_cartridgeidpins(void){
+  #if HAS_CARTRIDGE_ID
+    SET_INPUT(CART0_SIG2_PIN)
+    SET_INPUT(CART1_SIG2_PIN)
+  #endif
+}
+
 /*
   Enable 24V to fans, E-reg, Cartridge Holder, Cartridges
   if no short circuit is detected on line
@@ -715,6 +722,7 @@ void setup() {
   setup_killpin();
   setup_filrunoutpin();
   setup_powerhold();
+  setup_cartridgeidpins();
 
   #if HAS_STEPPER_RESET
     disableStepperDrivers();

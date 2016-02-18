@@ -213,6 +213,7 @@
 #define MSG_T_THERMAL_RUNAWAY               "Thermal Runaway"
 #define MSG_T_MAXTEMP                       "MAXTEMP triggered"
 #define MSG_T_MINTEMP                       "MINTEMP triggered"
+#define MSG_T_CARTRIDGE_REMOVED             "Cartridge Removed"
 #define MSG_PNEUMATIC_PUMP_OFF              ": Pressure pump turned off, MAX/MIN value exceeded!!"
 
 // Debug
