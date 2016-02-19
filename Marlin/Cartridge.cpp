@@ -33,7 +33,7 @@ static void cartridgePresentUpdate(unsigned int cartNumber);
  /**
  * Check to see if cartridges are present or absent. Flags internally if 
  * one has been removed, or clears the removed flag if it's present. 
- * The status of cartridge removal can be found with CartridgeRemoved
+ * The status of cartridge removal can be found with CartridgeRemoved()
  */
 void UpdateCartridgeStatus(void)
 {
@@ -60,18 +60,26 @@ void UpdateCartridgeStatus(void)
 /**
  * This function checks to see if a cartridge has been removed from the
  * system, allowing us to make judgement calls for error reporting. This
- * information is updated by calling UpdateCartridgeStatus
- * @returns    Returns true if a cartridge has been removed 
+ * information is updated by calling UpdateCartridgeStatus. Will also 
+ * return true if no cartridges are present.
+ * @returns    Returns true if a cartridge has been removed, or no 
+ *             cartridge is present 
  */
 bool CartridgeRemoved(void)
 {
 	bool returnValue = false;
+	unsigned int cartridgePresentSum = 0;
 	for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
 	{
 		if (cartridgeRemoved[i] == true)
 		{
 			returnValue = true;
+			cartridgePresentSum += cartridgePresent[i];
 		}
+	}
+	if (cartridgePresentSum == 0)
+	{
+		returnValue = true;
 	}
 	return returnValue;
 }

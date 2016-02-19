@@ -511,6 +511,7 @@ inline void _temp_error(int e, const char *serial_msg, const char *lcd_msg) {
 
 inline void _cartridge_removed_error(int e, const char *serial_msg, const char *lcd_msg) {
   static bool killed = false;
+  disable_all_heaters();
   if (IsRunning()) {
     SERIAL_ERROR_START;
     serialprintPGM(serial_msg);
@@ -522,8 +523,6 @@ inline void _cartridge_removed_error(int e, const char *serial_msg, const char *
       killed = true;
       quickStop();
     }
-    else
-      disable_all_heaters(); // paranoia
 }
 
 void max_temp_error(uint8_t e) {
