@@ -27,6 +27,7 @@
 #include "MCP4725.h"
 
 #include "Sd2PinMap.h"
+#include "Cartridge.h"
 
 //===========================================================================
 //================================== macros =================================
@@ -510,7 +511,7 @@ inline void _temp_error(int e, const char *serial_msg, const char *lcd_msg) {
 
 inline void _cartridge_removed_error(int e, const char *serial_msg, const char *lcd_msg) {
   static bool killed = false;
-  if (isRunning()) {
+  if (IsRunning()) {
     SERIAL_ERROR_START;
     serialprintPGM(serial_msg);
     SERIAL_ERRORPGM(MSG_STOPPED_HEATER);
@@ -519,8 +520,7 @@ inline void _cartridge_removed_error(int e, const char *serial_msg, const char *
     if (!killed) {
       Running = false;
       killed = true;
-      kill(lcd_msg);
-      enable_z();
+      quickStop();
     }
     else
       disable_all_heaters(); // paranoia
@@ -533,8 +533,9 @@ void max_temp_error(uint8_t e) {
   }
 // There has been a recent error, if was more than a second ago, it is probably an error
   else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
-    if(READ(CART0_SIG2_PIN) == LOW || READ(CART1_SIG2_PIN) == HIGH )
-      _cartridge_removed_error(e, PSTR(MSG_T_CARTRIDGE_REMOVED),PSTR(MSG_ERR_CARTRIDGE_REMOVED))
+    UpdateCartridgeStatus();
+    if(CartridgeRemoved())
+      _cartridge_removed_error(e, PSTR(MSG_T_CARTRIDGE_REMOVED),PSTR(MSG_ERR_CARTRIDGE_REMOVED));
     else
       _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
   }
