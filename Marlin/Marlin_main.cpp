@@ -791,8 +791,8 @@ void setup() {
   setup_photpin();
   servo_init();
 
-  //UpdateCartridgeStatus(); // Initialize cartridge status.
-
+  UpdateCartridgeStatus();
+  
   #if HAS_CONTROLLERFAN
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
   #endif

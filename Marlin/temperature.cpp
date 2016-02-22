@@ -513,11 +513,11 @@ inline void _cartridge_removed_error(int e, const char *serial_msg, const char *
   static bool killed = false;
   disable_all_heaters();
   if (IsRunning()) {
-    SERIAL_ERROR_START;
+    //SERIAL_ERROR_START;
     serialprintPGM(serial_msg);
-    SERIAL_ERRORPGM(MSG_STOPPED_HEATER);
-    if (e >= 0) SERIAL_ERRORLN((int)e); else SERIAL_ERRORLNPGM(MSG_HEATER_BED);
-  }
+    //SERIAL_ERRORPGM(MSG_STOPPED_HEATER);
+    //if (e >= 0) SERIAL_ERRORLN((int)e); else SERIAL_ERRORLNPGM(MSG_HEATER_BED);
+    }
     if (!killed) {
       Running = false;
       killed = true;
@@ -534,7 +534,7 @@ void max_temp_error(uint8_t e) {
   }
 // There has been a recent error, if was more than a second ago, it is probably an error
   else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
-    //UpdateCartridgeStatus();
+    UpdateCartridgeStatus();
     if(CartridgeRemoved())
       _cartridge_removed_error(e, PSTR(MSG_T_CARTRIDGE_REMOVED),PSTR(MSG_ERR_CARTRIDGE_REMOVED));
     else
