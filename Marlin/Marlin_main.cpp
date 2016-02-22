@@ -604,6 +604,7 @@ void setup_powerhold() {
 
 void setup_cartridgeidpins(void){
   #if HAS_CARTRIDGE_ID
+    SET_OUTPUT(CART1_SIG1_PIN)
     SET_INPUT(CART0_SIG2_PIN)
     SET_INPUT(CART1_SIG2_PIN)
   #endif

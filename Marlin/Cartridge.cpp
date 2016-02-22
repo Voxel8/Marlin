@@ -4,6 +4,7 @@
  * Date: 2/19/2016
  * Used to keep track of all information about material cartridges, for use
  * in decision making in other parts of the program
+ * Copyright (C) 2016 Voxel8
  */
 
 #include "Marlin.h"
@@ -37,51 +38,51 @@ static void cartridgePresentUpdate(unsigned int cartNumber);
  */
 void UpdateCartridgeStatus(void)
 {
-	// Cartridge zero is pulled low by default
-	if(READ(CART0_SIG2_PIN) == HIGH)
-	{
-		cartridgePresentUpdate(0);
-	}
-	else
-	{
-		cartridgeAbsentUpdate(0);
-	}
-	// Cartridge one is pulled high by default
-	if(READ(CART1_SIG2_PIN) == LOW)
-	{
-		cartridgePresentUpdate(1);
-	}
-	else
-	{
-		cartridgeAbsentUpdate(1);
-	}
+    // Cartridge zero is pulled low by default
+    if(READ(CART0_SIG2_PIN) == HIGH)
+    {
+        cartridgePresentUpdate(0);
+    }
+    else
+    {
+        cartridgeAbsentUpdate(0);
+    }
+    // Cartridge one is pulled high by default
+    if(READ(CART1_SIG2_PIN) == LOW)
+    {
+        cartridgePresentUpdate(1);
+    }
+    else
+    {
+        cartridgeAbsentUpdate(1);
+    }
 }  
 
 /**
  * This function checks to see if a cartridge has been removed from the
  * system, allowing us to make judgement calls for error reporting. This
- * information is updated by calling UpdateCartridgeStatus. Will also 
+ * information is updated by calling UpdateCartridgeStatus(). Will also 
  * return true if no cartridges are present.
  * @returns    Returns true if a cartridge has been removed, or no 
  *             cartridge is present 
  */
 bool CartridgeRemoved(void)
 {
-	bool returnValue = false;
-	unsigned int cartridgePresentSum = 0;
-	for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
-	{
-		if (cartridgeRemoved[i] == true)
-		{
-			returnValue = true;
-			cartridgePresentSum += cartridgePresent[i];
-		}
-	}
-	if (cartridgePresentSum == 0)
-	{
-		returnValue = true;
-	}
-	return returnValue;
+    bool returnValue = false;
+    unsigned int cartridgePresentSum = 0;
+    for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
+    {
+        if (cartridgeRemoved[i] == true)
+        {
+            returnValue = true;
+            cartridgePresentSum += cartridgePresent[i];
+        }
+    }
+    if (cartridgePresentSum == 0)
+    {
+        returnValue = true;
+    }
+    return returnValue;
 }
 
 //===========================================================================
@@ -94,11 +95,17 @@ bool CartridgeRemoved(void)
  */
 static void cartridgeAbsentUpdate(unsigned int cartNumber)
 {
-	if (cartridgePresent[cartNumber] == true)
-	{
-		cartridgeRemoved[cartNumber] = true;
-	}
-	cartridgePresent[cartNumber] = false;
+    if (cartridgePresent[cartNumber] == true)
+    {
+        
+        cartridgeRemoved[cartNumber] = true;
+        if (cartNumber == 1)
+        {
+            WRITE(CART1_SIG1_PIN, LOW) // Prevents the silver extruder from
+                                       // being lowered unintentionally
+        }
+    }
+    cartridgePresent[cartNumber] = false;
 }
 
 /**
@@ -107,6 +114,6 @@ static void cartridgeAbsentUpdate(unsigned int cartNumber)
  */
 static void cartridgePresentUpdate(unsigned int cartNumber)
 {
-	cartridgePresent[cartNumber] = true;
-	cartridgeRemoved[cartNumber] = false;
+    cartridgePresent[cartNumber] = true;
+    cartridgeRemoved[cartNumber] = false;
 }
