@@ -523,6 +523,8 @@ inline void _cartridge_removed_error(int e, const char *serial_msg, const char *
       killed = true;
       quickStop();
     }
+    else
+      disable_all_heaters();
 }
 
 void max_temp_error(uint8_t e) {
@@ -532,7 +534,7 @@ void max_temp_error(uint8_t e) {
   }
 // There has been a recent error, if was more than a second ago, it is probably an error
   else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
-    UpdateCartridgeStatus();
+    //UpdateCartridgeStatus();
     if(CartridgeRemoved())
       _cartridge_removed_error(e, PSTR(MSG_T_CARTRIDGE_REMOVED),PSTR(MSG_ERR_CARTRIDGE_REMOVED));
     else

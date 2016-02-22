@@ -52,6 +52,7 @@
 #include "math.h"
 #include "buzzer.h"
 #include "Wire.h"
+#include "Cartridge.h"
 
 #if ENABLED(EXT_ADC)
   #include "ADC.h"
@@ -789,6 +790,8 @@ void setup() {
   st_init();    // Initialize stepper, this enables interrupts!
   setup_photpin();
   servo_init();
+
+  //UpdateCartridgeStatus(); // Initialize cartridge status.
 
   #if HAS_CONTROLLERFAN
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan

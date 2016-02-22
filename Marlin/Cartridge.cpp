@@ -72,10 +72,10 @@ bool CartridgeRemoved(void)
     unsigned int cartridgePresentSum = 0;
     for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
     {
+        cartridgePresentSum += cartridgePresent[i];
         if (cartridgeRemoved[i] == true)
         {
             returnValue = true;
-            cartridgePresentSum += cartridgePresent[i];
         }
     }
     if (cartridgePresentSum == 0)
@@ -97,11 +97,10 @@ static void cartridgeAbsentUpdate(unsigned int cartNumber)
 {
     if (cartridgePresent[cartNumber] == true)
     {
-        
         cartridgeRemoved[cartNumber] = true;
         if (cartNumber == 1)
         {
-            WRITE(CART1_SIG1_PIN, LOW) // Prevents the silver extruder from
+            WRITE(CART1_SIG1_PIN, LOW); // Prevents the silver extruder from
                                        // being lowered unintentionally
         }
     }
