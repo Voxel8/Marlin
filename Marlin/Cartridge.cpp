@@ -10,7 +10,8 @@
 #include "Marlin.h"
 #include "Cartridge.h"
 
-#define NUMBER_OF_CARTRIDGES   (2)
+#define NUMBER_OF_CARTRIDGES               (2)
+#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (10)
 
 
 //===========================================================================
@@ -18,8 +19,8 @@
 //===========================================================================
 
 static bool cartridgePresent[NUMBER_OF_CARTRIDGES] = {false,false};
-static bool cartridgeRemoved[NUMBER_OF_CARTRIDGES]  = {false,false};
-
+static bool cartridgeRemoved[NUMBER_OF_CARTRIDGES] = {false,false};
+static bool cartridgeRemovedSafeToMove             = false;
 //===========================================================================
 //======================= Private Functions Prototypes ======================
 //===========================================================================
@@ -70,21 +71,36 @@ bool CartridgeRemoved(void)
 {
     bool returnValue = false;
     unsigned int cartridgePresentSum = 0;
+    static unsigned int cartridgeRemovalHysteresis = 0;
+    
     for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
     {
         cartridgePresentSum += cartridgePresent[i];
         if (cartridgeRemoved[i] == true)
         {
             returnValue = true;
+            cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
         }
     }
-    if (cartridgePresentSum == 0)
+
+    if (!cartidgePresent[0] || cartridgePresentSum == 0)
     {
         returnValue = true;
+        cartridgeRemovedSafeToMove = true;
     }
+    else if (cartridgeRemovalHysteresis > 0)
+    {
+        cartridgeRemovalHysteresis--;
+        returnValue = true;
+    }
+
     return returnValue;
 }
 
+bool CartridgeRemovedSafeToMove(void)
+{
+    return cartridgeRemovedSafeToMove;
+}
 //===========================================================================
 //============================ Private Functions ============================
 //===========================================================================

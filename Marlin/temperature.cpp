@@ -510,21 +510,16 @@ inline void _temp_error(int e, const char *serial_msg, const char *lcd_msg) {
 }
 
 inline void _cartridge_removed_error(int e, const char *serial_msg, const char *lcd_msg) {
-  static bool killed = false;
-  disable_all_heaters();
-  if (IsRunning()) {
-    //SERIAL_ERROR_START;
+  static millis_t timeSinceLastRemoval = {0};
+  if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL)
+  {
+    disable_all_heaters();
+    quickStop();
+    SERIAL_ERROR_START;
     serialprintPGM(serial_msg);
-    //SERIAL_ERRORPGM(MSG_STOPPED_HEATER);
-    //if (e >= 0) SERIAL_ERRORLN((int)e); else SERIAL_ERRORLNPGM(MSG_HEATER_BED);
-    }
-    if (!killed) {
-      Running = false;
-      killed = true;
-      quickStop();
-    }
-    else
-      disable_all_heaters();
+    SERIAL_EOL;
+  }
+  timeSinceLastRemoval = millis();
 }
 
 void max_temp_error(uint8_t e) {
