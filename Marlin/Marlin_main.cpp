@@ -7987,16 +7987,25 @@ void Stop() {
  * Returns TRUE if the target is invalid
  */
 bool setTargetedHotend(int code) {
-  target_extruder = active_extruder;
-  if (code_seen('T')) {
-    target_extruder = code_value_short();
-    if (target_extruder >= EXTRUDERS) {
-      SERIAL_ECHO_START;
-      SERIAL_CHAR('M');
-      SERIAL_ECHO(code);
-      SERIAL_ECHOPGM(" " MSG_INVALID_EXTRUDER " ");
-      SERIAL_ECHOLN(target_extruder);
-      return true;
+  if (CartridgeRemovedSafeToMove())
+  {
+    //SERIAL_ERROR_START;
+    serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_SAFE));
+    SERIAL_EOL;
+  }
+  else
+  {
+    target_extruder = active_extruder;
+    if (code_seen('T')) {
+      target_extruder = code_value_short();
+      if (target_extruder >= EXTRUDERS) {
+        SERIAL_ECHO_START;
+        SERIAL_CHAR('M');
+        SERIAL_ECHO(code);
+        SERIAL_ECHOPGM(" " MSG_INVALID_EXTRUDER " ");
+        SERIAL_ECHOLN(target_extruder);
+        return true;
+      }
     }
   }
   return false;
