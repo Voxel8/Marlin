@@ -51,6 +51,7 @@
 #include "pins_arduino.h"
 #include "math.h"
 #include "buzzer.h"
+#include "Wire.h"
 
 #if ENABLED(EXT_ADC)
   #include "ADC.h"
@@ -66,7 +67,6 @@
 
 #if ENABLED(BLINKM)
   #include "blinkm.h"
-  #include "Wire.h"
 #endif
 
 #if HAS_SERVOS
@@ -4110,7 +4110,7 @@ inline void gcode_M105() {
   SERIAL_EOL;
 }
 
-#if HAS_FAN
+#if HAS_FAN // Uses dedicated FAN_PIN
 
   /**
    * M106: Set Fan Speed
@@ -4121,6 +4121,54 @@ inline void gcode_M105() {
    * M107: Fan Off
    */
   inline void gcode_M107() { fanSpeed = 0; }
+
+#else // Uses I2C
+
+  /**
+   * M106: Set Fan Speed
+   */
+
+  // 127 (50%) is maxy duty cycle for 12V fans
+  #define MAX_FAN_DUTY  127
+
+  inline void gcode_M106() {
+    // Desired speed given
+    if ((code_seen('S')) && (code_value() <= MAX_FAN_DUTY)) {
+      fanSpeed = code_value();
+    }
+    // No speed given, defaults to MAX_FAN_DUTY
+    else {
+      fanSpeed = MAX_FAN_DUTY;
+    }
+
+    Wire.beginTransmission(CART_HOLDER_ADDR);
+    Wire.write(SET_FAN_DRIVE_0_PWM);
+    Wire.write(fanSpeed);
+    Wire.endTransmission();
+
+    #if defined(DEBUG)
+      SERIAL_PROTOCOLLNPGM("Command: 'Set Fan Speed' Sent");
+      SERIAL_PROTOCOL("fanSpeed = ");
+      SERIAL_PROTOCOL(fanSpeed);
+    #endif // end DEBUG
+  }
+
+  /**
+   * M107: Fan Off
+   */
+  inline void gcode_M107() {
+    fanSpeed = 0;
+    Wire.beginTransmission(CART_HOLDER_ADDR);
+    Wire.write(SET_FAN_DRIVE_0_PWM);
+    Wire.write(fanSpeed);
+    Wire.endTransmission();
+
+    #if defined(DEBUG)
+      SERIAL_PROTOCOLLNPGM("Command: 'Fan Off' Sent");
+      SERIAL_PROTOCOL("fanSpeed = ");
+      SERIAL_PROTOCOL(fanSpeed);
+    #endif // end DEBUG
+  }
 
 #endif // HAS_FAN
 
@@ -6547,14 +6595,12 @@ void process_next_command() {
           break;
       #endif // HAS_TEMP_BED
 
-      #if HAS_FAN
-        case 106: // M106: Fan On
-          gcode_M106();
-          break;
-        case 107: // M107: Fan Off
-          gcode_M107();
-          break;
-      #endif // HAS_FAN
+      case 106: // M106: Fan On
+        gcode_M106();
+        break;
+      case 107: // M107: Fan Off
+        gcode_M107();
+        break;
 
       #if ENABLED(BARICUDA)
         // PWM for HEATER_1_PIN
