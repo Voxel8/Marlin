@@ -210,6 +210,7 @@
 #define MSG_T_MAXTEMP                       "MAXTEMP triggered"
 #define MSG_T_MINTEMP                       "MINTEMP triggered"
 #define MSG_T_CARTRIDGE_REMOVED             "Cartridge removed"
+#define MSG_T_CARTRIDGE_REMOVED_SAFE        "Cartridge Removed during operation previously and still removed."
 
 // Debug
 #define MSG_DEBUG_ECHO                      "DEBUG ECHO ENABLED"

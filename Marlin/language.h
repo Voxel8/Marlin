@@ -214,6 +214,7 @@
 #define MSG_T_MAXTEMP                       "MAXTEMP triggered"
 #define MSG_T_MINTEMP                       "MINTEMP triggered"
 #define MSG_T_CARTRIDGE_REMOVED             "Cartridge Removed"
+#define MSG_T_CARTRIDGE_REMOVED_SAFE        "Cartridge Removed during operation previously and still removed."
 #define MSG_PNEUMATIC_PUMP_OFF              ": Pressure pump turned off, MAX/MIN value exceeded!!"
 
 // Debug

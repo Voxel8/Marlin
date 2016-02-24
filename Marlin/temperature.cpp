@@ -509,13 +509,25 @@ inline void _temp_error(int e, const char *serial_msg, const char *lcd_msg) {
   #endif
 }
 
-inline void _cartridge_removed_error(int e, const char *serial_msg, const char *lcd_msg) {
+inline void _cartridge_removed_error(const char *serial_msg) {
   static millis_t timeSinceLastRemoval = {0};
   if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL)
   {
     disable_all_heaters();
     quickStop();
     SERIAL_ERROR_START;
+    serialprintPGM(serial_msg);
+    SERIAL_EOL;
+  }
+  timeSinceLastRemoval = millis();
+}
+
+inline void _cartridge_removed_safe(const char *serial_msg) {
+  static millis_t timeSinceLastRemoval = {0};
+  if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL)
+  {
+    disable_all_heaters();
+    quickStop();
     serialprintPGM(serial_msg);
     SERIAL_EOL;
   }
@@ -531,7 +543,9 @@ void max_temp_error(uint8_t e) {
   else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
     UpdateCartridgeStatus();
     if(CartridgeRemoved())
-      _cartridge_removed_error(e, PSTR(MSG_T_CARTRIDGE_REMOVED),PSTR(MSG_ERR_CARTRIDGE_REMOVED));
+      _cartridge_removed_error(PSTR(MSG_T_CARTRIDGE_REMOVED));
+    else if (CartridgeRemovedSafeToMove())
+      _cartridge_removed_safe(PSTR(MSG_T_CARTRIDGE_REMOVED_SAFE));
     else
       _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
   }

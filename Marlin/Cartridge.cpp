@@ -10,26 +10,32 @@
 #include "Marlin.h"
 #include "Cartridge.h"
 
+//===========================================================================
+//=============================== Definitions ===============================
+//===========================================================================
+
 #define NUMBER_OF_CARTRIDGES               (2)
 #define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (10)
 
 
 //===========================================================================
-//============================= Private Variables ===========================
+//============================ Private Variables ============================
 //===========================================================================
 
 static bool cartridgePresent[NUMBER_OF_CARTRIDGES] = {false,false};
 static bool cartridgeRemoved[NUMBER_OF_CARTRIDGES] = {false,false};
 static bool cartridgeRemovedSafeToMove             = false;
 //===========================================================================
-//======================= Private Functions Prototypes ======================
+//====================== Private Functions Prototypes =======================
 //===========================================================================
 
 static void cartridgeAbsentUpdate(unsigned int cartNumber);
 static void cartridgePresentUpdate(unsigned int cartNumber);
+static bool noCartridgesRemoved(void);
+static bool noCartridgesPresent(void);
 
 //===========================================================================
-//============================= Public Functions ============================
+//============================ Public Functions =============================
 //===========================================================================
 
  /**
@@ -82,13 +88,7 @@ bool CartridgeRemoved(void)
             cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
         }
     }
-
-    if (!cartidgePresent[0] || cartridgePresentSum == 0)
-    {
-        returnValue = true;
-        cartridgeRemovedSafeToMove = true;
-    }
-    else if (cartridgeRemovalHysteresis > 0)
+    if (cartridgeRemovalHysteresis > 0)
     {
         cartridgeRemovalHysteresis--;
         returnValue = true;
@@ -97,9 +97,30 @@ bool CartridgeRemoved(void)
     return returnValue;
 }
 
+/**
+ * This signals that the conditions of a removed cartridge are present. When 
+ * no cartridge has been removed, this means that the system has restarted and 
+ * we shouldn't disconnect from Marlin as soon as the error is seen.
+ * @returns    Returns true if cartridges aren't present and haven't been marked
+ *             as removed, which would happen at startup.
+ */
 bool CartridgeRemovedSafeToMove(void)
 {
-    return cartridgeRemovedSafeToMove;
+    bool returnValue = false;
+    static unsigned int cartridgeRemovedSafeHysteresis = 0;
+
+    bool removedCondition = (!cartridgePresent[0] || noCartridgesPresent());
+    if (removedCondition && noCartridgesRemoved())
+    {
+        returnValue = true;
+        cartridgeRemovedSafeHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
+    }
+    if (cartridgeRemovedSafeHysteresis > 0)
+    {
+        cartridgeRemovedSafeHysteresis--;
+        returnValue = true;
+    }
+    return returnValue;
 }
 //===========================================================================
 //============================ Private Functions ============================
@@ -117,7 +138,7 @@ static void cartridgeAbsentUpdate(unsigned int cartNumber)
         if (cartNumber == 1)
         {
             WRITE(CART1_SIG1_PIN, LOW); // Prevents the silver extruder from
-                                       // being lowered unintentionally
+                                        // being lowered unintentionally
         }
     }
     cartridgePresent[cartNumber] = false;
@@ -131,4 +152,38 @@ static void cartridgePresentUpdate(unsigned int cartNumber)
 {
     cartridgePresent[cartNumber] = true;
     cartridgeRemoved[cartNumber] = false;
+}
+
+/**
+ * Signals that no cartridges have been removed, used to tell if the system 
+ * is safe to run after a reset with cartridges removed.
+ * @returns    Returns true if no catridges have been removed, false otherwise.
+ */
+static bool noCartridgesRemoved(void)
+{
+    for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
+    {
+        if (cartridgeRemoved[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * Signals that no cartridges are present, used to tell if the system 
+ * is safe to run after a reset with cartridges removed.
+ * @returns    Returns true if no catridges are present, false otherwise.
+ */
+static bool noCartridgesPresent(void)
+{
+    for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
+    {
+        if (cartridgePresent[i])
+        {
+            return false;
+        }
+    }
+    return true;
 }

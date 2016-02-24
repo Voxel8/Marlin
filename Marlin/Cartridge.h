@@ -14,6 +14,13 @@
 //============================= Public Functions ============================
 //===========================================================================
 
+ /**
+ * Check to see if cartridges are present or absent. Flags internally if 
+ * one has been removed, or clears the removed flag if it's present. 
+ * The status of cartridge removal can be found with CartridgeRemoved
+ */
+ void UpdateCartridgeStatus(void);
+
 /**
  * This function checks to see if a cartridge has been removed from the
  * system, allowing us to make judgement calls for error reporting. This
@@ -22,11 +29,12 @@
  */
  bool CartridgeRemoved(void);
 
- /**
- * Check to see if cartridges are present or absent. Flags internally if 
- * one has been removed, or clears the removed flag if it's present. 
- * The status of cartridge removal can be found with CartridgeRemoved
+/**
+ * This signals that the conditions of a removed cartridge are present. When 
+ * no cartridge has been removed, this means that the system has restarted and 
+ * we shouldn't disconnect from Marlin as soon as the error is seen.
+ * @returns    Returns true if cartridges aren't present and haven't been marked
+ *             as removed, which would happen at startup.
  */
- void UpdateCartridgeStatus(void);
-
+bool CartridgeRemovedSafeToMove(void);
 #endif

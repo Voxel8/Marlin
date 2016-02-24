@@ -432,6 +432,9 @@
 #ifndef MSG_ERR_CARTRIDGE_REMOVED
 #define MSG_ERR_CARTRIDGE_REMOVED           "Err: CARTRIDGE REMOVED"
 #endif
+#ifndef MSG_ERR_CARTRIDGE_SAFE
+#define MSG_ERR_CARTRIDGE_SAFE              "Err: CARTRIDGE REMOVED, SAFE TO MOVE"
+#endif
 #ifndef MSG_ERR_PNEUMATIC
 #define MSG_ERR_PNEUMATIC                   "Err: Pressure value out of Range"
 #endif

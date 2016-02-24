@@ -128,6 +128,7 @@
   #define MSG_ERR_MINTEMP                     "Err: MINTEMP"
   #define MSG_ERR_MAXTEMP_BED                 "Err: MAXTEMP BED"
   #define MSG_ERR_CARTRIDGE_REMOVED           "Err: CARTRIDGE REMOVED"
+  #define MSG_ERR_CARTRIDGE_REMOVED_SAFE      "Err: CARTRIDGE REMOVED"
   #define MSG_END_HOUR                        "hours"
   #define MSG_END_MINUTE                      "minutes"
 
