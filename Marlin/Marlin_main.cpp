@@ -7989,7 +7989,7 @@ void Stop() {
 bool setTargetedHotend(int code) {
   if (CartridgeRemovedSafeToMove())
   {
-    //SERIAL_ERROR_START;
+    SERIAL_ERROR_START;
     serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_SAFE));
     SERIAL_EOL;
   }

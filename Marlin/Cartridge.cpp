@@ -31,8 +31,8 @@ static bool cartridgeRemovedSafeToMove             = false;
 
 static void cartridgeAbsentUpdate(unsigned int cartNumber);
 static void cartridgePresentUpdate(unsigned int cartNumber);
-static bool noCartridgesRemoved(void);
-static bool noCartridgesPresent(void);
+static bool cartridgesRemovedCheck(void);
+static bool cartridgesPresentCheck(void);
 
 //===========================================================================
 //============================ Public Functions =============================
@@ -76,18 +76,14 @@ void UpdateCartridgeStatus(void)
 bool CartridgeRemoved(void)
 {
     bool returnValue = false;
-    unsigned int cartridgePresentSum = 0;
     static unsigned int cartridgeRemovalHysteresis = 0;
     
-    for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
+    // If a cartridge is seen to be removed, set the hysteresis counter.
+    if(cartridgesRemovedCheck())
     {
-        cartridgePresentSum += cartridgePresent[i];
-        if (cartridgeRemoved[i] == true)
-        {
-            returnValue = true;
-            cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
-        }
+        cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
     }
+
     // We have this hysteresis here to accomodate putting the cartridge 
     // back in. Without it, Marlin will recognize the cartridge has been
     // reinserted before the temperature updates from its maximum value and
@@ -113,8 +109,8 @@ bool CartridgeRemovedSafeToMove(void)
     bool returnValue = false;
     static unsigned int cartridgeRemovedSafeHysteresis = 0;
 
-    bool removedCondition = (!cartridgePresent[0] || noCartridgesPresent());
-    if (removedCondition && noCartridgesRemoved())
+    bool removedCondition = (!cartridgePresent[0] || !cartridgesPresentCheck());
+    if (removedCondition && !cartridgesRemovedCheck())
     {
         returnValue = true;
         cartridgeRemovedSafeHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
@@ -168,16 +164,16 @@ static void cartridgePresentUpdate(unsigned int cartNumber)
  * is safe to run after a reset with cartridges removed.
  * @returns    Returns true if no catridges have been removed, false otherwise.
  */
-static bool noCartridgesRemoved(void)
+static bool cartridgesRemovedCheck(void)
 {
     for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
     {
         if (cartridgeRemoved[i])
         {
-            return false;
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 /**
@@ -185,14 +181,14 @@ static bool noCartridgesRemoved(void)
  * is safe to run after a reset with cartridges removed.
  * @returns    Returns true if no catridges are present, false otherwise.
  */
-static bool noCartridgesPresent(void)
+static bool cartridgesPresentCheck(void)
 {
     for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
     {
         if (cartridgePresent[i])
         {
-            return false;
+            return true;
         }
     }
-    return true;
+    return false;
 }
