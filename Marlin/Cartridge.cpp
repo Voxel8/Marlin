@@ -17,7 +17,6 @@
 #define NUMBER_OF_CARTRIDGES               (2)
 #define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (10)
 
-
 //===========================================================================
 //============================ Private Variables ============================
 //===========================================================================
@@ -25,6 +24,7 @@
 static bool cartridgePresent[NUMBER_OF_CARTRIDGES] = {false,false};
 static bool cartridgeRemoved[NUMBER_OF_CARTRIDGES] = {false,false};
 static bool cartridgeRemovedSafeToMove             = false;
+
 //===========================================================================
 //====================== Private Functions Prototypes =======================
 //===========================================================================
@@ -88,6 +88,10 @@ bool CartridgeRemoved(void)
             cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
         }
     }
+    // We have this hysteresis here to accomodate putting the cartridge 
+    // back in. Without it, Marlin will recognize the cartridge has been
+    // reinserted before the temperature updates from its maximum value and
+    // will throw a high temperature error.
     if (cartridgeRemovalHysteresis > 0)
     {
         cartridgeRemovalHysteresis--;
@@ -115,6 +119,10 @@ bool CartridgeRemovedSafeToMove(void)
         returnValue = true;
         cartridgeRemovedSafeHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
     }
+    // We have this hysteresis here to accomodate putting the cartridge 
+    // back in. Without it, Marlin will recognize the cartridge has been
+    // reinserted before the temperature updates from its maximum value and
+    // will throw a high temperature error.
     if (cartridgeRemovedSafeHysteresis > 0)
     {
         cartridgeRemovedSafeHysteresis--;
@@ -122,6 +130,7 @@ bool CartridgeRemovedSafeToMove(void)
     }
     return returnValue;
 }
+
 //===========================================================================
 //============================ Private Functions ============================
 //===========================================================================
