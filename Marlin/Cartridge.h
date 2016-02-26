@@ -9,9 +9,6 @@
 #ifndef cartridge_h
 #define cartridge_h 
 
-
-enum HysteresisStatus {slow,fast};
-
 //===========================================================================
 //============================= Public Functions ============================
 //===========================================================================
@@ -38,5 +35,15 @@ enum HysteresisStatus {slow,fast};
  * @returns    Returns true if cartridges aren't present and haven't been marked
  *             as removed, which would happen at startup.
  */
-bool CartridgeRemovedSafeToMove(HysteresisStatus filterspeed = slow);
+bool CartridgeRemovedSafeToMove(void);
+
+/**
+ * This signals that the conditions of a removed cartridge are present. When 
+ * no cartridge has been removed, this means that the system has restarted and 
+ * we shouldn't disconnect from Marlin as soon as the error is seen. Does not 
+ * implement the hysteresis seen in the above to get an instant update.
+ * @returns    Returns true if cartridges aren't present and haven't been marked
+ *             as removed, which would happen at startup.
+ */
+bool CartridgeRemovedSafeToMoveQuick(void);
 #endif

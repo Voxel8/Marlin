@@ -4034,7 +4034,7 @@ inline void gcode_M42() {
  * M104: Set hot end temperature
  */
 inline void gcode_M104() {
-  if (CartridgeRemovedSafeToMove(fast))
+  if (CartridgeRemovedSafeToMoveQuick())
   {
     SERIAL_ERROR_START;
     serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
@@ -4198,7 +4198,7 @@ inline void gcode_M105() {
  * M109: Wait for extruder(s) to reach temperature
  */
 inline void gcode_M109() {
-    if (CartridgeRemovedSafeToMove(fast))
+    if (CartridgeRemovedSafeToMoveQuick())
   {
     //SERIAL_ERROR_START;
     serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
