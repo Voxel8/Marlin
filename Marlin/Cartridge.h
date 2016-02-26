@@ -10,6 +10,8 @@
 #define cartridge_h 
 
 
+enum HysteresisStatus {slow,fast};
+
 //===========================================================================
 //============================= Public Functions ============================
 //===========================================================================
@@ -36,5 +38,5 @@
  * @returns    Returns true if cartridges aren't present and haven't been marked
  *             as removed, which would happen at startup.
  */
-bool CartridgeRemovedSafeToMove(void);
+bool CartridgeRemovedSafeToMove(HysteresisStatus filterspeed = slow);
 #endif

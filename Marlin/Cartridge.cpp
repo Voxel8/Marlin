@@ -15,7 +15,7 @@
 //===========================================================================
 
 #define NUMBER_OF_CARTRIDGES               (2)
-#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (10)
+#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (4)
 
 //===========================================================================
 //============================ Private Variables ============================
@@ -104,7 +104,7 @@ bool CartridgeRemoved(void)
  * @returns    Returns true if cartridges aren't present and haven't been marked
  *             as removed, which would happen at startup.
  */
-bool CartridgeRemovedSafeToMove(void)
+bool CartridgeRemovedSafeToMove(HysteresisStatus filterspeed)
 {
     bool returnValue = false;
     static unsigned int cartridgeRemovedSafeHysteresis = 0;
@@ -112,8 +112,11 @@ bool CartridgeRemovedSafeToMove(void)
     bool removedCondition = (!cartridgePresent[0] || !cartridgesPresentCheck());
     if (removedCondition && !cartridgesRemovedCheck())
     {
-        returnValue = true;
         cartridgeRemovedSafeHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
+    }
+    else if (filterspeed == fast)
+    {
+        cartridgeRemovedSafeHysteresis = 0;
     }
     // We have this hysteresis here to accomodate putting the cartridge 
     // back in. Without it, Marlin will recognize the cartridge has been

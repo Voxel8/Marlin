@@ -891,6 +891,7 @@ void loop() {
     cmd_queue_index_r = (cmd_queue_index_r + 1) % BUFSIZE;
   }
   checkHitEndstops();
+  UpdateCartridgeStatus();
   idle();
 }
 
@@ -4033,16 +4034,25 @@ inline void gcode_M42() {
  * M104: Set hot end temperature
  */
 inline void gcode_M104() {
-  if (setTargetedHotend(104)) return;
-  if (marlin_debug_flags & DEBUG_DRYRUN) return;
+  if (CartridgeRemovedSafeToMove(fast))
+  {
+    SERIAL_ERROR_START;
+    serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
+    SERIAL_EOL;
+  }
+  else
+  {
+    if (setTargetedHotend(104)) return;
+    if (marlin_debug_flags & DEBUG_DRYRUN) return;
 
-  if (code_seen('S')) {
-    float temp = code_value();
-    setTargetHotend(temp, target_extruder);
-    #if ENABLED(DUAL_X_CARRIAGE)
-      if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
-        setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
-    #endif
+    if (code_seen('S')) {
+      float temp = code_value();
+      setTargetHotend(temp, target_extruder);
+      #if ENABLED(DUAL_X_CARRIAGE)
+        if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
+          setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
+      #endif
+    }
   }
 }
 
@@ -4188,83 +4198,92 @@ inline void gcode_M105() {
  * M109: Wait for extruder(s) to reach temperature
  */
 inline void gcode_M109() {
-  if (setTargetedHotend(109)) return;
-  if (marlin_debug_flags & DEBUG_DRYRUN) return;
-
-  LCD_MESSAGEPGM(MSG_HEATING);
-
-  no_wait_for_cooling = code_seen('S');
-  if (no_wait_for_cooling || code_seen('R')) {
-    float temp = code_value();
-    setTargetHotend(temp, target_extruder);
-    #if ENABLED(DUAL_X_CARRIAGE)
-      if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
-        setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
-    #endif
+    if (CartridgeRemovedSafeToMove(fast))
+  {
+    //SERIAL_ERROR_START;
+    serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
+    SERIAL_EOL;
   }
+  else
+  {
+    if (setTargetedHotend(109)) return;
+    if (marlin_debug_flags & DEBUG_DRYRUN) return;
 
-  #if ENABLED(AUTOTEMP)
-    autotemp_enabled = code_seen('F');
-    if (autotemp_enabled) autotemp_factor = code_value();
-    if (code_seen('S')) autotemp_min = code_value();
-    if (code_seen('B')) autotemp_max = code_value();
-  #endif
+    LCD_MESSAGEPGM(MSG_HEATING);
 
-  millis_t temp_ms = millis();
-
-  /* See if we are heating up or cooling down */
-  target_direction = isHeatingHotend(target_extruder); // true if heating, false if cooling
-
-  cancel_heatup = false;
-
-  #ifdef TEMP_RESIDENCY_TIME
-    long residency_start_ms = -1;
-    /* continue to loop until we have reached the target temp
-      _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
-    while((!cancel_heatup)&&((residency_start_ms == -1) ||
-          (residency_start_ms >= 0 && (((unsigned int) (millis() - residency_start_ms)) < (TEMP_RESIDENCY_TIME * 1000UL)))) )
-  #else
-    while ( target_direction ? (isHeatingHotend(target_extruder)) : (isCoolingHotend(target_extruder)&&(no_wait_for_cooling==false)) )
-  #endif //TEMP_RESIDENCY_TIME
-
-    { // while loop
-      if (millis() > temp_ms + 1000UL) { //Print temp & remaining time every 1s while waiting
-        SERIAL_PROTOCOLPGM("T:");
-        SERIAL_PROTOCOL_F(degHotend(target_extruder),1);
-        SERIAL_PROTOCOLPGM(" E:");
-        SERIAL_PROTOCOL((int)target_extruder);
-        #ifdef TEMP_RESIDENCY_TIME
-          SERIAL_PROTOCOLPGM(" W:");
-          if (residency_start_ms > -1) {
-            temp_ms = ((TEMP_RESIDENCY_TIME * 1000UL) - (millis() - residency_start_ms)) / 1000UL;
-            SERIAL_PROTOCOLLN(temp_ms);
-          }
-          else {
-            SERIAL_PROTOCOLLNPGM("?");
-          }
-        #else
-          SERIAL_EOL;
-        #endif
-        temp_ms = millis();
-      }
-
-      idle();
-
-      #ifdef TEMP_RESIDENCY_TIME
-        // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target temp for the first time
-        // or when current temp falls outside the hysteresis after target temp was reached
-        if ((residency_start_ms == -1 &&  target_direction && (degHotend(target_extruder) >= (degTargetHotend(target_extruder)-TEMP_WINDOW))) ||
-            (residency_start_ms == -1 && !target_direction && (degHotend(target_extruder) <= (degTargetHotend(target_extruder)+TEMP_WINDOW))) ||
-            (residency_start_ms > -1 && labs(degHotend(target_extruder) - degTargetHotend(target_extruder)) > TEMP_HYSTERESIS) )
-        {
-          residency_start_ms = millis();
-        }
-      #endif //TEMP_RESIDENCY_TIME
+    no_wait_for_cooling = code_seen('S');
+    if (no_wait_for_cooling || code_seen('R')) {
+      float temp = code_value();
+      setTargetHotend(temp, target_extruder);
+      #if ENABLED(DUAL_X_CARRIAGE)
+        if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
+          setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
+      #endif
     }
 
-  LCD_MESSAGEPGM(MSG_HEATING_COMPLETE);
-  refresh_cmd_timeout();
-  print_job_start_ms = previous_cmd_ms;
+    #if ENABLED(AUTOTEMP)
+      autotemp_enabled = code_seen('F');
+      if (autotemp_enabled) autotemp_factor = code_value();
+      if (code_seen('S')) autotemp_min = code_value();
+      if (code_seen('B')) autotemp_max = code_value();
+    #endif
+
+    millis_t temp_ms = millis();
+
+    /* See if we are heating up or cooling down */
+    target_direction = isHeatingHotend(target_extruder); // true if heating, false if cooling
+
+    cancel_heatup = false;
+
+    #ifdef TEMP_RESIDENCY_TIME
+      long residency_start_ms = -1;
+      /* continue to loop until we have reached the target temp
+        _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
+      while((!cancel_heatup)&&((residency_start_ms == -1) ||
+            (residency_start_ms >= 0 && (((unsigned int) (millis() - residency_start_ms)) < (TEMP_RESIDENCY_TIME * 1000UL)))) )
+    #else
+      while ( target_direction ? (isHeatingHotend(target_extruder)) : (isCoolingHotend(target_extruder)&&(no_wait_for_cooling==false)) )
+    #endif //TEMP_RESIDENCY_TIME
+
+      { // while loop
+        if (millis() > temp_ms + 1000UL) { //Print temp & remaining time every 1s while waiting
+          SERIAL_PROTOCOLPGM("T:");
+          SERIAL_PROTOCOL_F(degHotend(target_extruder),1);
+          SERIAL_PROTOCOLPGM(" E:");
+          SERIAL_PROTOCOL((int)target_extruder);
+          #ifdef TEMP_RESIDENCY_TIME
+            SERIAL_PROTOCOLPGM(" W:");
+            if (residency_start_ms > -1) {
+              temp_ms = ((TEMP_RESIDENCY_TIME * 1000UL) - (millis() - residency_start_ms)) / 1000UL;
+              SERIAL_PROTOCOLLN(temp_ms);
+            }
+            else {
+              SERIAL_PROTOCOLLNPGM("?");
+            }
+          #else
+            SERIAL_EOL;
+          #endif
+          temp_ms = millis();
+        }
+
+        idle();
+
+        #ifdef TEMP_RESIDENCY_TIME
+          // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target temp for the first time
+          // or when current temp falls outside the hysteresis after target temp was reached
+          if ((residency_start_ms == -1 &&  target_direction && (degHotend(target_extruder) >= (degTargetHotend(target_extruder)-TEMP_WINDOW))) ||
+              (residency_start_ms == -1 && !target_direction && (degHotend(target_extruder) <= (degTargetHotend(target_extruder)+TEMP_WINDOW))) ||
+              (residency_start_ms > -1 && labs(degHotend(target_extruder) - degTargetHotend(target_extruder)) > TEMP_HYSTERESIS) )
+          {
+            residency_start_ms = millis();
+          }
+        #endif //TEMP_RESIDENCY_TIME
+      }
+
+    LCD_MESSAGEPGM(MSG_HEATING_COMPLETE);
+    refresh_cmd_timeout();
+    print_job_start_ms = previous_cmd_ms;
+  }
 }
 
 #if HAS_TEMP_BED
@@ -7987,25 +8006,16 @@ void Stop() {
  * Returns TRUE if the target is invalid
  */
 bool setTargetedHotend(int code) {
-  if (CartridgeRemovedSafeToMove())
-  {
-    SERIAL_ERROR_START;
-    serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_SAFE));
-    SERIAL_EOL;
-  }
-  else
-  {
-    target_extruder = active_extruder;
-    if (code_seen('T')) {
-      target_extruder = code_value_short();
-      if (target_extruder >= EXTRUDERS) {
-        SERIAL_ECHO_START;
-        SERIAL_CHAR('M');
-        SERIAL_ECHO(code);
-        SERIAL_ECHOPGM(" " MSG_INVALID_EXTRUDER " ");
-        SERIAL_ECHOLN(target_extruder);
-        return true;
-      }
+  target_extruder = active_extruder;
+  if (code_seen('T')) {
+    target_extruder = code_value_short();
+    if (target_extruder >= EXTRUDERS) {
+      SERIAL_ECHO_START;
+      SERIAL_CHAR('M');
+      SERIAL_ECHO(code);
+      SERIAL_ECHOPGM(" " MSG_INVALID_EXTRUDER " ");
+      SERIAL_ECHOLN(target_extruder);
+      return true;
     }
   }
   return false;

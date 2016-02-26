@@ -510,6 +510,7 @@ inline void _temp_error(int e, const char *serial_msg, const char *lcd_msg) {
 }
 
 inline void _cartridge_removed_error(const char *serial_msg) {
+  static bool killed = false;
   static millis_t timeSinceLastRemoval = {0};
   if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL)
   {
@@ -518,6 +519,12 @@ inline void _cartridge_removed_error(const char *serial_msg) {
     SERIAL_ERROR_START;
     serialprintPGM(serial_msg);
     SERIAL_EOL;
+    if (!killed) 
+    {
+      Running = false;
+      killed = true;
+      kill(serial_msg);
+    }
   }
   timeSinceLastRemoval = millis();
 }

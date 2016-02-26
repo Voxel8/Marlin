@@ -215,6 +215,7 @@
 #define MSG_T_MINTEMP                       "MINTEMP triggered"
 #define MSG_T_CARTRIDGE_REMOVED             "Cartridge Removed"
 #define MSG_T_CARTRIDGE_REMOVED_SAFE        "Cartridge Removed during operation previously and still removed."
+#define MSG_T_CARTRIDGE_REMOVED_HEATING     "No FFF Cartridge detected, will not heat"
 #define MSG_PNEUMATIC_PUMP_OFF              ": Pressure pump turned off, MAX/MIN value exceeded!!"
 
 // Debug
