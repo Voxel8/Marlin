@@ -77,9 +77,18 @@ bool CartridgeRemoved(void)
 {
     bool returnValue = false;
     static unsigned int cartridgeRemovalHysteresis = 0;
-    
+    bool removedCondition = (!cartridgePresent[0] || !cartridgesPresentCheck());
+
     // If a cartridge is seen to be removed, set the hysteresis counter.
     if(cartridgesRemovedCheck())
+    {
+        cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
+    }
+
+    // If the appropriate cartridges are absent but we don't see that a cartridge
+    // has been removed, we started up with it missing and will be able to operate
+    // but not activate the hot ends. 
+    else if (removedCondition && !cartridgesRemovedCheck())
     {
         cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
     }
@@ -97,57 +106,24 @@ bool CartridgeRemoved(void)
     return returnValue;
 }
 
-/**
- * This signals that the conditions of a removed cartridge are present. When 
- * no cartridge has been removed, this means that the system has restarted and 
- * we shouldn't disconnect from Marlin as soon as the error is seen.
- * @returns    Returns true if cartridges aren't present and haven't been marked
- *             as removed, which would happen at startup.
- */
-bool CartridgeRemovedSafeToMove(void)
+bool CartridgeRemovedQuickResponse(void)
 {
     bool returnValue = false;
-    static unsigned int cartridgeRemovedSafeHysteresis = 0;
-    
-    // If the appropriate cartridges are absent but we dont' see that a cartridge
+    bool removedCondition = (!cartridgePresent[0] || !cartridgesPresentCheck());
+    // If a cartridge is seen to be removed, set the hysteresis counter.
+    if(cartridgesRemovedCheck())
+    {
+        returnValue = true;
+    }
+
+    // If the appropriate cartridges are absent but we don't see that a cartridge
     // has been removed, we started up with it missing and will be able to operate
     // but not activate the hot ends. 
-    bool removedCondition = (!cartridgePresent[0] || !cartridgesPresentCheck());
-    if (removedCondition && !cartridgesRemovedCheck())
-    {
-        cartridgeRemovedSafeHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
-    }
-
-    // We have this hysteresis here to accomodate putting the cartridge 
-    // back in. Without it, Marlin will recognize the cartridge has been
-    // reinserted before the temperature updates from its maximum value and
-    // will throw a high temperature error.
-    if (cartridgeRemovedSafeHysteresis > 0)
-    {
-        cartridgeRemovedSafeHysteresis--;
-        returnValue = true;
-    }
-    return returnValue;
-}
-
-
-
-/**
- * This signals that the conditions of a removed cartridge are present. When 
- * no cartridge has been removed, this means that the system has restarted and 
- * we shouldn't disconnect from Marlin as soon as the error is seen. Does not 
- * implement the hysteresis seen in the above to get an instant update.
- * @returns    Returns true if cartridges aren't present and haven't been marked
- *             as removed, which would happen at startup.
- */
-bool CartridgeRemovedSafeToMoveQuick(void)
-{
-    bool returnValue = false;
-    bool removedCondition = (!cartridgePresent[0] || !cartridgesPresentCheck());
-    if (removedCondition && !cartridgesRemovedCheck())
+    else if (removedCondition && !cartridgesRemovedCheck())
     {
         returnValue = true;
     }
+
     return returnValue;
 }
 

@@ -29,21 +29,10 @@
  bool CartridgeRemoved(void);
 
 /**
- * This signals that the conditions of a removed cartridge are present. When 
- * no cartridge has been removed, this means that the system has restarted and 
- * we shouldn't disconnect from Marlin as soon as the error is seen.
- * @returns    Returns true if cartridges aren't present and haven't been marked
- *             as removed, which would happen at startup.
+ * This function checks to see if a cartridge has been removed from the
+ * system, allowing us to make judgement calls for error reporting. This
+ * information is updated by calling UpdateCartridgeStatus
+ * @returns    Returns true if a cartridge has been removed 
  */
-bool CartridgeRemovedSafeToMove(void);
-
-/**
- * This signals that the conditions of a removed cartridge are present. When 
- * no cartridge has been removed, this means that the system has restarted and 
- * we shouldn't disconnect from Marlin as soon as the error is seen. Does not 
- * implement the hysteresis seen in the above to get an instant update.
- * @returns    Returns true if cartridges aren't present and haven't been marked
- *             as removed, which would happen at startup.
- */
-bool CartridgeRemovedSafeToMoveQuick(void);
+ bool CartridgeRemovedQuickResponse(void);
 #endif

@@ -4034,11 +4034,12 @@ inline void gcode_M42() {
  * M104: Set hot end temperature
  */
 inline void gcode_M104() {
-  if (CartridgeRemovedSafeToMoveQuick())
+  if (CartridgeRemovedQuickResponse())
   {
-    SERIAL_ERROR_START;
+    //SERIAL_ERROR_START;
     serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
     SERIAL_EOL;
+    SERIAL_ECHOLN("// action:pause");
   }
   else
   {
@@ -4198,11 +4199,12 @@ inline void gcode_M105() {
  * M109: Wait for extruder(s) to reach temperature
  */
 inline void gcode_M109() {
-    if (CartridgeRemovedSafeToMoveQuick())
+    if (CartridgeRemovedQuickResponse())
   {
     //SERIAL_ERROR_START;
     serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
     SERIAL_EOL;
+    SERIAL_ECHOLN("// action:pause");
   }
   else
   {
@@ -4239,10 +4241,10 @@ inline void gcode_M109() {
       long residency_start_ms = -1;
       /* continue to loop until we have reached the target temp
         _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
-      while((!cancel_heatup)&&((residency_start_ms == -1) ||
-            (residency_start_ms >= 0 && (((unsigned int) (millis() - residency_start_ms)) < (TEMP_RESIDENCY_TIME * 1000UL)))) )
+      while(((!cancel_heatup)&&((residency_start_ms == -1) ||
+            (residency_start_ms >= 0 && (((unsigned int) (millis() - residency_start_ms)) < (TEMP_RESIDENCY_TIME * 1000UL))))) && !CartridgeRemovedQuickResponse())
     #else
-      while ( target_direction ? (isHeatingHotend(target_extruder)) : (isCoolingHotend(target_extruder)&&(no_wait_for_cooling==false)) )
+      while ( (target_direction ? (isHeatingHotend(target_extruder)) : (isCoolingHotend(target_extruder)&&(no_wait_for_cooling==false)))  && !CartridgeRemovedQuickResponse())
     #endif //TEMP_RESIDENCY_TIME
 
       { // while loop
@@ -4267,7 +4269,7 @@ inline void gcode_M109() {
         }
 
         idle();
-
+        UpdateCartridgeStatus();
         #ifdef TEMP_RESIDENCY_TIME
           // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target temp for the first time
           // or when current temp falls outside the hysteresis after target temp was reached
