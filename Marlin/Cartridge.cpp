@@ -26,7 +26,6 @@
 
 static bool cartridgePresent[NUMBER_OF_CARTRIDGES] = {false,false};
 static bool cartridgeRemoved[NUMBER_OF_CARTRIDGES] = {false,false};
-static bool cartridgeRemovedSafeToMove             = false;
 
 //===========================================================================
 //====================== Private Functions Prototypes =======================

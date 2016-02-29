@@ -43,6 +43,6 @@
  * called once if it's been called multiple times in quick succession.
  */
  void _cartridge_removed_error(const char *serial_msg);
-
-
+ 
 #endif
+ 
