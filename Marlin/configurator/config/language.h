@@ -209,9 +209,7 @@
 #define MSG_T_THERMAL_RUNAWAY               "Thermal Runaway"
 #define MSG_T_MAXTEMP                       "MAXTEMP triggered"
 #define MSG_T_MINTEMP                       "MINTEMP triggered"
-#define MSG_T_CARTRIDGE_REMOVED             "Cartridge removed"
-#define MSG_T_CARTRIDGE_REMOVED_SAFE        "Cartridge Removed during operation previously and still removed."
-#define MSG_T_CARTRIDGE_REMOVED_HEATING     "No FFF Cartridge detected, will not heat"
+#define MSG_T_CARTRIDGE_REMOVED             "Cartridge Removed. Print will not continue, and heating is disabled"
 
 // Debug
 #define MSG_DEBUG_ECHO                      "DEBUG ECHO ENABLED"

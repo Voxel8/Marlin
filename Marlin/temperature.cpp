@@ -509,20 +509,6 @@ inline void _temp_error(int e, const char *serial_msg, const char *lcd_msg) {
   #endif
 }
 
-inline void _cartridge_removed_error(const char *serial_msg) {
-  static bool killed = false;
-  static millis_t timeSinceLastRemoval = {0};
-  if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL)
-  {
-    disable_all_heaters();
-    quickStop();
-    serialprintPGM(serial_msg);
-    SERIAL_EOL;
-    SERIAL_ECHOLN("// action:pause");
-  }
-  timeSinceLastRemoval = millis();
-}
-
 void max_temp_error(uint8_t e) {
 // Temp error has been reset
   if (time_since_last_err[e] == 0) {
@@ -532,7 +518,7 @@ void max_temp_error(uint8_t e) {
   else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
     UpdateCartridgeStatus();
     if(CartridgeRemoved())
-      _cartridge_removed_error(PSTR(MSG_T_CARTRIDGE_REMOVED_SAFE));
+      _cartridge_removed_error(PSTR(MSG_T_CARTRIDGE_REMOVED));
     else
       _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
   }

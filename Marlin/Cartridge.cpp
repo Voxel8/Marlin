@@ -10,6 +10,9 @@
 #include "Marlin.h"
 #include "Cartridge.h"
 
+#include "temperature.h" // for disable_all_heaters()
+#include "stepper.h"    // for quickStop()
+
 //===========================================================================
 //=============================== Definitions ===============================
 //===========================================================================
@@ -41,7 +44,8 @@ static bool cartridgesPresentCheck(void);
  /**
  * Check to see if cartridges are present or absent. Flags internally if 
  * one has been removed, or clears the removed flag if it's present. 
- * The status of cartridge removal can be found with CartridgeRemoved()
+ * The status of cartridge removal can be found with 
+ * CartridgeRemoved()
  */
 void UpdateCartridgeStatus(void)
 {
@@ -69,9 +73,12 @@ void UpdateCartridgeStatus(void)
  * This function checks to see if a cartridge has been removed from the
  * system, allowing us to make judgement calls for error reporting. This
  * information is updated by calling UpdateCartridgeStatus(). Will also 
- * return true if no cartridges are present.
+ * return true if no cartridges are present. This version includes hysteresis
+ * so that when the cartridge is re-inserted, we don't immediately throw a 
+ * temperature error (we'll read max temp when a cartridge is removed and
+ * this may not update immediately when we call this function)
  * @returns    Returns true if a cartridge has been removed, or no 
- *             cartridge is present 
+ *             cartridge is present WITH HYSTERESIS
  */
 bool CartridgeRemoved(void)
 {
@@ -85,10 +92,10 @@ bool CartridgeRemoved(void)
         cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
     }
 
-    // If the appropriate cartridges are absent but we don't see that a cartridge
-    // has been removed, we started up with it missing and will be able to operate
-    // but not activate the hot ends. 
-    else if (removedCondition && !cartridgesRemovedCheck())
+    // If the appropriate cartridges are absent but we don't see that a 
+    // cartridge has been removed, we started up with it missing and will also 
+    // mark it as removed.
+    else if (removedCondition)
     {
         cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
     }
@@ -106,25 +113,39 @@ bool CartridgeRemoved(void)
     return returnValue;
 }
 
-bool CartridgeRemovedQuickResponse(void)
+/**
+ * This function checks to see if the FFF cartridge is removed,
+ * to prevent heating
+ * @returns    Returns true if an FFF cartridge has been removed
+ */
+bool CartridgeRemovedFFF(void)
 {
-    bool returnValue = false;
-    bool removedCondition = (!cartridgePresent[0] || !cartridgesPresentCheck());
-    // If a cartridge is seen to be removed, set the hysteresis counter.
-    if(cartridgesRemovedCheck())
+    if(!cartridgePresent[0])
     {
-        returnValue = true;
+        return true;
     }
+    return false;
+}
 
-    // If the appropriate cartridges are absent but we don't see that a cartridge
-    // has been removed, we started up with it missing and will be able to operate
-    // but not activate the hot ends. 
-    else if (removedCondition && !cartridgesRemovedCheck())
-    {
-        returnValue = true;
-    }
-
-    return returnValue;
+/**
+ * This is the error handler for when we see the cartridge removed error. It 
+ * reports to octoprint that we should pause the print, as well as disabling
+ * all heaters and stopping the currently queued commands. This will only get
+ * called once if it's been called multiple times in quick succession.
+ * @inputs     An input that will be displayed on the serial monitor
+ */
+  void _cartridge_removed_error(const char *serial_msg) {
+  static bool killed = false;
+  static millis_t timeSinceLastRemoval = {0};
+  if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL)
+  {
+    disable_all_heaters();
+    quickStop();
+    serialprintPGM(serial_msg);
+    SERIAL_EOL;
+    SERIAL_ECHOLN("// action:pause");
+  }
+  timeSinceLastRemoval = millis();
 }
 
 //===========================================================================
@@ -140,10 +161,18 @@ static void cartridgeAbsentUpdate(unsigned int cartNumber)
     if (cartridgePresent[cartNumber] == true)
     {
         cartridgeRemoved[cartNumber] = true;
-        if (cartNumber == 1)
+        switch (cartNumber)
         {
-            WRITE(CART1_SIG1_PIN, LOW); // Prevents the silver extruder from
+            case 0:
+                SERIAL_ECHOLN("Cartidge 0 Removed");
+                break;
+            case 1:
+                WRITE(CART1_SIG1_PIN, LOW); // Prevents the silver extruder from
                                         // being lowered unintentionally
+                SERIAL_ECHOLN("Cartidge 1 Removed");
+                break;
+            default:
+                SERIAL_ECHOLN("Cartridge Removed");
         }
     }
     cartridgePresent[cartNumber] = false;
@@ -155,6 +184,20 @@ static void cartridgeAbsentUpdate(unsigned int cartNumber)
  */
 static void cartridgePresentUpdate(unsigned int cartNumber)
 {
+    if (cartridgePresent[cartNumber] == false)
+    {
+        switch (cartNumber)
+        {
+            case 0:
+                SERIAL_ECHOLN("Cartidge 0 Inserted");
+                break;
+            case 1:
+                SERIAL_ECHOLN("Cartidge 1 Inserted");
+                break;
+            default:
+                SERIAL_ECHOLN("Cartridge Removed");
+        }
+    }
     cartridgePresent[cartNumber] = true;
     cartridgeRemoved[cartNumber] = false;
 }

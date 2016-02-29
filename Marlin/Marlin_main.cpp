@@ -892,6 +892,10 @@ void loop() {
   }
   checkHitEndstops();
   UpdateCartridgeStatus();
+  if (CartridgeRemoved())
+  {
+    _cartridge_removed_error(PSTR(MSG_T_CARTRIDGE_REMOVED));
+  }
   idle();
 }
 
@@ -4034,7 +4038,7 @@ inline void gcode_M42() {
  * M104: Set hot end temperature
  */
 inline void gcode_M104() {
-  if (CartridgeRemovedQuickResponse())
+  if (CartridgeRemovedFFF())
   {
     //SERIAL_ERROR_START;
     serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
@@ -4199,7 +4203,7 @@ inline void gcode_M105() {
  * M109: Wait for extruder(s) to reach temperature
  */
 inline void gcode_M109() {
-    if (CartridgeRemovedQuickResponse())
+    if (CartridgeRemovedFFF())
   {
     //SERIAL_ERROR_START;
     serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
@@ -4242,9 +4246,9 @@ inline void gcode_M109() {
       /* continue to loop until we have reached the target temp
         _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
       while(((!cancel_heatup)&&((residency_start_ms == -1) ||
-            (residency_start_ms >= 0 && (((unsigned int) (millis() - residency_start_ms)) < (TEMP_RESIDENCY_TIME * 1000UL))))) && !CartridgeRemovedQuickResponse())
+            (residency_start_ms >= 0 && (((unsigned int) (millis() - residency_start_ms)) < (TEMP_RESIDENCY_TIME * 1000UL))))) && !CartridgeRemovedFFF())
     #else
-      while ( (target_direction ? (isHeatingHotend(target_extruder)) : (isCoolingHotend(target_extruder)&&(no_wait_for_cooling==false)))  && !CartridgeRemovedQuickResponse())
+      while ( (target_direction ? (isHeatingHotend(target_extruder)) : (isCoolingHotend(target_extruder)&&(no_wait_for_cooling==false)))  && !CartridgeRemovedFFF())
     #endif //TEMP_RESIDENCY_TIME
 
       { // while loop
