@@ -11,7 +11,7 @@
 #include "Cartridge.h"
 
 #include "temperature.h" // for disable_all_heaters()
-#include "stepper.h"    // for quickStop()
+#include "stepper.h"     // for quickStop()
 
 //===========================================================================
 //=============================== Definitions ===============================
@@ -146,6 +146,21 @@ bool CartridgeRemovedFFF(void)
   }
   timeSinceLastRemoval = millis();
 }
+/**
+ * Macro function that updates cartridge status, checks if a cartridge has 
+ * been removed, and then activates the error if it has been.
+ * @returns    Returns true if a cartridge is removed
+ */
+bool CartridgeUpdateAndCheck()
+{
+    UpdateCartridgeStatus()
+    if (CartridgeRemoved())
+    {
+        _cartridge_removed_error();
+        return true;
+    }
+    return false;
+}
 
 //===========================================================================
 //============================ Private Functions ============================
@@ -194,7 +209,7 @@ static void cartridgePresentUpdate(unsigned int cartNumber)
                 SERIAL_ECHOLN("Cartidge 1 Inserted");
                 break;
             default:
-                SERIAL_ECHOLN("Cartridge Removed");
+                SERIAL_ECHOLN("Cartridge Inserted");
         }
     }
     cartridgePresent[cartNumber] = true;

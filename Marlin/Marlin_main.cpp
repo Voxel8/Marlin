@@ -2692,7 +2692,10 @@ inline void gcode_G28() {
 
             current_position[Z_AXIS] = 0;
             sync_plan_position();
-
+            if (CartridgeUpdateAndCheck())
+            {
+              return;
+            }
             //
             // Set the Z probe (or just the nozzle) destination to the safe homing point
             //
@@ -2715,7 +2718,10 @@ inline void gcode_G28() {
             // This could potentially move X, Y, Z all together
             line_to_destination();
             st_synchronize();
-
+            if (CartridgeUpdateAndCheck())
+            {
+              return;
+            }
             // Set current X, Y is the Z_SAFE_HOMING_POINT minus PROBE_OFFSET_FROM_EXTRUDER
             current_position[X_AXIS] = destination[X_AXIS];
             current_position[Y_AXIS] = destination[Y_AXIS];
@@ -2739,7 +2745,10 @@ inline void gcode_G28() {
                 // Set the plan current position to X, Y, 0
                 current_position[Z_AXIS] = 0;
                 plan_set_position(cpx, cpy, 0, current_position[E_AXIS]); // = sync_plan_position
-
+                if (CartridgeUpdateAndCheck())
+                {
+                  return;
+                }
                 // Set Z destination away from bed and raise the axis
                 // NOTE: This should always just be Z_RAISE_BEFORE_HOMING unless...???
                 destination[Z_AXIS] = -Z_RAISE_BEFORE_HOMING * home_dir(Z_AXIS);
@@ -2756,7 +2765,10 @@ inline void gcode_G28() {
 
                 line_to_destination();
                 st_synchronize();
-
+                if (CartridgeUpdateAndCheck())
+                {
+                  return;
+                }
                 // Home the Z axis
                 HOMEAXIS(Z);
               }
@@ -2928,6 +2940,10 @@ inline void gcode_G28() {
           current_position[Z_AXIS] = MESH_HOME_SEARCH_Z;
           plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[X_AXIS]/60, active_extruder);
           st_synchronize();
+          if (CartridgeUpdateAndCheck())
+          {
+            return;
+          }
         }
         // Is there another point to sample? Move there.
         if (probe_point < MESH_NUM_X_POINTS * MESH_NUM_Y_POINTS) {
@@ -2938,6 +2954,10 @@ inline void gcode_G28() {
           current_position[Y_AXIS] = mbl.get_y(iy);
           plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[X_AXIS]/60, active_extruder);
           st_synchronize();
+          if (CartridgeUpdateAndCheck())
+          {
+            return;
+          }
           probe_point++;
         }
         else {
@@ -2946,6 +2966,10 @@ inline void gcode_G28() {
           probe_point = -1;
           mbl.active = 1;
           enqueuecommands_P(PSTR("G28"));
+          if (CartridgeUpdateAndCheck())
+          {
+            return;
+          }
         }
         break;
 

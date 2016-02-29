@@ -44,5 +44,9 @@
  */
  void _cartridge_removed_error(const char *serial_msg);
  
+
+ bool CartridgeUpdateAndCheck();
+
 #endif
+ 
  
