@@ -1910,6 +1910,7 @@ ISR(TIMER0_COMPB_vect) {
       }
     }
   #endif //BABYSTEPPING
+  UpdateCartridgeStatus();
 }
 
 #if ENABLED(PIDTEMP)

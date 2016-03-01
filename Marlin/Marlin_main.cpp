@@ -3041,7 +3041,7 @@ inline void gcode_G28() {
    */
 #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
   /*
-  * M237 - Custom, more precise auto bed leveling
+  * G29 - Custom, more precise auto bed leveling
   */
   inline void gcode_G29() {
     if (!axis_known_position[X_AXIS] || !axis_known_position[Y_AXIS]) {
@@ -3050,16 +3050,16 @@ inline void gcode_G28() {
       SERIAL_ECHOLNPGM(MSG_POSITION_UNKNOWN);
       return;
     }
-  
+
     int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
     if (verbose_level < 0 || verbose_level > 4) {
       SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
       return;
     }
-  
+
     bool dryrun = code_seen('D') || code_seen('d');
     st_synchronize();
-  
+
     if (!dryrun) {
       plan_bed_level_matrix.set_to_identity();
       #ifdef DELTA
@@ -3070,7 +3070,7 @@ inline void gcode_G28() {
         current_position[Y_AXIS] = uncorrected_position.y;
         current_position[Z_AXIS] = uncorrected_position.z;
         sync_plan_position();
-      #endif // !DELTA
+      #endif  // !DELTA
     }
     if (!CartridgeUpdateAndCheck()) {
       setup_for_endstop_move();
@@ -3084,7 +3084,7 @@ inline void gcode_G28() {
         levelProbe_2 = bed_level_probe_pt(ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
       if (!CartridgeUpdateAndCheck())
         levelProbe_3 = bed_level_probe_pt(ABL_PROBE_PT_3_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_3_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
-      
+
       levelProbe_1 = (levelProbe_1 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
       levelProbe_2 = (levelProbe_2 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
       levelProbe_3 = (levelProbe_3 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
@@ -3104,7 +3104,7 @@ inline void gcode_G28() {
         set_bed_level_equation_3pts(levelProbe_1, levelProbe_2, levelProbe_3);
       }
     }
-  
+
     #ifndef DELTA
       if (verbose_level > 0) {
         plan_bed_level_matrix.debug(" \nBed Level Correction Matrix:");
@@ -3116,7 +3116,7 @@ inline void gcode_G28() {
       apply_rotation_xyz(plan_bed_level_matrix, x_tmp, y_tmp, z_tmp);
       current_position[Z_AXIS] = z_tmp - real_z + current_position[Z_AXIS];
       sync_plan_position();
-    #endif // !DELTA
+    #endif  // !DELTA
   }
 #endif
 
