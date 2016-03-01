@@ -132,8 +132,8 @@ bool CartridgeRemovedFFF(void) {
 }
 
 /**
- * Macro function that updates cartridge status, checks if a cartridge has 
- * been removed, and then activates the error if it has been.
+ * Macro function that updates cartridge status, and checks if a cartridge has 
+ * been removed.
  * @returns    Returns true if a cartridge is removed
  */
 bool CartridgeUpdateAndCheck() {
@@ -220,24 +220,3 @@ static bool cartridgesPresentCheck(void) {
     return false;
 }
 
-// static void RequestCartridgeInformation(unsigned int cartNumber)
-// {
-//     unsigned int cartAddress = NULL;
-//     switch (cartNumber)
-//     {
-//         case 0:
-//             cartAddress = CART0_ADDR;
-//         case 1:
-//             cartAddress = CART1_ADDR;
-//         default:
-//             cartAddress = NULL;
-//     }
-
-//     if (cartAddress)
-//     {
-//         Wire.begintransmission(cartAddress);
-//         Wire.write(REQUEST_ID_INFO);
-//         Wire.request(cartAddress,1)
-//         Wire.endTransmission();
-//     }
-// }
