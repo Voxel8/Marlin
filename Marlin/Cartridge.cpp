@@ -10,8 +10,9 @@
 #include "Marlin.h"
 #include "Cartridge.h"
 
-#include "temperature.h" // for disable_all_heaters()
-#include "stepper.h"     // for quickStop()
+#include "./temperature.h"  // for disable_all_heaters()
+#include "./stepper.h"      // for quickStop()
+#include "./language.h"     // for MSG_T_CARTRIDGE_REMOVED
 
 //===========================================================================
 //=============================== Definitions ===============================
@@ -24,8 +25,8 @@
 //============================ Private Variables ============================
 //===========================================================================
 
-static bool cartridgePresent[NUMBER_OF_CARTRIDGES] = {false,false};
-static bool cartridgeRemoved[NUMBER_OF_CARTRIDGES] = {false,false};
+static bool cartridgePresent[NUMBER_OF_CARTRIDGES] = {false, false};
+static bool cartridgeRemoved[NUMBER_OF_CARTRIDGES] = {false, false};
 
 //===========================================================================
 //====================== Private Functions Prototypes =======================
@@ -46,27 +47,20 @@ static bool cartridgesPresentCheck(void);
  * The status of cartridge removal can be found with 
  * CartridgeRemoved()
  */
-void UpdateCartridgeStatus(void)
-{
+void UpdateCartridgeStatus(void) {
     // Cartridge zero is pulled low by default
-    if(READ(CART0_SIG2_PIN) == HIGH)
-    {
+    if (READ(CART0_SIG2_PIN) == HIGH) {
         cartridgePresentUpdate(0);
-    }
-    else
-    {
+    } else {
         cartridgeAbsentUpdate(0);
     }
     // Cartridge one is pulled high by default
-    if(READ(CART1_SIG2_PIN) == LOW)
-    {
+    if (READ(CART1_SIG2_PIN) == LOW) {
         cartridgePresentUpdate(1);
-    }
-    else
-    {
+    } else {
         cartridgeAbsentUpdate(1);
     }
-}  
+}
 
 /**
  * This function checks to see if a cartridge has been removed from the
@@ -79,32 +73,26 @@ void UpdateCartridgeStatus(void)
  * @returns    Returns true if a cartridge has been removed, or no 
  *             cartridge is present WITH HYSTERESIS
  */
-bool CartridgeRemoved(void)
-{
+bool CartridgeRemoved(void) {
     bool returnValue = false;
     static unsigned int cartridgeRemovalHysteresis = 0;
     bool removedCondition = (!cartridgePresent[0] || !cartridgesPresentCheck());
 
     // If a cartridge is seen to be removed, set the hysteresis counter.
-    if(cartridgesRemovedCheck())
-    {
-        cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
-    }
-
-    // If the appropriate cartridges are absent but we don't see that a 
-    // cartridge has been removed, we started up with it missing and will also 
+    // If the appropriate cartridges are absent but we don't see that a
+    // cartridge has been removed, we started up with it missing and will also
     // mark it as removed.
-    else if (removedCondition)
-    {
+    if (cartridgesRemovedCheck()) {
+        cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
+    } else if (removedCondition) {
         cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
     }
 
-    // We have this hysteresis here to accomodate putting the cartridge 
+    // We have this hysteresis here to accomodate putting the cartridge
     // back in. Without it, Marlin will recognize the cartridge has been
     // reinserted before the temperature updates from its maximum value and
     // will throw a high temperature error.
-    if (cartridgeRemovalHysteresis > 0)
-    {
+    if (cartridgeRemovalHysteresis > 0) {
         cartridgeRemovalHysteresis--;
         returnValue = true;
     }
@@ -117,10 +105,8 @@ bool CartridgeRemoved(void)
  * to prevent heating
  * @returns    Returns true if an FFF cartridge has been removed
  */
-bool CartridgeRemovedFFF(void)
-{
-    if(!cartridgePresent[0])
-    {
+bool CartridgeRemovedFFF(void) {
+    if (!cartridgePresent[0]) {
         return true;
     }
     return false;
@@ -134,10 +120,8 @@ bool CartridgeRemovedFFF(void)
  * @inputs     An input that will be displayed on the serial monitor
  */
   void _cartridge_removed_error(const char *serial_msg) {
-  static bool killed = false;
   static millis_t timeSinceLastRemoval = {0};
-  if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL)
-  {
+  if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL) {
     disable_all_heaters();
     quickStop();
     serialprintPGM(serial_msg);
@@ -146,20 +130,17 @@ bool CartridgeRemovedFFF(void)
   }
   timeSinceLastRemoval = millis();
 }
+
 /**
  * Macro function that updates cartridge status, checks if a cartridge has 
  * been removed, and then activates the error if it has been.
  * @returns    Returns true if a cartridge is removed
  */
-bool CartridgeUpdateAndCheck()
-{
-    UpdateCartridgeStatus()
-    if (CartridgeRemoved())
-    {
-        _cartridge_removed_error();
-        return true;
-    }
-    return false;
+bool CartridgeUpdateAndCheck() {
+    bool returnValue = false;
+    UpdateCartridgeStatus();
+    returnValue = CartridgeRemoved();
+    return returnValue;
 }
 
 //===========================================================================
@@ -170,19 +151,17 @@ bool CartridgeUpdateAndCheck()
  * Reports that a cartridge is absent. If there was a cartridge present,
  * marks it as removed
  */
-static void cartridgeAbsentUpdate(unsigned int cartNumber)
-{
-    if (cartridgePresent[cartNumber] == true)
-    {
+static void cartridgeAbsentUpdate(unsigned int cartNumber) {
+    if (cartridgePresent[cartNumber] == true) {
         cartridgeRemoved[cartNumber] = true;
-        switch (cartNumber)
-        {
+        switch (cartNumber) {
             case 0:
                 SERIAL_ECHOLN("Cartidge 0 Removed");
                 break;
             case 1:
-                WRITE(CART1_SIG1_PIN, LOW); // Prevents the silver extruder from
-                                        // being lowered unintentionally
+                // Prevents the silver extruder from being lowered
+                // unintentionally
+                WRITE(CART1_SIG1_PIN, LOW);
                 SERIAL_ECHOLN("Cartidge 1 Removed");
                 break;
             default:
@@ -196,12 +175,9 @@ static void cartridgeAbsentUpdate(unsigned int cartNumber)
  * Reports that a cartridge is present. If it was marked as removed,
  * this will clear it.
  */
-static void cartridgePresentUpdate(unsigned int cartNumber)
-{
-    if (cartridgePresent[cartNumber] == false)
-    {
-        switch (cartNumber)
-        {
+static void cartridgePresentUpdate(unsigned int cartNumber) {
+    if (cartridgePresent[cartNumber] == false) {
+        switch (cartNumber) {
             case 0:
                 SERIAL_ECHOLN("Cartidge 0 Inserted");
                 break;
@@ -221,12 +197,9 @@ static void cartridgePresentUpdate(unsigned int cartNumber)
  * is safe to run after a reset with cartridges removed.
  * @returns    Returns true if no catridges have been removed, false otherwise.
  */
-static bool cartridgesRemovedCheck(void)
-{
-    for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
-    {
-        if (cartridgeRemoved[i])
-        {
+static bool cartridgesRemovedCheck(void) {
+    for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
+        if (cartridgeRemoved[i]) {
             return true;
         }
     }
@@ -238,14 +211,33 @@ static bool cartridgesRemovedCheck(void)
  * is safe to run after a reset with cartridges removed.
  * @returns    Returns true if no catridges are present, false otherwise.
  */
-static bool cartridgesPresentCheck(void)
-{
-    for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++)
-    {
-        if (cartridgePresent[i])
-        {
+static bool cartridgesPresentCheck(void) {
+    for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
+        if (cartridgePresent[i]) {
             return true;
         }
     }
     return false;
 }
+
+// static void RequestCartridgeInformation(unsigned int cartNumber)
+// {
+//     unsigned int cartAddress = NULL;
+//     switch (cartNumber)
+//     {
+//         case 0:
+//             cartAddress = CART0_ADDR;
+//         case 1:
+//             cartAddress = CART1_ADDR;
+//         default:
+//             cartAddress = NULL;
+//     }
+
+//     if (cartAddress)
+//     {
+//         Wire.begintransmission(cartAddress);
+//         Wire.write(REQUEST_ID_INFO);
+//         Wire.request(cartAddress,1)
+//         Wire.endTransmission();
+//     }
+// }
