@@ -258,7 +258,17 @@
   CardReader card;
 #endif
 
+// This bool is referenced in many places, and will cause the printer to not operate
+// if set to false
 bool Running = true;
+
+
+// This bool will cause some error conditions to kill the printer if activated, instead
+// of trying to continue normal operation.
+volatile bool SafetyCriticalSection = false;
+
+#define START_SAFETY_CRITICAL_SECTION (SafetyCriticalSection = true)
+#define END_SAFETY_CRITICAL_SECTION (SafetyCriticalSection = false)
 
 uint8_t marlin_debug_flags = DEBUG_INFO|DEBUG_ERRORS;
 
@@ -891,11 +901,6 @@ void loop() {
     cmd_queue_index_r = (cmd_queue_index_r + 1) % BUFSIZE;
   }
   checkHitEndstops();
-  UpdateCartridgeStatus();
-  if (CartridgeRemoved())
-  {
-    _cartridge_removed_error(PSTR(MSG_T_CARTRIDGE_REMOVED));
-  }
   idle();
 }
 
@@ -2480,12 +2485,14 @@ inline void gcode_G4() {
  *
  */
 inline void gcode_G28() {
-
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (marlin_debug_flags & DEBUG_LEVELING) {
       SERIAL_ECHOLNPGM("gcode_G28 >>>");
     }
   #endif
+
+  // Set this as a safety critical section, causing some errors to kill the printer
+  START_SAFETY_CRITICAL_SECTION;
 
   // Wait for planner moves to finish!
   st_synchronize();
@@ -2845,7 +2852,8 @@ inline void gcode_G28() {
       SERIAL_ECHOLNPGM("<<< gcode_G28");
     }
   #endif
-
+  // End the safety critical section
+  END_SAFETY_CRITICAL_SECTION;
 }
 
 #if ENABLED(MESH_BED_LEVELING)
@@ -2872,7 +2880,6 @@ inline void gcode_G28() {
    *
    */
   inline void gcode_G29() {
-
     static int probe_point = -1;
     MeshLevelingState state = code_seen('S') ? (MeshLevelingState)code_value_short() : MeshReport;
     if (state < 0 || state > 3) {
@@ -2885,7 +2892,7 @@ inline void gcode_G28() {
 
     switch(state) {
       case MeshReport:
-        if (mbl.active && !CartridgeUpdateAndCheck()) {
+        if (mbl.active) {
           SERIAL_PROTOCOLPGM("Num X,Y: ");
           SERIAL_PROTOCOL(MESH_NUM_X_POINTS);
           SERIAL_PROTOCOLCHAR(',');
@@ -2902,44 +2909,37 @@ inline void gcode_G28() {
           }
         }
         else
-          if (!CartridgeUpdateAndCheck())
-            SERIAL_PROTOCOLLNPGM("Mesh bed leveling not active.");
+          SERIAL_PROTOCOLLNPGM("Mesh bed leveling not active.");
         break;
 
       case MeshStart:
-        if (!CartridgeUpdateAndCheck())
-        {
         mbl.reset();
         probe_point = 0;
         enqueuecommands_P(PSTR("G28\nG29 S2"));
-        }
         break;
 
       case MeshNext:
-        if (probe_point < 0 && !CartridgeUpdateAndCheck()) {
+        if (probe_point < 0) {
           SERIAL_PROTOCOLLNPGM("Start mesh probing with \"G29 S1\" first.");
           return;
         }
-        if (probe_point == 0 && !CartridgeUpdateAndCheck()) {
+        if (probe_point == 0) {
           // Set Z to a positive value before recording the first Z.
           current_position[Z_AXIS] = MESH_HOME_SEARCH_Z;
           sync_plan_position();
         }
         else {
-          if (!CartridgeUpdateAndCheck())
-          {
-            // For others, save the Z of the previous point, then raise Z again.
-            ix = (probe_point - 1) % MESH_NUM_X_POINTS;
-            iy = (probe_point - 1) / MESH_NUM_X_POINTS;
-            if (iy & 1) ix = (MESH_NUM_X_POINTS - 1) - ix; // zig-zag
-            mbl.set_z(ix, iy, current_position[Z_AXIS]);
-            current_position[Z_AXIS] = MESH_HOME_SEARCH_Z;
-            plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[X_AXIS]/60, active_extruder);
-            st_synchronize();
-          }
+          // For others, save the Z of the previous point, then raise Z again.
+          ix = (probe_point - 1) % MESH_NUM_X_POINTS;
+          iy = (probe_point - 1) / MESH_NUM_X_POINTS;
+          if (iy & 1) ix = (MESH_NUM_X_POINTS - 1) - ix; // zig-zag
+          mbl.set_z(ix, iy, current_position[Z_AXIS]);
+          current_position[Z_AXIS] = MESH_HOME_SEARCH_Z;
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], homing_feedrate[X_AXIS]/60, active_extruder);
+          st_synchronize();
         }
         // Is there another point to sample? Move there.
-        if (probe_point < MESH_NUM_X_POINTS * MESH_NUM_Y_POINTS && !CartridgeUpdateAndCheck()) {
+        if (probe_point < MESH_NUM_X_POINTS * MESH_NUM_Y_POINTS) {
           ix = probe_point % MESH_NUM_X_POINTS;
           iy = probe_point / MESH_NUM_X_POINTS;
           if (iy & 1) ix = (MESH_NUM_X_POINTS - 1) - ix; // zig-zag
@@ -2950,48 +2950,42 @@ inline void gcode_G28() {
           probe_point++;
         }
         else {
-          if (!CartridgeUpdateAndCheck())
-          {
-            // After recording the last point, activate the mbl and home
-            SERIAL_PROTOCOLLNPGM("Mesh probing done.");
-            probe_point = -1;
-            mbl.active = 1;
-            enqueuecommands_P(PSTR("G28"));
-          }
+          // After recording the last point, activate the mbl and home
+          SERIAL_PROTOCOLLNPGM("Mesh probing done.");
+          probe_point = -1;
+          mbl.active = 1;
+          enqueuecommands_P(PSTR("G28"));
         }
         break;
 
       case MeshSet:
-        if (!CartridgeUpdateAndCheck())
-        {
-          if (code_seen('X')) {
-            ix = code_value_long()-1;
-            if (ix < 0 || ix >= MESH_NUM_X_POINTS) {
-              SERIAL_PROTOCOLPGM("X out of range (1-" STRINGIFY(MESH_NUM_X_POINTS) ").\n");
-              return;
-            }
-          } else {
-              SERIAL_PROTOCOLPGM("X not entered.\n");
-              return;
-          }
-          if (code_seen('Y')) {
-            iy = code_value_long()-1;
-            if (iy < 0 || iy >= MESH_NUM_Y_POINTS) {
-              SERIAL_PROTOCOLPGM("Y out of range (1-" STRINGIFY(MESH_NUM_Y_POINTS) ").\n");
-              return;
-            }
-          } else {
-              SERIAL_PROTOCOLPGM("Y not entered.\n");
-              return;
-          }
-          if (code_seen('Z')) {
-            z = code_value();
-          } else {
-            SERIAL_PROTOCOLPGM("Z not entered.\n");
+        if (code_seen('X')) {
+          ix = code_value_long()-1;
+          if (ix < 0 || ix >= MESH_NUM_X_POINTS) {
+            SERIAL_PROTOCOLPGM("X out of range (1-" STRINGIFY(MESH_NUM_X_POINTS) ").\n");
             return;
           }
-          mbl.z_values[iy][ix] = z;
+        } else {
+            SERIAL_PROTOCOLPGM("X not entered.\n");
+            return;
         }
+        if (code_seen('Y')) {
+          iy = code_value_long()-1;
+          if (iy < 0 || iy >= MESH_NUM_Y_POINTS) {
+            SERIAL_PROTOCOLPGM("Y out of range (1-" STRINGIFY(MESH_NUM_Y_POINTS) ").\n");
+            return;
+          }
+        } else {
+            SERIAL_PROTOCOLPGM("Y not entered.\n");
+            return;
+        }
+        if (code_seen('Z')) {
+          z = code_value();
+        } else {
+          SERIAL_PROTOCOLPGM("Z not entered.\n");
+          return;
+        }
+        mbl.z_values[iy][ix] = z;
     } // switch(state)
   }
 
@@ -3074,37 +3068,32 @@ inline void gcode_G28() {
         sync_plan_position();
       #endif  // !DELTA
     }
-    if (!CartridgeUpdateAndCheck()) {
-      setup_for_endstop_move();
-      feedrate = homing_feedrate[Z_AXIS];
-      float levelProbe_1 = 0;
-      float levelProbe_2 = 0;
-      float levelProbe_3 = 0;
-      if (!CartridgeUpdateAndCheck())
-        levelProbe_1 = bed_level_probe_pt(ABL_PROBE_PT_1_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_1_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
-      if (!CartridgeUpdateAndCheck())
-        levelProbe_2 = bed_level_probe_pt(ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
-      if (!CartridgeUpdateAndCheck())
-        levelProbe_3 = bed_level_probe_pt(ABL_PROBE_PT_3_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_3_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
+    setup_for_endstop_move();
+    feedrate = homing_feedrate[Z_AXIS];
+    float levelProbe_1 = 0;
+    float levelProbe_2 = 0;
+    float levelProbe_3 = 0;
+    levelProbe_1 = bed_level_probe_pt(ABL_PROBE_PT_1_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_1_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
+    levelProbe_2 = bed_level_probe_pt(ABL_PROBE_PT_2_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_2_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
+    levelProbe_3 = bed_level_probe_pt(ABL_PROBE_PT_3_X - X_PROBE_OFFSET_FROM_EXTRUDER, ABL_PROBE_PT_3_Y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS], verbose_level);
 
-      levelProbe_1 = (levelProbe_1 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
-      levelProbe_2 = (levelProbe_2 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
-      levelProbe_3 = (levelProbe_3 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
-      if (verbose_level > 2) {
-        SERIAL_PROTOCOLPGM("probe 1: ");
-        SERIAL_PROTOCOL_F(levelProbe_1, 5);
-        SERIAL_EOL;
-        SERIAL_PROTOCOLPGM("probe 2: ");
-        SERIAL_PROTOCOL_F(levelProbe_2, 5);
-        SERIAL_EOL;
-        SERIAL_PROTOCOLPGM("probe 3: ");
-        SERIAL_PROTOCOL_F(levelProbe_3, 5);
-        SERIAL_EOL;
-      }
-      clean_up_after_endstop_move();
-      if (!dryrun) {
-        set_bed_level_equation_3pts(levelProbe_1, levelProbe_2, levelProbe_3);
-      }
+    levelProbe_1 = (levelProbe_1 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
+    levelProbe_2 = (levelProbe_2 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
+    levelProbe_3 = (levelProbe_3 - LDIST_OFFSET)/LDIST_UNIT_DIVISOR;
+    if (verbose_level > 2) {
+      SERIAL_PROTOCOLPGM("probe 1: ");
+      SERIAL_PROTOCOL_F(levelProbe_1, 5);
+      SERIAL_EOL;
+      SERIAL_PROTOCOLPGM("probe 2: ");
+      SERIAL_PROTOCOL_F(levelProbe_2, 5);
+      SERIAL_EOL;
+      SERIAL_PROTOCOLPGM("probe 3: ");
+      SERIAL_PROTOCOL_F(levelProbe_3, 5);
+      SERIAL_EOL;
+    }
+    clean_up_after_endstop_move();
+    if (!dryrun) {
+      set_bed_level_equation_3pts(levelProbe_1, levelProbe_2, levelProbe_3);
     }
 
     #ifndef DELTA
@@ -6150,11 +6139,10 @@ void process_next_command() {
 
       #if ENABLED(AUTO_BED_LEVELING_FEATURE) || ENABLED(MESH_BED_LEVELING)
         case 29: // Auto bed leveling
-          // #if ENABLED(EXT_ADC) 
-          //   gcode_M237(); // M237: Auto bed leveling function using profilometer data
-          // #else
-            gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more points
-          // #endif
+          // Set this as a safety critical section, causing some errors to kill the printer
+          START_SAFETY_CRITICAL_SECTION;
+          gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more points
+          END_SAFETY_CRITICAL_SECTION;
           break;
       #endif
 

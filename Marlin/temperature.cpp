@@ -1484,7 +1484,11 @@ ISR(TIMER0_COMPB_vect) {
   static unsigned char temp_count = 0;
   static TempState temp_state = StartupDelay;
   static unsigned char pwm_count = BIT(SOFT_PWM_SCALE);
-
+   
+  if (CartridgeUpdateAndCheck()) {
+    _cartridge_removed_error(PSTR(MSG_T_CARTRIDGE_REMOVED));
+  }
+  
   // Static members for each heater
   #if ENABLED(SLOW_PWM_HEATERS)
     static unsigned char slow_pwm_count = 0;

@@ -19,7 +19,7 @@
 //===========================================================================
 
 #define NUMBER_OF_CARTRIDGES               (2)
-#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (4)
+#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (10)
 
 //===========================================================================
 //============================ Private Variables ============================
@@ -120,16 +120,31 @@ bool CartridgeRemovedFFF(void) {
  * @inputs     An input that will be displayed on the serial monitor
  */
 void _cartridge_removed_error(const char *serial_msg) {
-    static millis_t timeSinceLastRemoval = {0};
-    if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL) {
-        quickStop();
-        disable_all_heaters();
-        disable_all_steppers();
-        serialprintPGM(serial_msg);
-        SERIAL_EOL;
-        SERIAL_ECHOLN("// action:pause");
+
+    if (IsSafetyCriticalSection()) {
+        static bool killed = false;
+        if (IsRunning()) {
+            SERIAL_ERROR_START;
+            serialprintPGM(serial_msg);
+            SERIAL_EOL;
+        }
+        if (!killed) {
+            Running = false;
+            killed = true;
+            kill(serial_msg);
+        }
+    } else {
+        static millis_t timeSinceLastRemoval = {0};
+        if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL) {
+            quickStop();
+            disable_all_heaters();
+            disable_all_steppers();
+            serialprintPGM(serial_msg);
+            SERIAL_EOL;
+            SERIAL_ECHOLN("// action:pause");
+        }
+        timeSinceLastRemoval = millis();
     }
-    timeSinceLastRemoval = millis();
 }
 
 /**
