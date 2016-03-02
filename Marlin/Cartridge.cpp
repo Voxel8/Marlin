@@ -134,7 +134,7 @@ void _cartridge_removed_error(const char *serial_msg) {
         }
     } else {
         static millis_t timeSinceLastRemoval = {0};
-        if (millis() > timeSinceLastRemoval + CARTRODGE_REMOVED_ERR_INTERVAL) {
+        if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERR_INTERVAL) {
             quickStop();
             disable_all_heaters();
             disable_all_steppers();
