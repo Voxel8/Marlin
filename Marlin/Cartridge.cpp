@@ -120,7 +120,6 @@ bool CartridgeRemovedFFF(void) {
  * @inputs     An input that will be displayed on the serial monitor
  */
 void _cartridge_removed_error(const char *serial_msg) {
-
     if (IsSafetyCriticalSection()) {
         static bool killed = false;
         if (IsRunning()) {
@@ -135,7 +134,7 @@ void _cartridge_removed_error(const char *serial_msg) {
         }
     } else {
         static millis_t timeSinceLastRemoval = {0};
-        if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL) {
+        if (millis() > timeSinceLastRemoval + CARTRODGE_REMOVED_ERR_INTERVAL) {
             quickStop();
             disable_all_heaters();
             disable_all_steppers();
