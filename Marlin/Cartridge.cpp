@@ -119,16 +119,17 @@ bool CartridgeRemovedFFF(void) {
  * called once if it's been called multiple times in quick succession.
  * @inputs     An input that will be displayed on the serial monitor
  */
-  void _cartridge_removed_error(const char *serial_msg) {
-  static millis_t timeSinceLastRemoval = {0};
-  if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL) {
-    disable_all_heaters();
-    quickStop();
-    serialprintPGM(serial_msg);
-    SERIAL_EOL;
-    SERIAL_ECHOLN("// action:pause");
-  }
-  timeSinceLastRemoval = millis();
+void _cartridge_removed_error(const char *serial_msg) {
+    static millis_t timeSinceLastRemoval = {0};
+    if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERROR_INTERVAL) {
+        quickStop();
+        disable_all_heaters();
+        disable_all_steppers();
+        serialprintPGM(serial_msg);
+        SERIAL_EOL;
+        SERIAL_ECHOLN("// action:pause");
+    }
+    timeSinceLastRemoval = millis();
 }
 
 /**
