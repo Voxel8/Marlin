@@ -334,6 +334,8 @@ Wv = (VRef / 1.66) * 255
 #define SET_LED_RED_0_PWM       0x04
 #define SET_LED_UV_0_PWM        0x05
 
+#define I2C_EMPTY_ADDRESS       0xFF
+#define I2C_EMPTY_DATA          0xFF
 
 //===========================================================================
 //=============================Additional Features===========================

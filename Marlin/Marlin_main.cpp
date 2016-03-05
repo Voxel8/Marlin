@@ -4182,6 +4182,7 @@ inline void gcode_M105() {
     Wire.beginTransmission(CART_HOLDER_ADDR);
     Wire.write(SET_FAN_DRIVE_0_PWM);
     Wire.write(fanSpeed);
+    Wire.write(EMPTY_ADDRESS);
     Wire.endTransmission();
 
     #if defined(DEBUG)
@@ -4199,6 +4200,7 @@ inline void gcode_M105() {
     Wire.beginTransmission(CART_HOLDER_ADDR);
     Wire.write(SET_FAN_DRIVE_0_PWM);
     Wire.write(fanSpeed);
+    Wire.write(EMPTY_ADDRESS);
     Wire.endTransmission();
 
     #if defined(DEBUG)
