@@ -53,6 +53,7 @@
 #include "buzzer.h"
 #include "Wire.h"
 #include "Cartridge.h"
+#include "Voxel8_I2C_Commands.h"
 
 #if ENABLED(EXT_ADC)
   #include "ADC.h"
@@ -4149,7 +4150,6 @@ inline void gcode_M105() {
 }
 
 #if HAS_FAN // Uses dedicated FAN_PIN
-
   /**
    * M106: Set Fan Speed
    */
@@ -4166,48 +4166,20 @@ inline void gcode_M105() {
    * M106: Set Fan Speed
    */
 
-  // 127 (50%) is maxy duty cycle for 12V fans
-  #define MAX_FAN_DUTY  127
-
   inline void gcode_M106() {
     // Desired speed given
-    if ((code_seen('S')) && (code_value() <= MAX_FAN_DUTY)) {
-      fanSpeed = code_value();
-    }
-    // No speed given, defaults to MAX_FAN_DUTY
-    else {
-      fanSpeed = MAX_FAN_DUTY;
+    if ((code_seen('S'))) {
+      fanSpeed = (unsigned int)code_value();
     }
 
-    Wire.beginTransmission(CART_HOLDER_ADDR);
-    Wire.write(SET_FAN_DRIVE_0_PWM);
-    Wire.write(fanSpeed);
-    Wire.write(EMPTY_ADDRESS);
-    Wire.endTransmission();
-
-    #if defined(DEBUG)
-      SERIAL_PROTOCOLLNPGM("Command: 'Set Fan Speed' Sent");
-      SERIAL_PROTOCOL("fanSpeed = ");
-      SERIAL_PROTOCOL(fanSpeed);
-    #endif // end DEBUG
+    I2C__SetFanDrive0PWM(fanSpeed);
   }
 
   /**
    * M107: Fan Off
    */
   inline void gcode_M107() {
-    fanSpeed = 0;
-    Wire.beginTransmission(CART_HOLDER_ADDR);
-    Wire.write(SET_FAN_DRIVE_0_PWM);
-    Wire.write(fanSpeed);
-    Wire.write(EMPTY_ADDRESS);
-    Wire.endTransmission();
-
-    #if defined(DEBUG)
-      SERIAL_PROTOCOLLNPGM("Command: 'Fan Off' Sent");
-      SERIAL_PROTOCOL("fanSpeed = ");
-      SERIAL_PROTOCOL(fanSpeed);
-    #endif // end DEBUG
+    I2C__SetFanOff();
   }
 
 #endif // HAS_FAN
@@ -5415,6 +5387,91 @@ inline void gcode_M226() {
     enqueuecommand(cmd);
   }
 #endif
+
+/*
+* M242 - General I2C Message Interface
+*   A - 4 - 127 7-bit decimal device address
+*   P - 0 - 255 Process ID (See I2C Commands in Configuration_adv.h)
+*   S - 0 - 255 value to send
+*/
+inline void gcode_M242() {
+  int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
+  if (verbose_level < 0 || verbose_level > 4) {
+    SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
+    return;
+  }
+  
+  uint8_t i2c_address;
+  uint8_t i2c_process_id;
+  uint8_t i2c_eeprom_address;
+  uint8_t i2c_data;
+  
+  // Desired address for peripheral device
+  if (code_seen('A')) {
+    i2c_address = (unsigned int)code_value();
+  }
+  // Desired process command given
+  if (code_seen('P')) {
+    i2c_process_id = (unsigned int)code_value();
+  }        
+  // Desired data given
+  if (code_seen('D')) {
+    i2c_data = (unsigned int)code_value();
+  }
+  if (code_seen('E')) {
+    i2c_eeprom_address = (unsigned int)code_value();
+  }
+
+  I2C__GeneralCommand(i2c_address, i2c_process_id, i2c_eeprom_address, i2c_data);
+}
+
+/*
+* M244 - EEPROM Write
+*   A - 4 - 127 7-bit decimal device address
+*   0 - 255 Cartridge EEPROM Address
+*   D - 0 - 255 value to write
+*/
+inline void gcode_M243() {
+  uint8_t i2c_address;
+  uint8_t i2c_eeprom_address;
+  uint8_t i2c_data;
+  
+  // Desired address for peripheral device
+  if (code_seen('A')) {
+    i2c_address = (unsigned int)code_value();
+  }
+  // Desired EEPROM address
+  if (code_seen('E')) {
+    i2c_eeprom_address = (unsigned int)code_value();
+  }
+  // Desired data to write
+  if (code_seen('D')) {
+    i2c_data = (unsigned int)code_value();
+  }
+
+  I2C__EEPROMWrite(i2c_address, i2c_eeprom_address, i2c_data);
+}
+
+/*
+* M244 - EEPROM Read
+*   A - 4 - 127 7-bit decimal device address
+*   E - 0 - 255 Cartridge EEPROM Address
+*/
+inline void gcode_M244() {
+  uint8_t i2c_address;
+  uint8_t i2c_eeprom_address;
+  
+  // Desired address for peripheral device
+  if (code_seen('A')) {
+    i2c_address = (unsigned int)code_value();
+  }
+  // Desired EEPROM address
+  if (code_seen('E')) {
+    i2c_eeprom_address = (unsigned int)code_value();
+  }
+
+  I2C__EEPROMRead(i2c_address, i2c_eeprom_address);
+}
 
 #if HAS_SERVOS
 
@@ -6887,6 +6944,18 @@ void process_next_command() {
           gcode_M239();
           break;
       #endif
+
+      case 242: // M242 - I2C General Command
+        gcode_M242();
+        break;
+
+      case 243: // M243 - I2C EEPROM Write
+        gcode_M243();
+        break;
+
+      case 244: // M244 - I2C EEPROM Read
+        gcode_M244();
+        break;
 
       #if HAS_SERVOS
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
