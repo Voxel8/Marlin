@@ -155,14 +155,22 @@ uint8_t I2C__EEPROMRead(uint8_t cartridge,
 //============================ Private Functions ============================
 //===========================================================================
 
+/*
+ * DEFINES ON CARTRIDDGES, USE THIS AS A REFERENCE FOR HOW TO WRITE YOUR PACKETS
+ * #define I2C_BFFR_SIZE       0x03    // 2 bytes, command, address, and data
+ * #define I2C_COMMAND         0
+ * #define I2C_DATA            1
+ * #define I2C_ADDRESS         2
+*/
+
 void writeThreeBytePacket(uint8_t I2C_target_address, 
                           uint8_t command,
                           uint8_t address,
                           uint8_t data){
     Wire.beginTransmission((uint8_t)I2C_target_address);
     Wire.write(command);
-    Wire.write(address);
     Wire.write(data);
+    Wire.write(address);
     Wire.endTransmission();
 }
 

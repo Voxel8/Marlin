@@ -28,6 +28,6 @@ void I2C__EEPROMWrite(uint8_t cartridge,
                       uint8_t data);
 
 uint8_t I2C__EEPROMRead(uint8_t cartridge, 
-                             uint8_t address);
+                        uint8_t address);
 
 #endif  // MARLIN_VOXEL8_I2C_COMMANDS_H_
