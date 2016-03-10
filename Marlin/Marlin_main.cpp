@@ -5436,20 +5436,41 @@ inline void gcode_M243() {
   uint8_t i2c_eeprom_address;
   uint8_t i2c_data;
   
+  bool hasC, hasE, hasD;
   // Desired address for peripheral device
-  if (code_seen('A')) {
-    i2c_address = (unsigned int)code_value();
+  if (hasC = code_seen('C')) {
+    switch(int(code_value())) {
+      case 0:
+        i2c_address = CART0_ADDR;
+        break;
+      case 1:
+        i2c_address = CART1_ADDR;
+        break;
+    }
   }
   // Desired EEPROM address
-  if (code_seen('E')) {
-    i2c_eeprom_address = (unsigned int)code_value();
-  }
-  // Desired data to write
-  if (code_seen('D')) {
-    i2c_data = (unsigned int)code_value();
+  if (hasE = code_seen('E')) {
+    i2c_eeprom_address = (uint8_t)code_value();
+    SERIAL_PROTOCOL(i2c_eeprom_address);
   }
 
-  I2C__EEPROMWrite(i2c_address, i2c_eeprom_address, i2c_data);
+  // Desired data to write
+  if (hasD = code_seen('D')) {
+    i2c_data = (uint8_t)code_value();
+    SERIAL_PROTOCOL(i2c_data);
+  }
+
+  if (!hasC){
+    SERIAL_ECHOLNPGM("No cartridge address given");
+  }
+  if (!hasD){
+    SERIAL_ECHOLNPGM("No data given given");
+  }
+  if (!hasE){
+    SERIAL_ECHOLNPGM("No eeprom address given");
+  }
+
+  I2C__EEPROMWrite(CART0_ADDR, i2c_eeprom_address, i2c_data);
 }
 
 /*
@@ -5460,17 +5481,31 @@ inline void gcode_M243() {
 inline void gcode_M244() {
   uint8_t i2c_address;
   uint8_t i2c_eeprom_address;
-  
+  bool hasC, hasE;
   // Desired address for peripheral device
-  if (code_seen('A')) {
-    i2c_address = (unsigned int)code_value();
+  if (hasC = code_seen('C')) {
+    switch(int(code_value())) {
+      case 0:
+        i2c_address = CART0_ADDR;
+        break;
+      case 1:
+        i2c_address = CART1_ADDR;
+        break;
+    }
   }
   // Desired EEPROM address
-  if (code_seen('E')) {
-    i2c_eeprom_address = (unsigned int)code_value();
+  if (hasE = code_seen('E')) {
+    i2c_eeprom_address = (uint8_t)code_value();
   }
 
-  I2C__EEPROMRead(i2c_address, i2c_eeprom_address);
+  if (!hasC){
+    SERIAL_ECHOLNPGM("No cartridge address given");
+  }
+  if (!hasE){
+    SERIAL_ECHOLNPGM("No eeprom address given");
+  }
+
+  I2C__EEPROMRead(CART0_ADDR, i2c_eeprom_address);
 }
 
 #if HAS_SERVOS
