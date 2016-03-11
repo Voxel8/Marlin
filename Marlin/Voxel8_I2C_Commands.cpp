@@ -138,7 +138,7 @@ void I2C__EEPROMWrite(uint8_t cartridge,
  * @parameter address             The EEPROM address being written to
  */ 
 void I2C__EEPROMRead(uint8_t cartridge, 
-                     uint8_t address){
+                     uint8_t address) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_READ, address, I2C_EMPTY_DATA);
 
