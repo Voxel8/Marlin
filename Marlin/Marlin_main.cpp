@@ -5392,7 +5392,8 @@ inline void gcode_M226() {
 * M242 - General I2C Message Interface
 *   A - 4 - 127 7-bit decimal device address
 *   P - 0 - 255 Process ID (See I2C Commands in Configuration_adv.h)
-*   S - 0 - 255 value to send
+*   D - 0 - 255 Data to write
+*   E - 0 - 255 EEPROM address, if applicable
 */
 inline void gcode_M242() {
   int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
@@ -5418,6 +5419,8 @@ inline void gcode_M242() {
   if (code_seen('D')) {
     i2c_data = (unsigned int)code_value();
   }
+
+  // EEPROM address, if applicable
   if (code_seen('E')) {
     i2c_eeprom_address = (unsigned int)code_value();
   }
@@ -7009,21 +7012,26 @@ void process_next_command() {
           break;
       #endif
 
-      case 242: // M242 - I2C General Command
+      case 242: // M242 - I2C General Command 
+                // A - 4 - 127 7-bit decimal device address
+                // P - 0 - 255 Process ID (See I2C Commands in Configuration_adv.h)
+                // D - 0 - 255 Data to write
+                // E - 0 - 255 EEPROM address, if applicable
         gcode_M242();
         break;
 
-      case 243: // M243 - I2C EEPROM Write
+      case 243: // M243 - I2C EEPROM Write C: Cartridge E: EEPROM Address D: Data
         gcode_M243();
         break;
 
-      case 244: // M244 - I2C EEPROM Read
+      case 244: // M244 - I2C EEPROM Read C: Cartridge E: EEPROM Address
         gcode_M244();
         break;
 
-      case 245: // M245 - I2C Diagnostics Readout
+      case 245: // M245 - I2C Diagnostics Readout C: Cartridge
         gcode_M245();
         break;
+        
       #if HAS_SERVOS
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
           gcode_M280();
