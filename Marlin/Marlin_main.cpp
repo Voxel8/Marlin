@@ -5501,11 +5501,40 @@ inline void gcode_M244() {
   if (!hasC){
     SERIAL_ECHOLNPGM("No cartridge address given");
   }
+
   if (!hasE){
     SERIAL_ECHOLNPGM("No eeprom address given");
   }
 
-  I2C__EEPROMRead(CART0_ADDR, i2c_eeprom_address);
+  I2C__EEPROMRead(i2c_address, i2c_eeprom_address);
+}
+
+inline void gcode_M245() {
+  uint8_t i2c_address;
+
+  bool hasC;
+  // Desired address for peripheral device
+  if (hasC = code_seen('C')) {
+    switch(int(code_value())) {
+      case 0:
+        i2c_address = CART0_ADDR;
+        break;
+      case 1:
+        i2c_address = CART1_ADDR;
+        break;
+    }
+  }
+  
+  if (!hasC){
+    SERIAL_ECHOLNPGM("No cartridge address given");
+  }
+
+  I2C__GetSerial(i2c_address);
+  I2C__GetProgrammerStation(i2c_address);
+  I2C__GetCartridgeType(i2c_address);
+  I2C__GetSize(i2c_address);
+  I2C__GetMaterial(i2c_address);
+
 }
 
 #if HAS_SERVOS
@@ -6992,6 +7021,9 @@ void process_next_command() {
         gcode_M244();
         break;
 
+      case 245: // M245 - I2C Diagnostics Readout
+        gcode_M245();
+        break;
       #if HAS_SERVOS
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
           gcode_M280();

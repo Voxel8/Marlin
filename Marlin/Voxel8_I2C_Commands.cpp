@@ -34,6 +34,11 @@
 #define SET_LED_UV_0_PWM        0x05
 #define EEPROM_WRITE            0x06
 #define EEPROM_READ             0x07
+#define EEPROM_READ_SERIAL      0x08
+#define EEPROM_READ_SIZE        0x09
+#define EEPROM_READ_MTRL        0x10
+#define EEPROM_READ_TYPE        0x11
+#define EEPROM_READ_PRGMR       0x12
 
 // Defines for specific commands 
 // 127 (50%) is maxy duty cycle for 12V fans
@@ -137,8 +142,8 @@ void I2C__EEPROMWrite(uint8_t cartridge,
     requestAndPrintPacket(cartridge, 1);
 }
 
-uint8_t I2C__EEPROMRead(uint8_t cartridge, 
-                        uint8_t address){
+void I2C__EEPROMRead(uint8_t cartridge, 
+                     uint8_t address){
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_READ, address, I2C_EMPTY_DATA);
 
@@ -150,6 +155,60 @@ uint8_t I2C__EEPROMRead(uint8_t cartridge,
     requestAndPrintPacket(cartridge, 1);
 }
 
+void I2C__GetSerial(uint8_t cartridge) {
+    // Send message
+    writeThreeBytePacket(cartridge, EEPROM_READ_SERIAL, I2C_EMPTY_ADDRESS, 
+                         I2C_EMPTY_DATA);
+    //SERIAL_PROTOCOLLNPGM("Command: 'EEPROM READ SERIAL' Sent");
+    SERIAL_PROTOCOL("Serial Number = ");
+
+    // Read from cartridge and report
+    requestAndPrintPacket(cartridge, 2);
+}
+
+void I2C__GetProgrammerStation(uint8_t cartridge) {
+    // Send message
+    writeThreeBytePacket(cartridge, EEPROM_READ_PRGMR, I2C_EMPTY_ADDRESS, 
+                         I2C_EMPTY_DATA);
+    //SERIAL_PROTOCOLLNPGM("Command: 'EEPROM READ SERIAL' Sent");
+    SERIAL_PROTOCOL("Programmer Station = ");
+
+    // Read from cartridge and report
+    requestAndPrintPacket(cartridge, 1);
+}
+
+void I2C__GetCartridgeType(uint8_t cartridge) {
+    // Send message
+    writeThreeBytePacket(cartridge, EEPROM_READ_TYPE, I2C_EMPTY_ADDRESS, 
+                         I2C_EMPTY_DATA);
+    //SERIAL_PROTOCOLLNPGM("Command: 'EEPROM READ SERIAL' Sent");
+    SERIAL_PROTOCOL("Cartridge Type = ");
+
+    // Read from cartridge and report
+    requestAndPrintPacket(cartridge, 1);
+}
+
+void I2C__GetSize(uint8_t cartridge) {
+    // Send message
+    writeThreeBytePacket(cartridge, EEPROM_READ_SIZE, I2C_EMPTY_ADDRESS, 
+                         I2C_EMPTY_DATA);
+    //SERIAL_PROTOCOLLNPGM("Command: 'EEPROM READ SERIAL' Sent");
+    SERIAL_PROTOCOL("Cartridge Size = ");
+
+    // Read from cartridge and report
+    requestAndPrintPacket(cartridge, 1);
+}
+
+void I2C__GetMaterial(uint8_t cartridge) {
+    // Send message
+    writeThreeBytePacket(cartridge, EEPROM_READ_MTRL, I2C_EMPTY_ADDRESS, 
+                         I2C_EMPTY_DATA);
+    //SERIAL_PROTOCOLLNPGM("Command: 'EEPROM READ SERIAL' Sent");
+    SERIAL_PROTOCOL("Cartridge Material = ");
+
+    // Read from cartridge and report
+    requestAndPrintPacket(cartridge, 1);
+}
 
 //===========================================================================
 //============================ Private Functions ============================
