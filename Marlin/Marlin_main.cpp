@@ -5009,6 +5009,7 @@ inline void gcode_M220() {
  * M221: Set extrusion percentage (M221 T0 S95)
  */
 inline void gcode_M221() {
+  // Set extrusion multiplier
   if (code_seen('S')) {
     int sval = code_value();
     if (code_seen('T')) {
@@ -5017,6 +5018,21 @@ inline void gcode_M221() {
     }
     else {
       extruder_multiplier[active_extruder] = sval;
+    }
+  }
+  // Display extrusion multiplier
+  else {
+    SERIAL_PROTOCOLPGM("Extrusion multiplier (T");
+    if (code_seen('T')) {
+      if (setTargetedHotend(221)) return;
+      SERIAL_PROTOCOL(int(code_value()));
+      SERIAL_PROTOCOL("): ");
+      SERIAL_PROTOCOLLN(extruder_multiplier[target_extruder]);
+    }
+    else {
+      SERIAL_PROTOCOL(int(code_value()));
+      SERIAL_PROTOCOL("): ");
+      SERIAL_PROTOCOLLN(extruder_multiplier[active_extruder]);
     }
   }
 }
