@@ -378,6 +378,9 @@ Here are some standard links for getting your machine calibrated:
 // Define this if you are using the electro-pneumatic regulator
 #define E_REGULATOR
 
+// Define this if you are using dual pneumatics
+//#define DUAL_PNEUMATICS
+
 #if ENABLED(E_REGULATOR)
  // Set E-regulator Sensor Type HERE:
  // ---------------------------------
