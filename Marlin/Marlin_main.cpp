@@ -629,7 +629,7 @@ void setup_cartridgeidpins(void){
 */
 #if ENABLED(CURRENT_LIMIT)
 void enable_power_supply() {
-	
+  
   // Turn on FAN first so that 24V does not have a path to 24V_SW through the Rambo. 
   // TODO: Disconnect these two circuits.
   pinMode(FAN_CHASSIS_TOP_PIN, OUTPUT);
@@ -642,21 +642,21 @@ void enable_power_supply() {
 
   if (V_Monitor_Result > PS_ENABLE_LOWER_LIMIT) {     // Test for 24V short to gnd
     if (V_Monitor_Result <= PS_ENABLE_UPPER_LIMIT) {  // Test for 24V short to 5V
-	  // Test passed - enable power supply
+    // Test passed - enable power supply
       digitalWrite(PS_FORCE_ON_LL,LOW); // Pull Power Supply enable low to force on
       pinMode(PS_FORCE_ON_LL, OUTPUT);  //
       delayMicroseconds(100);           // 100us minimum delay to register on
       pinMode(PS_FORCE_ON_LL, INPUT);   // Release Power Supply to allow current limit
     }
-	
-	  // There are two cases that will cause Marlin to enter this block:
-	  //   1) The power supply is already enabled (result: do nothing)
-	  //   2) The 24V line is electrically shorted to 5V (result: kill printer)
+  
+    // There are two cases that will cause Marlin to enter this block:
+    //   1) The power supply is already enabled (result: do nothing)
+    //   2) The 24V line is electrically shorted to 5V (result: kill printer)
     // MCUSR set to 0 in bootloader. TODO: resolve
-    else if (MCUSR & (1 << PORF)) {	// Coming up from power-up reset?
-		  SERIAL_ERROR_START;
-		  SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
-		  kill(PSTR("ERR:Please Reset"));
+    else if (MCUSR & (1 << PORF)) { // Coming up from power-up reset?
+      SERIAL_ERROR_START;
+      SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
+      kill(PSTR("ERR:Please Reset"));
     }
   }  
   
@@ -4257,13 +4257,20 @@ inline void gcode_M109() {
       long residency_start_ms = -1;
       /* continue to loop until we have reached the target temp
         _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
-      while(((!cancel_heatup)&&((residency_start_ms == -1) ||
-            (residency_start_ms >= 0 && (((unsigned int) (millis() - residency_start_ms)) < (TEMP_RESIDENCY_TIME * 1000UL))))) && !CartridgeRemovedFFF())
-    #else
-      while ( (target_direction ? (isHeatingHotend(target_extruder)) : (isCoolingHotend(target_extruder)&&(no_wait_for_cooling==false)))  && !CartridgeRemovedFFF())
-    #endif //TEMP_RESIDENCY_TIME
+      while (((!cancel_heatup) &&
+              ((residency_start_ms == -1) ||
+               (residency_start_ms >= 0 &&
+                (((unsigned int)(millis() - residency_start_ms)) <
+                 (TEMP_RESIDENCY_TIME * 1000UL))))) &&
+            !CartridgeRemovedFFF())
+#else
+    while ((target_direction ? (isHeatingHotend(target_extruder))
+                             : (isCoolingHotend(target_extruder) &&
+                                (no_wait_for_cooling == false))) &&
+                             !CartridgeRemovedFFF())
+#endif  // TEMP_RESIDENCY_TIME
 
-      { // while loop
+      {                                    // while loop
         if (millis() > temp_ms + 1000UL) { //Print temp & remaining time every 1s while waiting
           SERIAL_PROTOCOLPGM("T:");
           SERIAL_PROTOCOL_F(degHotend(target_extruder),1);
@@ -4281,26 +4288,33 @@ inline void gcode_M109() {
           #else
             SERIAL_EOL;
           #endif
-          temp_ms = millis();
+            temp_ms = millis();
         }
 
         idle();
         UpdateCartridgeStatus();
-        #ifdef TEMP_RESIDENCY_TIME
-          // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target temp for the first time
-          // or when current temp falls outside the hysteresis after target temp was reached
-          if ((residency_start_ms == -1 &&  target_direction && (degHotend(target_extruder) >= (degTargetHotend(target_extruder)-TEMP_WINDOW))) ||
-              (residency_start_ms == -1 && !target_direction && (degHotend(target_extruder) <= (degTargetHotend(target_extruder)+TEMP_WINDOW))) ||
-              (residency_start_ms > -1 && labs(degHotend(target_extruder) - degTargetHotend(target_extruder)) > TEMP_HYSTERESIS) )
-          {
-            residency_start_ms = millis();
-          }
-        #endif //TEMP_RESIDENCY_TIME
+#ifdef TEMP_RESIDENCY_TIME
+        // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target
+        // temp for the first time
+        // or when current temp falls outside the hysteresis after target temp
+        // was reached
+        if ((residency_start_ms == -1 && target_direction &&
+             (degHotend(target_extruder) >=
+              (degTargetHotend(target_extruder) - TEMP_WINDOW))) ||
+            (residency_start_ms == -1 && !target_direction &&
+             (degHotend(target_extruder) <=
+              (degTargetHotend(target_extruder) + TEMP_WINDOW))) ||
+            (residency_start_ms > -1 &&
+             labs(degHotend(target_extruder) -
+                  degTargetHotend(target_extruder)) > TEMP_HYSTERESIS)) {
+          residency_start_ms = millis();
+        }
+#endif  // TEMP_RESIDENCY_TIME
       }
 
-    LCD_MESSAGEPGM(MSG_HEATING_COMPLETE);
-    refresh_cmd_timeout();
-    print_job_start_ms = previous_cmd_ms;
+      LCD_MESSAGEPGM(MSG_HEATING_COMPLETE);
+      refresh_cmd_timeout();
+      print_job_start_ms = previous_cmd_ms;
   }
 }
 
@@ -6936,7 +6950,7 @@ void process_next_command() {
       case 399: // M399 Pause command
         gcode_M399();
         break;
-		  
+      
       case 400: // M400 finish all moves
         gcode_M400();
         break;
