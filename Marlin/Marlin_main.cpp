@@ -6139,9 +6139,16 @@ void process_next_command() {
 
       #if ENABLED(AUTO_BED_LEVELING_FEATURE) || ENABLED(MESH_BED_LEVELING)
         case 29: // Auto bed leveling
-          // Set this as a safety critical section, causing some errors to kill the printer
           START_SAFETY_CRITICAL_SECTION;
-          gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more points
+          #if ENABLED(EXT_ADC)
+              gcode_M237(); // M237: Auto bed leveling function using 
+                            // profilometer data
+          #else
+              // Set this as a safety critical section, causing some errors to
+              // kill the printer
+              gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more
+                           // points
+          #endif
           END_SAFETY_CRITICAL_SECTION;
           break;
       #endif
