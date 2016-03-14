@@ -1483,44 +1483,42 @@ static void setup_for_endstop_move() {
    *  The final current_position may not be the one that was requested
    */
   static void do_blocking_move_to(float x, float y, float z) {
-    if (!CartridgeRemoved()) {
-      float oldFeedRate = feedrate;
+    float oldFeedRate = feedrate;
 
-      #if ENABLED(DEBUG_LEVELING_FEATURE)
-        if (marlin_debug_flags & DEBUG_LEVELING) {
-          print_xyz("do_blocking_move_to", x, y, z);
-        }
-      #endif
+    #if ENABLED(DEBUG_LEVELING_FEATURE)
+      if (marlin_debug_flags & DEBUG_LEVELING) {
+        print_xyz("do_blocking_move_to", x, y, z);
+      }
+    #endif
 
-      #if ENABLED(DELTA)
+    #if ENABLED(DELTA)
 
-        feedrate = XY_TRAVEL_SPEED;
+      feedrate = XY_TRAVEL_SPEED;
 
-        destination[X_AXIS] = x;
-        destination[Y_AXIS] = y;
-        destination[Z_AXIS] = z;
-        prepare_move_raw(); // this will also set_current_to_destination
-        st_synchronize();
+      destination[X_AXIS] = x;
+      destination[Y_AXIS] = y;
+      destination[Z_AXIS] = z;
+      prepare_move_raw(); // this will also set_current_to_destination
+      st_synchronize();
 
-      #else
+    #else
 
-        feedrate = homing_feedrate[Z_AXIS];
+      feedrate = homing_feedrate[Z_AXIS];
 
-        current_position[Z_AXIS] = z;
-        line_to_current_position();
-        st_synchronize();
+      current_position[Z_AXIS] = z;
+      line_to_current_position();
+      st_synchronize();
 
-        feedrate = xy_travel_speed;
+      feedrate = xy_travel_speed;
 
-        current_position[X_AXIS] = x;
-        current_position[Y_AXIS] = y;
-        line_to_current_position();
-        st_synchronize();
+      current_position[X_AXIS] = x;
+      current_position[Y_AXIS] = y;
+      line_to_current_position();
+      st_synchronize();
 
-      #endif
+    #endif
 
-      feedrate = oldFeedRate;
-    }
+    feedrate = oldFeedRate;
   }
 
   inline void do_blocking_move_to_xy(float x, float y) { do_blocking_move_to(x, y, current_position[Z_AXIS]); }
