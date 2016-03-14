@@ -2997,6 +2997,8 @@ inline void gcode_G28() {
     SERIAL_PROTOCOLLNPGM(" position out of range.");
   }
 
+#endif
+
   /**
    * G29: Detailed Z probe, probes the bed at 3 or more points.
    *      Will fail if the printer has not been homed with G28.
@@ -3035,6 +3037,7 @@ inline void gcode_G28() {
    *     Usage: "G29 E" or "G29 e"
    *
    */
+
 #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
   /*
   * G29 - Custom, more precise auto bed leveling
@@ -4267,7 +4270,7 @@ inline void gcode_M109() {
     while ((target_direction ? (isHeatingHotend(target_extruder))
                              : (isCoolingHotend(target_extruder) &&
                                 (no_wait_for_cooling == false))) &&
-                             !CartridgeRemovedFFF())
+                            !CartridgeRemovedFFF())
 #endif  // TEMP_RESIDENCY_TIME
 
       {                                    // while loop
@@ -6520,12 +6523,12 @@ void process_next_command() {
       #if ENABLED(AUTO_BED_LEVELING_FEATURE) || ENABLED(MESH_BED_LEVELING)
         case 29: // Auto bed leveling
           START_SAFETY_CRITICAL_SECTION;
+          // Set this as a safety critical section, causing some errors to
+          // kill the printer
           #if ENABLED(EXT_ADC)
               gcode_M237(); // M237: Auto bed leveling function using 
                             // profilometer data
           #else
-              // Set this as a safety critical section, causing some errors to
-              // kill the printer
               gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more
                            // points
           #endif
