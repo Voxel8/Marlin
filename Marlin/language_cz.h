@@ -134,6 +134,8 @@
 #define MSG_ERR_MINTEMP                     "Chyba: NIZKA TEPLOTA"
 #define MSG_ERR_MAXTEMP_BED                 "Chyba: VYSOKA TEPLOTA PODL."
 #define MSG_ERR_MINTEMP_BED                 "Chyba: NIZKA TEPLOTA PODL."
+#define MSG_ERR_CARTRIDGE_REMOVED           "Chyba: TLACOVEHO MATERIALU ODSTRANENE"
+#define MSG_ERR_CARTRIDGE_REMOVED_SAFE      "Chyba: TLACOVEHO MATERIALU ODSTRANENE"
 #define MSG_END_HOUR                        "hod"
 #define MSG_END_MINUTE                      "min"
 #define MSG_HEATING                         "Zahrivani..."

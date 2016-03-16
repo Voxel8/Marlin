@@ -213,6 +213,8 @@
 #define MSG_T_THERMAL_RUNAWAY               "Thermal Runaway"
 #define MSG_T_MAXTEMP                       "MAXTEMP triggered"
 #define MSG_T_MINTEMP                       "MINTEMP triggered"
+#define MSG_T_CARTRIDGE_REMOVED             "Cartridge Removed. Print will not continue, and heating is disabled"
+#define MSG_T_CARTRIDGE_REMOVED_HEATING     "An FFF Cartridge has been removed, will not heat"
 #define MSG_PNEUMATIC_PUMP_OFF              ": Pressure pump turned off, MAX/MIN value exceeded!!"
 
 // Debug

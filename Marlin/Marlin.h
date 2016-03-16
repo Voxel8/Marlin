@@ -231,8 +231,10 @@ enum DebugFlags {
 extern uint8_t marlin_debug_flags;
 
 extern bool Running;
+extern bool SafetyCriticalSection;
 inline bool IsRunning() { return  Running; }
 inline bool IsStopped() { return !Running; }
+inline bool IsSafetyCriticalSection() { return SafetyCriticalSection; }
 
 bool enqueuecommand(const char *cmd); //put a single ASCII command at the end of the current buffer or return false when it is full
 void enqueuecommands_P(const char *cmd); //put one or many ASCII commands at the end of the current buffer, read from flash

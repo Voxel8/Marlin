@@ -27,6 +27,7 @@
 #include "MCP4725.h"
 
 #include "Sd2PinMap.h"
+#include "Cartridge.h"
 
 //===========================================================================
 //================================== macros =================================
@@ -515,9 +516,13 @@ void max_temp_error(uint8_t e) {
   }
 // There has been a recent error, if was more than a second ago, it is probably an error
   else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
-    _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
+    if(CartridgeRemoved())
+      _cartridge_removed_error(PSTR(MSG_T_CARTRIDGE_REMOVED));
+    else
+      _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
   }
 }
+
 void min_temp_error(uint8_t e) {
   if (time_since_last_err[e] == 0) {
     time_since_last_err[e] = millis();
@@ -526,6 +531,7 @@ void min_temp_error(uint8_t e) {
     _temp_error(e, PSTR(MSG_T_MINTEMP), PSTR(MSG_ERR_MINTEMP));
   }
 }
+
 void bed_max_temp_error(void) {
   if (time_since_last_err_bed == 0) {
     time_since_last_err_bed = millis();
@@ -1477,7 +1483,11 @@ ISR(TIMER0_COMPB_vect) {
   static unsigned char temp_count = 0;
   static TempState temp_state = StartupDelay;
   static unsigned char pwm_count = BIT(SOFT_PWM_SCALE);
-
+   
+  if (CartridgeRemoved()) {
+    _cartridge_removed_error(PSTR(MSG_T_CARTRIDGE_REMOVED));
+  }
+  
   // Static members for each heater
   #if ENABLED(SLOW_PWM_HEATERS)
     static unsigned char slow_pwm_count = 0;

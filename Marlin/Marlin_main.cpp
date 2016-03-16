@@ -52,6 +52,7 @@
 #include "math.h"
 #include "buzzer.h"
 #include "Wire.h"
+#include "Cartridge.h"
 
 #if ENABLED(EXT_ADC)
   #include "ADC.h"
@@ -257,7 +258,17 @@
   CardReader card;
 #endif
 
+// This bool is referenced in many places, and will cause the printer to not 
+// operate if set to false
 bool Running = true;
+
+
+// This bool will cause some error conditions to kill the printer if activated, 
+// instead of trying to continue normal operation.
+bool SafetyCriticalSection = false;
+
+#define START_SAFETY_CRITICAL_SECTION (SafetyCriticalSection = true)
+#define END_SAFETY_CRITICAL_SECTION (SafetyCriticalSection = false)
 
 uint8_t marlin_debug_flags = DEBUG_INFO|DEBUG_ERRORS;
 
@@ -602,6 +613,14 @@ void setup_powerhold() {
   #endif
 }
 
+void setup_cartridgeidpins(void){
+  #if HAS_CARTRIDGE_ID
+    SET_OUTPUT(CART1_SIG1_PIN)
+    SET_INPUT(CART0_SIG2_PIN)
+    SET_INPUT(CART1_SIG2_PIN)
+  #endif
+}
+
 /*
   Enable 24V to fans, E-reg, Cartridge Holder, Cartridges
   if no short circuit is detected on line
@@ -610,7 +629,7 @@ void setup_powerhold() {
 */
 #if ENABLED(CURRENT_LIMIT)
 void enable_power_supply() {
-	
+  
   // Turn on FAN first so that 24V does not have a path to 24V_SW through the Rambo. 
   // TODO: Disconnect these two circuits.
   pinMode(FAN_CHASSIS_TOP_PIN, OUTPUT);
@@ -623,21 +642,21 @@ void enable_power_supply() {
 
   if (V_Monitor_Result > PS_ENABLE_LOWER_LIMIT) {     // Test for 24V short to gnd
     if (V_Monitor_Result <= PS_ENABLE_UPPER_LIMIT) {  // Test for 24V short to 5V
-	  // Test passed - enable power supply
+    // Test passed - enable power supply
       digitalWrite(PS_FORCE_ON_LL,LOW); // Pull Power Supply enable low to force on
       pinMode(PS_FORCE_ON_LL, OUTPUT);  //
       delayMicroseconds(100);           // 100us minimum delay to register on
       pinMode(PS_FORCE_ON_LL, INPUT);   // Release Power Supply to allow current limit
     }
-	
-	  // There are two cases that will cause Marlin to enter this block:
-	  //   1) The power supply is already enabled (result: do nothing)
-	  //   2) The 24V line is electrically shorted to 5V (result: kill printer)
+  
+    // There are two cases that will cause Marlin to enter this block:
+    //   1) The power supply is already enabled (result: do nothing)
+    //   2) The 24V line is electrically shorted to 5V (result: kill printer)
     // MCUSR set to 0 in bootloader. TODO: resolve
-    else if (MCUSR & (1 << PORF)) {	// Coming up from power-up reset?
-		  SERIAL_ERROR_START;
-		  SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
-		  kill(PSTR("ERR:Please Reset"));
+    else if (MCUSR & (1 << PORF)) { // Coming up from power-up reset?
+      SERIAL_ERROR_START;
+      SERIAL_ECHOLN("ERROR TURNING ON 24V POWER. Detected 24V/5V short... PLEASE CHECK HARDWARE...");
+      kill(PSTR("ERR:Please Reset"));
     }
   }  
   
@@ -715,6 +734,7 @@ void setup() {
   setup_killpin();
   setup_filrunoutpin();
   setup_powerhold();
+  setup_cartridgeidpins();
 
   #if HAS_STEPPER_RESET
     disableStepperDrivers();
@@ -780,7 +800,7 @@ void setup() {
   st_init();    // Initialize stepper, this enables interrupts!
   setup_photpin();
   servo_init();
-
+  
   #if HAS_CONTROLLERFAN
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
   #endif
@@ -2461,12 +2481,14 @@ inline void gcode_G4() {
  *
  */
 inline void gcode_G28() {
-
   #if ENABLED(DEBUG_LEVELING_FEATURE)
     if (marlin_debug_flags & DEBUG_LEVELING) {
       SERIAL_ECHOLNPGM("gcode_G28 >>>");
     }
   #endif
+
+  // Set this as a safety critical section, causing some errors to kill the printer
+  START_SAFETY_CRITICAL_SECTION;
 
   // Wait for planner moves to finish!
   st_synchronize();
@@ -2826,7 +2848,8 @@ inline void gcode_G28() {
       SERIAL_ECHOLNPGM("<<< gcode_G28");
     }
   #endif
-
+  // End the safety critical section
+  END_SAFETY_CRITICAL_SECTION;
 }
 
 #if ENABLED(MESH_BED_LEVELING)
@@ -2853,7 +2876,6 @@ inline void gcode_G28() {
    *
    */
   inline void gcode_G29() {
-
     static int probe_point = -1;
     MeshLevelingState state = code_seen('S') ? (MeshLevelingState)code_value_short() : MeshReport;
     if (state < 0 || state > 3) {
@@ -2960,7 +2982,6 @@ inline void gcode_G28() {
           return;
         }
         mbl.z_values[iy][ix] = z;
-
     } // switch(state)
   }
 
@@ -2971,6 +2992,8 @@ inline void gcode_G28() {
     serialprintPGM(p_edge);
     SERIAL_PROTOCOLLNPGM(" position out of range.");
   }
+
+#endif
 
   /**
    * G29: Detailed Z probe, probes the bed at 3 or more points.
@@ -3010,6 +3033,11 @@ inline void gcode_G28() {
    *     Usage: "G29 E" or "G29 e"
    *
    */
+
+#if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
+  /*
+  * G29 - Custom, more precise auto bed leveling
+  */
   inline void gcode_G29() {
 
     #if ENABLED(DEBUG_LEVELING_FEATURE)
@@ -4021,16 +4049,26 @@ inline void gcode_M42() {
  * M104: Set hot end temperature
  */
 inline void gcode_M104() {
-  if (setTargetedHotend(104)) return;
-  if (marlin_debug_flags & DEBUG_DRYRUN) return;
+  if (CartridgeRemovedFFF())
+  {
+    //SERIAL_ERROR_START;
+    serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
+    SERIAL_EOL;
+    SERIAL_ECHOLN("// action:pause");
+  }
+  else
+  {
+    if (setTargetedHotend(104)) return;
+    if (marlin_debug_flags & DEBUG_DRYRUN) return;
 
-  if (code_seen('S')) {
-    float temp = code_value();
-    setTargetHotend(temp, target_extruder);
-    #if ENABLED(DUAL_X_CARRIAGE)
-      if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
-        setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
-    #endif
+    if (code_seen('S')) {
+      float temp = code_value();
+      setTargetHotend(temp, target_extruder);
+      #if ENABLED(DUAL_X_CARRIAGE)
+        if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
+          setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
+      #endif
+    }
   }
 }
 
@@ -4172,87 +4210,115 @@ inline void gcode_M105() {
 
 #endif // HAS_FAN
 
-/**
- * M109: Wait for extruder(s) to reach temperature
- */
-inline void gcode_M109() {
-  if (setTargetedHotend(109)) return;
-  if (marlin_debug_flags & DEBUG_DRYRUN) return;
+  /**
+   * M109: Wait for extruder(s) to reach temperature
+   */
+  inline void gcode_M109() {
+    if (CartridgeRemovedFFF()) {
+      // SERIAL_ERROR_START;
+      serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
+      SERIAL_EOL;
+      SERIAL_ECHOLN("// action:pause");
+    } 
+    else {
+      if (setTargetedHotend(109)) return;
+      if (marlin_debug_flags & DEBUG_DRYRUN) return;
 
-  LCD_MESSAGEPGM(MSG_HEATING);
+      LCD_MESSAGEPGM(MSG_HEATING);
 
-  no_wait_for_cooling = code_seen('S');
-  if (no_wait_for_cooling || code_seen('R')) {
-    float temp = code_value();
-    setTargetHotend(temp, target_extruder);
-    #if ENABLED(DUAL_X_CARRIAGE)
-      if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
-        setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
-    #endif
-  }
-
-  #if ENABLED(AUTOTEMP)
-    autotemp_enabled = code_seen('F');
-    if (autotemp_enabled) autotemp_factor = code_value();
-    if (code_seen('S')) autotemp_min = code_value();
-    if (code_seen('B')) autotemp_max = code_value();
-  #endif
-
-  millis_t temp_ms = millis();
-
-  /* See if we are heating up or cooling down */
-  target_direction = isHeatingHotend(target_extruder); // true if heating, false if cooling
-
-  cancel_heatup = false;
-
-  #ifdef TEMP_RESIDENCY_TIME
-    long residency_start_ms = -1;
-    /* continue to loop until we have reached the target temp
-      _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
-    while((!cancel_heatup)&&((residency_start_ms == -1) ||
-          (residency_start_ms >= 0 && (((unsigned int) (millis() - residency_start_ms)) < (TEMP_RESIDENCY_TIME * 1000UL)))) )
-  #else
-    while ( target_direction ? (isHeatingHotend(target_extruder)) : (isCoolingHotend(target_extruder)&&(no_wait_for_cooling==false)) )
-  #endif //TEMP_RESIDENCY_TIME
-
-    { // while loop
-      if (millis() > temp_ms + 1000UL) { //Print temp & remaining time every 1s while waiting
-        SERIAL_PROTOCOLPGM("T:");
-        SERIAL_PROTOCOL_F(degHotend(target_extruder),1);
-        SERIAL_PROTOCOLPGM(" E:");
-        SERIAL_PROTOCOL((int)target_extruder);
-        #ifdef TEMP_RESIDENCY_TIME
-          SERIAL_PROTOCOLPGM(" W:");
-          if (residency_start_ms > -1) {
-            temp_ms = ((TEMP_RESIDENCY_TIME * 1000UL) - (millis() - residency_start_ms)) / 1000UL;
-            SERIAL_PROTOCOLLN(temp_ms);
-          }
-          else {
-            SERIAL_PROTOCOLLNPGM("?");
-          }
-        #else
-          SERIAL_EOL;
-        #endif
-        temp_ms = millis();
+      no_wait_for_cooling = code_seen('S');
+      if (no_wait_for_cooling || code_seen('R')) {
+        float temp = code_value();
+        setTargetHotend(temp, target_extruder);
+#if ENABLED(DUAL_X_CARRIAGE)
+        if (dual_x_carriage_mode == DXC_DUPLICATION_MODE &&
+            target_extruder == 0)
+          setTargetHotend1(temp == 0.0 ? 0.0
+                                       : temp + duplicate_extruder_temp_offset);
+#endif
       }
 
-      idle();
+#if ENABLED(AUTOTEMP)
+      autotemp_enabled = code_seen('F');
+      if (autotemp_enabled) autotemp_factor = code_value();
+      if (code_seen('S')) autotemp_min = code_value();
+      if (code_seen('B')) autotemp_max = code_value();
+#endif
 
-      #ifdef TEMP_RESIDENCY_TIME
-        // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target temp for the first time
-        // or when current temp falls outside the hysteresis after target temp was reached
-        if ((residency_start_ms == -1 &&  target_direction && (degHotend(target_extruder) >= (degTargetHotend(target_extruder)-TEMP_WINDOW))) ||
-            (residency_start_ms == -1 && !target_direction && (degHotend(target_extruder) <= (degTargetHotend(target_extruder)+TEMP_WINDOW))) ||
-            (residency_start_ms > -1 && labs(degHotend(target_extruder) - degTargetHotend(target_extruder)) > TEMP_HYSTERESIS) )
-        {
+      millis_t temp_ms = millis();
+
+      /* See if we are heating up or cooling down */
+      target_direction = isHeatingHotend(
+          target_extruder);  // true if heating, false if cooling
+
+      cancel_heatup = false;
+
+#ifdef TEMP_RESIDENCY_TIME
+      long residency_start_ms = -1;
+      /* continue to loop until we have reached the target temp
+        _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
+      while (((!cancel_heatup) &&
+              ((residency_start_ms == -1) ||
+               (residency_start_ms >= 0 &&
+                (((unsigned int)(millis() - residency_start_ms)) <
+                 (TEMP_RESIDENCY_TIME * 1000UL))))) &&
+             !CartridgeRemovedFFF())
+#else
+      while ((target_direction ? (isHeatingHotend(target_extruder))
+                               : (isCoolingHotend(target_extruder) &&
+                                  (no_wait_for_cooling == false))) &&
+             !CartridgeRemovedFFF())
+#endif  // TEMP_RESIDENCY_TIME
+
+      {  // while loop
+        if (millis() >
+            temp_ms +
+                1000UL) {  // Print temp & remaining time every 1s while waiting
+          SERIAL_PROTOCOLPGM("T:");
+          SERIAL_PROTOCOL_F(degHotend(target_extruder), 1);
+          SERIAL_PROTOCOLPGM(" E:");
+          SERIAL_PROTOCOL((int)target_extruder);
+#ifdef TEMP_RESIDENCY_TIME
+          SERIAL_PROTOCOLPGM(" W:");
+          if (residency_start_ms > -1) {
+            temp_ms = ((TEMP_RESIDENCY_TIME * 1000UL) -
+                       (millis() - residency_start_ms)) /
+                      1000UL;
+            SERIAL_PROTOCOLLN(temp_ms);
+          } else {
+            SERIAL_PROTOCOLLNPGM("?");
+          }
+#else
+          SERIAL_EOL;
+#endif
+          temp_ms = millis();
+        }
+
+        idle();
+
+#ifdef TEMP_RESIDENCY_TIME
+        // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target
+        // temp for the first time
+        // or when current temp falls outside the hysteresis after target temp
+        // was reached
+        if ((residency_start_ms == -1 && target_direction &&
+             (degHotend(target_extruder) >=
+              (degTargetHotend(target_extruder) - TEMP_WINDOW))) ||
+            (residency_start_ms == -1 && !target_direction &&
+             (degHotend(target_extruder) <=
+              (degTargetHotend(target_extruder) + TEMP_WINDOW))) ||
+            (residency_start_ms > -1 &&
+             labs(degHotend(target_extruder) -
+                  degTargetHotend(target_extruder)) > TEMP_HYSTERESIS)) {
           residency_start_ms = millis();
         }
-      #endif //TEMP_RESIDENCY_TIME
-    }
+#endif  // TEMP_RESIDENCY_TIME
+      }
 
-  LCD_MESSAGEPGM(MSG_HEATING_COMPLETE);
-  refresh_cmd_timeout();
-  print_job_start_ms = previous_cmd_ms;
+      LCD_MESSAGEPGM(MSG_HEATING_COMPLETE);
+      refresh_cmd_timeout();
+      print_job_start_ms = previous_cmd_ms;
+  }
 }
 
 #if HAS_TEMP_BED
@@ -6472,11 +6538,17 @@ void process_next_command() {
 
       #if ENABLED(AUTO_BED_LEVELING_FEATURE) || ENABLED(MESH_BED_LEVELING)
         case 29: // Auto bed leveling
-          #if ENABLED(EXT_ADC) 
-            gcode_M237(); // M237: Auto bed leveling function using profilometer data
+          START_SAFETY_CRITICAL_SECTION;
+          // Set this as a safety critical section, causing some errors to
+          // kill the printer
+          #if ENABLED(EXT_ADC)
+              gcode_M237(); // M237: Auto bed leveling function using 
+                            // profilometer data
           #else
-            gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more points
+              gcode_G29(); // G29: Detailed Z probe, probes the bed at 3 or more
+                           // points
           #endif
+          END_SAFETY_CRITICAL_SECTION;
           break;
       #endif
 
@@ -6897,7 +6969,7 @@ void process_next_command() {
       case 399: // M399 Pause command
         gcode_M399();
         break;
-		  
+      
       case 400: // M400 finish all moves
         gcode_M400();
         break;

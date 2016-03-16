@@ -43,6 +43,7 @@
 
 #define TEMP_ERROR_INTERVAL 500       //ms between temp error checks
 #define TEMP_BED_ERROR_INTERVAL 1000
+#define CARTRIDGE_REMOVED_ERR_INTERVAL 1000
 
 #if ENABLED(PIDTEMP)
   // this adds an experimental additional term to the heating power, proportional to the extrusion speed.
