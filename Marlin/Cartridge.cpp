@@ -19,7 +19,7 @@
 //===========================================================================
 
 #define NUMBER_OF_CARTRIDGES               (2)
-#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (300)
+#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (250)
 #define FFF_INDEX                          (0)
 #define SILVER_INDEX                       (1)
 
@@ -40,8 +40,8 @@ static CARTRIDGE_STATUS cartridgeStatus[NUMBER_OF_CARTRIDGES] = {ABSENT,
 //====================== Private Functions Prototypes =======================
 //===========================================================================
 
-static void cartridgeAbsentUpdate(unsigned int cartNumber);
-static void cartridgePresentUpdate(unsigned int cartNumber);
+static void cartridgeAbsentUpdate(uint8_t cartNumber);
+static void cartridgePresentUpdate(uint8_t cartNumber);
 static bool cartridgesRemovedCheck(void);
 static bool cartridgesPresentCheck(void);
 static void updateCartridgeStatus(void);
@@ -63,7 +63,7 @@ static void updateCartridgeStatus(void);
  */
 bool CartridgeRemoved(void) {
     bool returnValue = false;
-    static unsigned int cartridgeRemovalHysteresis = 0;
+    static uint8_t cartridgeRemovalHysteresis = 0;
 
     // Update Cartridge Status so that we have fresh information for the 
     // function
@@ -167,7 +167,7 @@ static void updateCartridgeStatus(void) {
  * Reports that a cartridge is absent. If there was a cartridge present,
  * marks it as removed
  */
-static void cartridgeAbsentUpdate(unsigned int cartNumber) {
+static void cartridgeAbsentUpdate(uint8_t cartNumber) {
     if (cartridgeStatus[cartNumber] == PRESENT) {
         cartridgeStatus[cartNumber] = REMOVED;
         switch (cartNumber) {
@@ -190,7 +190,7 @@ static void cartridgeAbsentUpdate(unsigned int cartNumber) {
  * Reports that a cartridge is present. If it was marked as removed,
  * this will clear it.
  */
-static void cartridgePresentUpdate(unsigned int cartNumber) {
+static void cartridgePresentUpdate(uint8_t cartNumber) {
     if (cartridgeStatus[cartNumber] != PRESENT) {
         switch (cartNumber) {
             case FFF_INDEX:
@@ -212,7 +212,7 @@ static void cartridgePresentUpdate(unsigned int cartNumber) {
  * @returns    Returns true if a catridge has been removed, false otherwise.
  */
 static bool cartridgesRemovedCheck(void) {
-    for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
+    for (uint8_t i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
         if (cartridgeStatus[i] == REMOVED) {
             return true;
         }
@@ -226,7 +226,7 @@ static bool cartridgesRemovedCheck(void) {
  * @returns    Returns true if a catridge is present, false otherwise.
  */
 static bool cartridgesPresentCheck(void) {
-    for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
+    for (uint8_t i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
         if (cartridgeStatus[i] == PRESENT) {
             return true;
         }
