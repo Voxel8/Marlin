@@ -112,21 +112,22 @@ bool CartridgeRemovedFFF(void) {
  * @inputs     An input that will be displayed on the serial monitor
  */
 void _cartridge_removed_error(const char *serial_msg) {
-    if (IsSafetyCriticalSection()) {
-        static bool killed = false;
-        if (IsRunning()) {
-            SERIAL_ERROR_START;
-            serialprintPGM(serial_msg);
-            SERIAL_EOL;
+    static millis_t timeSinceLastRemoval = {0};
+    if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERR_INTERVAL) {
+        if (IsSafetyCriticalSection()) {
+            static bool killed = false;
+            if (IsRunning()) {
+                SERIAL_ERROR_START;
+                serialprintPGM(serial_msg);
+                SERIAL_EOL;
+            }   
+            if (!killed) {
+                Running = false;
+                killed = true;
+                kill(serial_msg);
+            }
         }
-        if (!killed) {
-            Running = false;
-            killed = true;
-            kill(serial_msg);
-        }
-    } else {
-        static millis_t timeSinceLastRemoval = {0};
-        if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERR_INTERVAL) {
+        else {
             quickStop();
             disable_all_heaters();
             disable_all_steppers();
@@ -134,8 +135,8 @@ void _cartridge_removed_error(const char *serial_msg) {
             SERIAL_EOL;
             SERIAL_ECHOLN("// action:pause");
         }
-        timeSinceLastRemoval = millis();
     }
+    timeSinceLastRemoval = millis();
 }
 
 //===========================================================================
