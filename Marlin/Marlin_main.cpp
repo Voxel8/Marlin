@@ -258,13 +258,13 @@
   CardReader card;
 #endif
 
-// This bool is referenced in many places, and will cause the printer to not operate
-// if set to false
+// This bool is referenced in many places, and will cause the printer to not 
+// operate if set to false
 bool Running = true;
 
 
-// This bool will cause some error conditions to kill the printer if activated, instead
-// of trying to continue normal operation.
+// This bool will cause some error conditions to kill the printer if activated, 
+// instead of trying to continue normal operation.
 volatile bool SafetyCriticalSection = false;
 
 #define START_SAFETY_CRITICAL_SECTION (SafetyCriticalSection = true)

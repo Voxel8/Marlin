@@ -19,7 +19,7 @@
 //===========================================================================
 
 #define NUMBER_OF_CARTRIDGES               (2)
-#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (10)
+#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (200)
 
 //===========================================================================
 //============================ Private Variables ============================
