@@ -209,7 +209,7 @@ static void cartridgePresentUpdate(unsigned int cartNumber) {
 /**
  * Signals that no cartridges have been removed, used to tell if the system 
  * is safe to run after a reset with cartridges removed.
- * @returns    Returns true if no catridges have been removed, false otherwise.
+ * @returns    Returns true if a catridge has been removed, false otherwise.
  */
 static bool cartridgesRemovedCheck(void) {
     for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
@@ -223,7 +223,7 @@ static bool cartridgesRemovedCheck(void) {
 /**
  * Signals that no cartridges are present, used to tell if the system 
  * is safe to run after a reset with cartridges removed.
- * @returns    Returns true if no catridges are present, false otherwise.
+ * @returns    Returns true if a catridge is present, false otherwise.
  */
 static bool cartridgesPresentCheck(void) {
     for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
