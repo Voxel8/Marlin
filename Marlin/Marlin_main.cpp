@@ -265,7 +265,7 @@ bool Running = true;
 
 // This bool will cause some error conditions to kill the printer if activated, 
 // instead of trying to continue normal operation.
-volatile bool SafetyCriticalSection = false;
+bool SafetyCriticalSection = false;
 
 #define START_SAFETY_CRITICAL_SECTION (SafetyCriticalSection = true)
 #define END_SAFETY_CRITICAL_SECTION (SafetyCriticalSection = false)
@@ -4210,49 +4210,50 @@ inline void gcode_M105() {
 
 #endif // HAS_FAN
 
-/**
- * M109: Wait for extruder(s) to reach temperature
- */
-inline void gcode_M109() {
-    if (CartridgeRemovedFFF())
-  {
-    //SERIAL_ERROR_START;
-    serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
-    SERIAL_EOL;
-    SERIAL_ECHOLN("// action:pause");
-  }
-  else
-  {
-    if (setTargetedHotend(109)) return;
-    if (marlin_debug_flags & DEBUG_DRYRUN) return;
+  /**
+   * M109: Wait for extruder(s) to reach temperature
+   */
+  inline void gcode_M109() {
+    if (CartridgeRemovedFFF()) {
+      // SERIAL_ERROR_START;
+      serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
+      SERIAL_EOL;
+      SERIAL_ECHOLN("// action:pause");
+    } 
+    else {
+      if (setTargetedHotend(109)) return;
+      if (marlin_debug_flags & DEBUG_DRYRUN) return;
 
-    LCD_MESSAGEPGM(MSG_HEATING);
+      LCD_MESSAGEPGM(MSG_HEATING);
 
-    no_wait_for_cooling = code_seen('S');
-    if (no_wait_for_cooling || code_seen('R')) {
-      float temp = code_value();
-      setTargetHotend(temp, target_extruder);
-      #if ENABLED(DUAL_X_CARRIAGE)
-        if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
-          setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
-      #endif
-    }
+      no_wait_for_cooling = code_seen('S');
+      if (no_wait_for_cooling || code_seen('R')) {
+        float temp = code_value();
+        setTargetHotend(temp, target_extruder);
+#if ENABLED(DUAL_X_CARRIAGE)
+        if (dual_x_carriage_mode == DXC_DUPLICATION_MODE &&
+            target_extruder == 0)
+          setTargetHotend1(temp == 0.0 ? 0.0
+                                       : temp + duplicate_extruder_temp_offset);
+#endif
+      }
 
-    #if ENABLED(AUTOTEMP)
+#if ENABLED(AUTOTEMP)
       autotemp_enabled = code_seen('F');
       if (autotemp_enabled) autotemp_factor = code_value();
       if (code_seen('S')) autotemp_min = code_value();
       if (code_seen('B')) autotemp_max = code_value();
-    #endif
+#endif
 
-    millis_t temp_ms = millis();
+      millis_t temp_ms = millis();
 
-    /* See if we are heating up or cooling down */
-    target_direction = isHeatingHotend(target_extruder); // true if heating, false if cooling
+      /* See if we are heating up or cooling down */
+      target_direction = isHeatingHotend(
+          target_extruder);  // true if heating, false if cooling
 
-    cancel_heatup = false;
+      cancel_heatup = false;
 
-    #ifdef TEMP_RESIDENCY_TIME
+#ifdef TEMP_RESIDENCY_TIME
       long residency_start_ms = -1;
       /* continue to loop until we have reached the target temp
         _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
@@ -4261,33 +4262,36 @@ inline void gcode_M109() {
                (residency_start_ms >= 0 &&
                 (((unsigned int)(millis() - residency_start_ms)) <
                  (TEMP_RESIDENCY_TIME * 1000UL))))) &&
-            !CartridgeRemovedFFF())
+             !CartridgeRemovedFFF())
 #else
-    while ((target_direction ? (isHeatingHotend(target_extruder))
-                             : (isCoolingHotend(target_extruder) &&
-                                (no_wait_for_cooling == false))) &&
-                            !CartridgeRemovedFFF())
+      while ((target_direction ? (isHeatingHotend(target_extruder))
+                               : (isCoolingHotend(target_extruder) &&
+                                  (no_wait_for_cooling == false))) &&
+             !CartridgeRemovedFFF())
 #endif  // TEMP_RESIDENCY_TIME
 
-      {                                    // while loop
-        if (millis() > temp_ms + 1000UL) { //Print temp & remaining time every 1s while waiting
+      {  // while loop
+        if (millis() >
+            temp_ms +
+                1000UL) {  // Print temp & remaining time every 1s while waiting
           SERIAL_PROTOCOLPGM("T:");
-          SERIAL_PROTOCOL_F(degHotend(target_extruder),1);
+          SERIAL_PROTOCOL_F(degHotend(target_extruder), 1);
           SERIAL_PROTOCOLPGM(" E:");
           SERIAL_PROTOCOL((int)target_extruder);
-          #ifdef TEMP_RESIDENCY_TIME
-            SERIAL_PROTOCOLPGM(" W:");
-            if (residency_start_ms > -1) {
-              temp_ms = ((TEMP_RESIDENCY_TIME * 1000UL) - (millis() - residency_start_ms)) / 1000UL;
-              SERIAL_PROTOCOLLN(temp_ms);
-            }
-            else {
-              SERIAL_PROTOCOLLNPGM("?");
-            }
-          #else
-            SERIAL_EOL;
-          #endif
-            temp_ms = millis();
+#ifdef TEMP_RESIDENCY_TIME
+          SERIAL_PROTOCOLPGM(" W:");
+          if (residency_start_ms > -1) {
+            temp_ms = ((TEMP_RESIDENCY_TIME * 1000UL) -
+                       (millis() - residency_start_ms)) /
+                      1000UL;
+            SERIAL_PROTOCOLLN(temp_ms);
+          } else {
+            SERIAL_PROTOCOLLNPGM("?");
+          }
+#else
+          SERIAL_EOL;
+#endif
+          temp_ms = millis();
         }
 
         idle();

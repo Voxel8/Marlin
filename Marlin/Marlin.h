@@ -231,7 +231,7 @@ enum DebugFlags {
 extern uint8_t marlin_debug_flags;
 
 extern bool Running;
-extern volatile bool SafetyCriticalSection;
+extern bool SafetyCriticalSection;
 inline bool IsRunning() { return  Running; }
 inline bool IsStopped() { return !Running; }
 inline bool IsSafetyCriticalSection() { return SafetyCriticalSection; }
