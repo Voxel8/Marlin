@@ -19,14 +19,22 @@
 //===========================================================================
 
 #define NUMBER_OF_CARTRIDGES               (2)
-#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (200)
+#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (300)
+#define FFF_INDEX                          (0)
+#define SILVER_INDEX                       (1)
+
+typedef enum _CartridgeStatus {
+    PRESENT,
+    ABSENT,
+    REMOVED
+} CARTRIDGE_STATUS;
 
 //===========================================================================
 //============================ Private Variables ============================
 //===========================================================================
 
-static bool cartridgePresent[NUMBER_OF_CARTRIDGES] = {false, false};
-static bool cartridgeRemoved[NUMBER_OF_CARTRIDGES] = {false, false};
+static CARTRIDGE_STATUS cartridgeStatus[NUMBER_OF_CARTRIDGES] = {ABSENT,
+                                                                 ABSENT};
 
 //===========================================================================
 //====================== Private Functions Prototypes =======================
@@ -36,31 +44,11 @@ static void cartridgeAbsentUpdate(unsigned int cartNumber);
 static void cartridgePresentUpdate(unsigned int cartNumber);
 static bool cartridgesRemovedCheck(void);
 static bool cartridgesPresentCheck(void);
+static void updateCartridgeStatus(void);
 
 //===========================================================================
 //============================ Public Functions =============================
 //===========================================================================
-
- /**
- * Check to see if cartridges are present or absent. Flags internally if 
- * one has been removed, or clears the removed flag if it's present. 
- * The status of cartridge removal can be found with 
- * CartridgeRemoved()
- */
-void UpdateCartridgeStatus(void) {
-    // Cartridge zero is pulled low by default
-    if (READ(CART0_SIG2_PIN) == HIGH) {
-        cartridgePresentUpdate(0);
-    } else {
-        cartridgeAbsentUpdate(0);
-    }
-    // Cartridge one is pulled high by default
-    if (READ(CART1_SIG2_PIN) == LOW) {
-        cartridgePresentUpdate(1);
-    } else {
-        cartridgeAbsentUpdate(1);
-    }
-}
 
 /**
  * This function checks to see if a cartridge has been removed from the
@@ -76,15 +64,21 @@ void UpdateCartridgeStatus(void) {
 bool CartridgeRemoved(void) {
     bool returnValue = false;
     static unsigned int cartridgeRemovalHysteresis = 0;
-    bool removedCondition = (!cartridgePresent[0] || !cartridgesPresentCheck());
+
+    // Update Cartridge Status so that we have fresh information for the 
+    // function
+    updateCartridgeStatus();
+
+    // Set up addition condition beyond cartridgeRemovedCheck that
+    // could result in an the cartridge needing to be reported as missing.
+    bool removedCondition =
+        (cartridgeStatus[FFF_INDEX] != PRESENT);
 
     // If a cartridge is seen to be removed, set the hysteresis counter.
     // If the appropriate cartridges are absent but we don't see that a
     // cartridge has been removed, we started up with it missing and will also
     // mark it as removed.
-    if (cartridgesRemovedCheck()) {
-        cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
-    } else if (removedCondition) {
+    if (cartridgesRemovedCheck() || removedCondition) {
         cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
     }
 
@@ -106,10 +100,8 @@ bool CartridgeRemoved(void) {
  * @returns    Returns true if an FFF cartridge has been removed
  */
 bool CartridgeRemovedFFF(void) {
-    if (!cartridgePresent[0]) {
-        return true;
-    }
-    return false;
+    updateCartridgeStatus();
+    return (cartridgeStatus[FFF_INDEX] != PRESENT);
 }
 
 /**
@@ -146,44 +138,52 @@ void _cartridge_removed_error(const char *serial_msg) {
     }
 }
 
-/**
- * Macro function that updates cartridge status, and checks if a cartridge has 
- * been removed.
- * @returns    Returns true if a cartridge is removed
- */
-bool CartridgeUpdateAndCheck() {
-    bool returnValue = false;
-    UpdateCartridgeStatus();
-    returnValue = CartridgeRemoved();
-    return returnValue;
-}
-
 //===========================================================================
 //============================ Private Functions ============================
 //===========================================================================
+
+ /**
+ * Check to see if cartridges are present or absent. Flags internally if 
+ * one has been removed, or clears the removed flag if it's present. 
+ * The status of cartridge removal can be found with 
+ * CartridgeRemoved()
+ */
+static void updateCartridgeStatus(void) {
+    // Cartridge zero is pulled low by default
+    if (READ(CART0_SIG2_PIN) == HIGH) {
+        cartridgePresentUpdate(0);
+    } else {
+        cartridgeAbsentUpdate(0);
+    }
+    // Cartridge one is pulled high by default
+    if (READ(CART1_SIG2_PIN) == LOW) {
+        cartridgePresentUpdate(1);
+    } else {
+        cartridgeAbsentUpdate(1);
+    }
+}
 
 /**
  * Reports that a cartridge is absent. If there was a cartridge present,
  * marks it as removed
  */
 static void cartridgeAbsentUpdate(unsigned int cartNumber) {
-    if (cartridgePresent[cartNumber] == true) {
-        cartridgeRemoved[cartNumber] = true;
+    if (cartridgeStatus[cartNumber] == PRESENT) {
+        cartridgeStatus[cartNumber] = REMOVED;
         switch (cartNumber) {
-            case 0:
-                SERIAL_ECHOLN("Cartidge 0 Removed");
+            case FFF_INDEX:
+                SERIAL_ECHOLN("FFF Cartridge Removed");
                 break;
-            case 1:
+            case SILVER_INDEX:
                 // Prevents the silver extruder from being lowered
                 // unintentionally
                 WRITE(CART1_SIG1_PIN, LOW);
-                SERIAL_ECHOLN("Cartidge 1 Removed");
+                SERIAL_ECHOLN("Silver Cartridge Removed");
                 break;
             default:
                 SERIAL_ECHOLN("Cartridge Removed");
         }
     }
-    cartridgePresent[cartNumber] = false;
 }
 
 /**
@@ -191,20 +191,19 @@ static void cartridgeAbsentUpdate(unsigned int cartNumber) {
  * this will clear it.
  */
 static void cartridgePresentUpdate(unsigned int cartNumber) {
-    if (cartridgePresent[cartNumber] == false) {
+    if (cartridgeStatus[cartNumber] != PRESENT) {
         switch (cartNumber) {
-            case 0:
-                SERIAL_ECHOLN("Cartidge 0 Inserted");
+            case FFF_INDEX:
+                SERIAL_ECHOLN("FFF Cartridge Inserted");
                 break;
-            case 1:
-                SERIAL_ECHOLN("Cartidge 1 Inserted");
+            case SILVER_INDEX:
+                SERIAL_ECHOLN("Silver Cartridge Inserted");
                 break;
             default:
                 SERIAL_ECHOLN("Cartridge Inserted");
         }
     }
-    cartridgePresent[cartNumber] = true;
-    cartridgeRemoved[cartNumber] = false;
+    cartridgeStatus[cartNumber] = PRESENT;
 }
 
 /**
@@ -214,7 +213,7 @@ static void cartridgePresentUpdate(unsigned int cartNumber) {
  */
 static bool cartridgesRemovedCheck(void) {
     for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
-        if (cartridgeRemoved[i]) {
+        if (cartridgeStatus[i] == REMOVED) {
             return true;
         }
     }
@@ -228,10 +227,9 @@ static bool cartridgesRemovedCheck(void) {
  */
 static bool cartridgesPresentCheck(void) {
     for (unsigned int i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
-        if (cartridgePresent[i]) {
+        if (cartridgeStatus[i] == PRESENT) {
             return true;
         }
     }
     return false;
 }
-

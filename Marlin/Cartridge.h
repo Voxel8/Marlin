@@ -15,14 +15,6 @@
 //===========================================================================
 
 /**
- * Check to see if cartridges are present or absent. Flags internally if 
- * one has been removed, or clears the removed flag if it's present. 
- * The status of cartridge removal can be found with 
- * CartridgeRemoved
- */
-  void UpdateCartridgeStatus(void);
-
-/**
  * This function checks to see if the FFF cartridge is removed,
  * to prevent heating
  * @returns    Returns true if an FFF cartridge has been removed
@@ -31,8 +23,8 @@
 
 /**
  * This function checks to see if a cartridge has been removed from the
- * system, allowing us to make judgement calls for error reporting. This
- * information is updated by calling UpdateCartridgeStatus
+ * system, allowing us to make judgement calls for error reporting. This 
+ * also updates the cartridge status.
  * @returns    Returns true if a cartridge has been removed 
  */
   bool CartridgeRemoved(void);
@@ -44,12 +36,5 @@
  * called once if it's been called multiple times in quick succession.
  */
   void _cartridge_removed_error(const char *serial_msg);
-
-/**
- * Macro function that updates cartridge status, and checks if a cartridge has 
- * been removed.
- * @returns    Returns true if a cartridge is removed
- */
-  bool CartridgeUpdateAndCheck();
 
 #endif  // MARLIN_CARTRIDGE_H_

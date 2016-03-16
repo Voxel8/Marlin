@@ -800,8 +800,6 @@ void setup() {
   st_init();    // Initialize stepper, this enables interrupts!
   setup_photpin();
   servo_init();
-
-  UpdateCartridgeStatus();
   
   #if HAS_CONTROLLERFAN
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
@@ -4293,7 +4291,7 @@ inline void gcode_M109() {
         }
 
         idle();
-        UpdateCartridgeStatus();
+
 #ifdef TEMP_RESIDENCY_TIME
         // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target
         // temp for the first time
