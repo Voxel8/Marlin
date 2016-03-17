@@ -72,7 +72,7 @@ void I2C__GeneralCommand(uint8_t I2C_target_address,
  * Sets the speed of the fan on the cartridge holder.
  * @parameter fanspeed            Speed the fan is set to
  */ 
-void I2C__SetFanDrive0PWM(uint8_t fanSpeed){
+void I2C__SetFanDrive0PWM(uint8_t fanSpeed) {
 
     // Check fanspeed, cap at MAX_FAN_DUTY
     if (fanSpeed > MAX_FAN_DUTY){
@@ -117,7 +117,7 @@ void I2C__SetFanOff(void){
  */
 void I2C__EEPROMWrite(uint8_t cartridge,
                       uint8_t eeprom_address, 
-                      uint8_t data){
+                      uint8_t data) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_WRITE, eeprom_address, data);
 
@@ -246,7 +246,7 @@ void I2C__GetMaterial(uint8_t cartridge) {
 void writeThreeBytePacket(uint8_t I2C_target_address, 
                           uint8_t command,
                           uint8_t address,
-                          uint8_t data){
+                          uint8_t data) {
     Wire.beginTransmission((uint8_t)I2C_target_address);
     Wire.write(command);
     Wire.write(data);
@@ -255,7 +255,7 @@ void writeThreeBytePacket(uint8_t I2C_target_address,
 }
 
 void requestAndPrintPacket(uint8_t I2C_target_address,
-                           uint8_t bytes){
+                           uint8_t bytes) {
     // Read from cartridge and report
     Wire.requestFrom(I2C_target_address,bytes);
     while (Wire.available()){
