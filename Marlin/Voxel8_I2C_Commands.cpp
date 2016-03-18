@@ -15,7 +15,7 @@
 //=============================== Definitions ===============================
 //===========================================================================
 
-// Defines for specific commands 
+// Defines for specific commands
 // 127 (50%) is maxy duty cycle for 12V fans
 #define MAX_FAN_DUTY  127
 //===========================================================================
@@ -25,7 +25,7 @@
 //===========================================================================
 //====================== Private Functions Prototypes =======================
 //===========================================================================
-void writeThreeBytePacket(uint8_t I2C_target_address, 
+void writeThreeBytePacket(uint8_t I2C_target_address,
                           uint8_t command,
                           uint8_t address,
                           uint8_t data);
@@ -65,7 +65,7 @@ void I2C__GeneralCommand(uint8_t I2C_target_address,
     SERIAL_PROTOCOL("data = ");
     SERIAL_PROTOCOL(data);
     SERIAL_EOL;
-  #endif // end DEBUG
+  #endif  // end DEBUG
 }
 
 /**
@@ -73,9 +73,8 @@ void I2C__GeneralCommand(uint8_t I2C_target_address,
  * @parameter fanspeed            Speed the fan is set to
  */ 
 void I2C__SetFanDrive0PWM(uint8_t fanSpeed) {
-
     // Check fanspeed, cap at MAX_FAN_DUTY
-    if (fanSpeed > MAX_FAN_DUTY){
+    if (fanSpeed > MAX_FAN_DUTY) {
         fanSpeed = MAX_FAN_DUTY;
     }
 
@@ -88,13 +87,13 @@ void I2C__SetFanDrive0PWM(uint8_t fanSpeed) {
       SERIAL_PROTOCOLLNPGM("Command: 'Set Fan Speed' Sent");
       SERIAL_PROTOCOL("fanSpeed = ");
       SERIAL_PROTOCOL(fanSpeed);
-    #endif // end DEBUG
+    #endif  // end DEBUG
 }
 
 /**
  * Turns off the fan on the cartridge holder.
  */ 
-void I2C__SetFanOff(void){
+void I2C__SetFanOff(void) {
     uint8_t fanSpeed = 0;
 
     // Send message
@@ -106,7 +105,7 @@ void I2C__SetFanOff(void){
       SERIAL_PROTOCOLLNPGM("Command: 'Fan Off' Sent");
       SERIAL_PROTOCOL("fanSpeed = ");
       SERIAL_PROTOCOL(fanSpeed);
-    #endif // end DEBUG
+    #endif  // end DEBUG
 }
 
 /**
@@ -116,7 +115,7 @@ void I2C__SetFanOff(void){
  * @parameter data                The data being written
  */
 void I2C__EEPROMWrite(uint8_t cartridge,
-                      uint8_t eeprom_address, 
+                      uint8_t eeprom_address,
                       uint8_t data) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_WRITE, eeprom_address, data);
@@ -137,7 +136,7 @@ void I2C__EEPROMWrite(uint8_t cartridge,
  * @parameter cartridge           Address of the target (cartridge)
  * @parameter address             The EEPROM address being written to
  */ 
-void I2C__EEPROMRead(uint8_t cartridge, 
+void I2C__EEPROMRead(uint8_t cartridge,
                      uint8_t address) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_READ, address, I2C_EMPTY_DATA);
@@ -156,7 +155,7 @@ void I2C__EEPROMRead(uint8_t cartridge,
  */ 
 void I2C__GetSerial(uint8_t cartridge) {
     // Send message
-    writeThreeBytePacket(cartridge, EEPROM_READ_SERIAL, I2C_EMPTY_ADDRESS, 
+    writeThreeBytePacket(cartridge, EEPROM_READ_SERIAL, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
 
     // Send information to Octoprint
@@ -173,7 +172,7 @@ void I2C__GetSerial(uint8_t cartridge) {
  */ 
 void I2C__GetProgrammerStation(uint8_t cartridge) {
     // Send message
-    writeThreeBytePacket(cartridge, EEPROM_READ_PRGMR, I2C_EMPTY_ADDRESS, 
+    writeThreeBytePacket(cartridge, EEPROM_READ_PRGMR, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
 
     // Send information to Octoprint
@@ -189,7 +188,7 @@ void I2C__GetProgrammerStation(uint8_t cartridge) {
  */ 
 void I2C__GetCartridgeType(uint8_t cartridge) {
     // Send message
-    writeThreeBytePacket(cartridge, EEPROM_READ_TYPE, I2C_EMPTY_ADDRESS, 
+    writeThreeBytePacket(cartridge, EEPROM_READ_TYPE, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
 
     // Send information to Octoprint
@@ -205,7 +204,7 @@ void I2C__GetCartridgeType(uint8_t cartridge) {
  */ 
 void I2C__GetSize(uint8_t cartridge) {
     // Send message
-    writeThreeBytePacket(cartridge, EEPROM_READ_SIZE, I2C_EMPTY_ADDRESS, 
+    writeThreeBytePacket(cartridge, EEPROM_READ_SIZE, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
 
     // Send information to Octoprint
@@ -221,7 +220,7 @@ void I2C__GetSize(uint8_t cartridge) {
  */ 
 void I2C__GetMaterial(uint8_t cartridge) {
     // Send message
-    writeThreeBytePacket(cartridge, EEPROM_READ_MTRL, I2C_EMPTY_ADDRESS, 
+    writeThreeBytePacket(cartridge, EEPROM_READ_MTRL, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
 
     // Send information to Octoprint
@@ -243,7 +242,7 @@ void I2C__GetMaterial(uint8_t cartridge) {
  * #define I2C_ADDRESS         2
 */
 
-void writeThreeBytePacket(uint8_t I2C_target_address, 
+void writeThreeBytePacket(uint8_t I2C_target_address,
                           uint8_t command,
                           uint8_t address,
                           uint8_t data) {
@@ -257,9 +256,9 @@ void writeThreeBytePacket(uint8_t I2C_target_address,
 void requestAndPrintPacket(uint8_t I2C_target_address,
                            uint8_t bytes) {
     // Read from cartridge and report
-    Wire.requestFrom(I2C_target_address,bytes);
-    while (Wire.available()){
+    Wire.requestFrom(I2C_target_address, bytes);
+    while (Wire.available()) {
         SERIAL_PROTOCOL(Wire.read());
-    } 
+    }
     SERIAL_EOL;
 }
