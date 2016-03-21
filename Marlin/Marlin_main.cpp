@@ -5199,7 +5199,7 @@ inline void gcode_M226() {
   }
 #endif
  
-#if ENABLED(E_REGULATOR)
+#if (ENABLED(E_REGULATOR) && ENABLED(PNEUMATICS))
   /**
    * M236 - Send Value to ADC w/ no EEPROM write
    */
@@ -5288,7 +5288,7 @@ inline void gcode_M226() {
     }
     SERIAL_EOL;
   }
-#endif // E_REGULATOR
+#endif // E_REGULATOR && PNEUMATICS
 
 #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
   /*
@@ -6862,7 +6862,7 @@ void process_next_command() {
           break;
       #endif // EXT_ADC
 
-      #if ENABLED(E_REGULATOR)
+      #if (ENABLED(E_REGULATOR) && ENABLED(PNEUMATICS))
           case 236: // Send value to DAC; return current output pressure if no S parameter
           gcode_M236();
           break;

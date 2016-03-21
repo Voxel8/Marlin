@@ -785,7 +785,7 @@ void manage_heater() {
   #endif // PNEUMATICS
 
   // ELECTRO-PNEUMATIC REGULATOR CONTROL
-  #if ENABLED(E_REGULATOR)
+  #if (ENABLED(E_REGULATOR) && ENABLED(PNEUMATICS))
   if (millis() - previous_millis_regulator_value > REGULATOR_CHECK_INTERVAL) {
     
     previous_millis_regulator_value = millis();
