@@ -4169,7 +4169,7 @@ inline void gcode_M105() {
   inline void gcode_M106() {
     // Desired speed given
     if ((code_seen('S'))) {
-      fanSpeed = (unsigned int)code_value();
+      fanSpeed = (uint8_t)code_value();
     }
 
     I2C__SetFanDrive0PWM(fanSpeed);
@@ -5409,20 +5409,20 @@ inline void gcode_M242() {
   
   // Desired address for peripheral device
   if (code_seen('A')) {
-    i2c_address = (unsigned int)code_value();
+    i2c_address = (uint8_t)code_value();
   }
   // Desired process command given
   if (code_seen('P')) {
-    i2c_process_id = (unsigned int)code_value();
+    i2c_process_id = (uint8_t)code_value();
   }        
   // Desired data given
   if (code_seen('D')) {
-    i2c_data = (unsigned int)code_value();
+    i2c_data = (uint8_t)code_value();
   }
 
   // EEPROM address, if applicable
   if (code_seen('E')) {
-    i2c_eeprom_address = (unsigned int)code_value();
+    i2c_eeprom_address = (uint8_t)code_value();
   }
 
   I2C__GeneralCommand(i2c_address, i2c_process_id, i2c_eeprom_address, i2c_data);
