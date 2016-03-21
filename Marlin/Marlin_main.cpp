@@ -5401,28 +5401,44 @@ inline void gcode_M242() {
     SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
     return;
   }
-  
+
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
+  bool hasA, hasP, hasD, hasE;
   uint8_t i2c_address;
   uint8_t i2c_process_id;
   uint8_t i2c_eeprom_address;
   uint8_t i2c_data;
   
   // Desired address for peripheral device
-  if (code_seen('A')) {
+  if (hasA = code_seen('A')) {
     i2c_address = (uint8_t)code_value();
   }
   // Desired process command given
-  if (code_seen('P')) {
+  if (hasP = code_seen('P')) {
     i2c_process_id = (uint8_t)code_value();
   }        
   // Desired data given
-  if (code_seen('D')) {
+  if (hasD = code_seen('D')) {
     i2c_data = (uint8_t)code_value();
   }
 
   // EEPROM address, if applicable
-  if (code_seen('E')) {
+  if (hasE = code_seen('E')) {
     i2c_eeprom_address = (uint8_t)code_value();
+  }
+
+  if (!hasA){
+    SERIAL_ECHOLNPGM("No peripheral address given");
+  }
+  if (!hasP){
+    SERIAL_ECHOLNPGM("No process command given");
+  }
+  if (!hasD){
+    SERIAL_ECHOLNPGM("No data given");
+  }
+  if (!hasE){
+    SERIAL_ECHOLNPGM("No eeprom address given");
   }
 
   I2C__GeneralCommand(i2c_address, i2c_process_id, i2c_eeprom_address, i2c_data);
@@ -5439,7 +5455,10 @@ inline void gcode_M243() {
   uint8_t i2c_eeprom_address;
   uint8_t i2c_data;
   
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
   bool hasC, hasE, hasD;
+
   // Desired address for peripheral device
   if (hasC = code_seen('C')) {
     switch(int(code_value())) {
@@ -5467,7 +5486,7 @@ inline void gcode_M243() {
     SERIAL_ECHOLNPGM("No cartridge address given");
   }
   if (!hasD){
-    SERIAL_ECHOLNPGM("No data given given");
+    SERIAL_ECHOLNPGM("No data given");
   }
   if (!hasE){
     SERIAL_ECHOLNPGM("No eeprom address given");
@@ -5484,7 +5503,11 @@ inline void gcode_M243() {
 inline void gcode_M244() {
   uint8_t i2c_address;
   uint8_t i2c_eeprom_address;
+
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
   bool hasC, hasE;
+
   // Desired address for peripheral device
   if (hasC = code_seen('C')) {
     switch(int(code_value())) {
@@ -5515,7 +5538,10 @@ inline void gcode_M244() {
 inline void gcode_M245() {
   uint8_t i2c_address;
 
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
   bool hasC;
+
   // Desired address for peripheral device
   if (hasC = code_seen('C')) {
     switch(int(code_value())) {
