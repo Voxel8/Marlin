@@ -5445,9 +5445,9 @@ inline void gcode_M242() {
 }
 
 /*
-* M244 - EEPROM Write
-*   A - 4 - 127 7-bit decimal device address
-*   0 - 255 Cartridge EEPROM Address
+* M243 - EEPROM Write
+*   C - 4 - 127 7-bit decimal device address
+*   E - 0 - 255 Cartridge EEPROM Address
 *   D - 0 - 255 value to write
 */
 inline void gcode_M243() {
@@ -5492,7 +5492,7 @@ inline void gcode_M243() {
     SERIAL_ECHOLNPGM("No eeprom address given");
   }
 
-  I2C__EEPROMWrite(CART0_ADDR, i2c_eeprom_address, i2c_data);
+  I2C__EEPROMWrite(i2c_address, i2c_eeprom_address, i2c_data);
 }
 
 /*
