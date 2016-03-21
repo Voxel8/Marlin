@@ -5445,10 +5445,10 @@ inline void gcode_M242() {
 }
 
 /*
-* M243 - EEPROM Write
-*   C - 4 - 127 7-bit decimal device address
+* M243 - Cartridge EEPROM Write
+*   C - 0 - 1   Cartridge Address (0 or 1)
 *   E - 0 - 255 Cartridge EEPROM Address
-*   D - 0 - 255 value to write
+*   D - 0 - 255 Value to write
 */
 inline void gcode_M243() {
   uint8_t i2c_address;
@@ -5496,8 +5496,8 @@ inline void gcode_M243() {
 }
 
 /*
-* M244 - EEPROM Read
-*   A - 4 - 127 7-bit decimal device address
+* M244 - Cartridge EEPROM Read
+*   C - 0 - 1   Cartridge Address (0 or 1)
 *   E - 0 - 255 Cartridge EEPROM Address
 */
 inline void gcode_M244() {
@@ -5535,6 +5535,10 @@ inline void gcode_M244() {
   I2C__EEPROMRead(i2c_address, i2c_eeprom_address);
 }
 
+/*
+* M245 - Cartridge Diagnostics Readout
+*   C - 0 - 1   Cartridge Address (0 or 1)
+*/
 inline void gcode_M245() {
   uint8_t i2c_address;
 
