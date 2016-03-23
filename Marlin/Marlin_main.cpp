@@ -5391,7 +5391,7 @@ inline void gcode_M226() {
 /*
 * M242 - General I2C Message Interface
 *   A - 4 - 127 7-bit decimal device address
-*   P - 0 - 255 Process ID (See I2C Commands in Configuration_adv.h)
+*   P - 0 - 255 Process ID (See I2C Commands in Voxel8_I2C_Commands.h)
 *   D - 0 - 255 Data to write
 *   E - 0 - 255 EEPROM address, if applicable
 */
@@ -5405,10 +5405,10 @@ inline void gcode_M242() {
   // Used to see if we've been given arguments, and to warn you through the
   // serial port if they're not seen.
   bool hasA, hasP, hasD, hasE;
-  uint8_t i2c_address;
-  uint8_t i2c_process_id;
-  uint8_t i2c_eeprom_address;
-  uint8_t i2c_data;
+  uint8_t i2c_address        = 0xFF;
+  uint8_t i2c_process_id     = 0xFF;
+  uint8_t i2c_eeprom_address = 0xFF;
+  uint8_t i2c_data           = 0xFF;
   
   // Desired address for peripheral device
   if (hasA = code_seen('A')) {
@@ -5430,12 +5430,15 @@ inline void gcode_M242() {
 
   if (!hasA){
     SERIAL_ECHOLNPGM("No peripheral address given");
+    return;
   }
   if (!hasP){
     SERIAL_ECHOLNPGM("No process command given");
+    return;
   }
   if (!hasD){
     SERIAL_ECHOLNPGM("No data given");
+    return;
   }
   if (!hasE){
     SERIAL_ECHOLNPGM("No eeprom address given");
@@ -5451,9 +5454,9 @@ inline void gcode_M242() {
 *   D - 0 - 255 Value to write
 */
 inline void gcode_M243() {
-  uint8_t i2c_address;
-  uint8_t i2c_eeprom_address;
-  uint8_t i2c_data;
+  uint8_t i2c_address        = 0xFF;
+  uint8_t i2c_data           = 0xFF;
+  uint8_t i2c_eeprom_address = 0xFF;
   
   // Used to see if we've been given arguments, and to warn you through the
   // serial port if they're not seen.
@@ -5484,12 +5487,15 @@ inline void gcode_M243() {
 
   if (!hasC){
     SERIAL_ECHOLNPGM("No cartridge address given");
+    return;
   }
   if (!hasD){
     SERIAL_ECHOLNPGM("No data given");
+    return;
   }
   if (!hasE){
     SERIAL_ECHOLNPGM("No eeprom address given");
+    return;
   }
 
   I2C__EEPROMWrite(i2c_address, i2c_eeprom_address, i2c_data);
@@ -5501,8 +5507,8 @@ inline void gcode_M243() {
 *   E - 0 - 255 Cartridge EEPROM Address
 */
 inline void gcode_M244() {
-  uint8_t i2c_address;
-  uint8_t i2c_eeprom_address;
+  uint8_t i2c_address        = 0xFF;
+  uint8_t i2c_eeprom_address = 0xFF;
 
   // Used to see if we've been given arguments, and to warn you through the
   // serial port if they're not seen.
@@ -5526,10 +5532,12 @@ inline void gcode_M244() {
 
   if (!hasC){
     SERIAL_ECHOLNPGM("No cartridge address given");
+    return;
   }
 
   if (!hasE){
     SERIAL_ECHOLNPGM("No eeprom address given");
+    return;
   }
 
   I2C__EEPROMRead(i2c_address, i2c_eeprom_address);
@@ -5540,7 +5548,7 @@ inline void gcode_M244() {
 *   C - 0 - 1   Cartridge Address (0 or 1)
 */
 inline void gcode_M245() {
-  uint8_t i2c_address;
+  uint8_t i2c_address = 0xFF;
 
   // Used to see if we've been given arguments, and to warn you through the
   // serial port if they're not seen.
@@ -5560,6 +5568,7 @@ inline void gcode_M245() {
   
   if (!hasC){
     SERIAL_ECHOLNPGM("No cartridge address given");
+    return;
   }
 
   I2C__GetSerial(i2c_address);
@@ -7044,7 +7053,7 @@ void process_next_command() {
 
       case 242: // M242 - I2C General Command 
                 // A - 4 - 127 7-bit decimal device address
-                // P - 0 - 255 Process ID (See I2C Commands in Configuration_adv.h)
+                // P - 0 - 255 Process ID (See I2C Commands in Voxel8_I2C_Commands.h)
                 // D - 0 - 255 Data to write
                 // E - 0 - 255 EEPROM address, if applicable
         gcode_M242();
