@@ -15,6 +15,13 @@
 //===========================================================================
 
 /**
+ * Checks to see if a cartridge is present, using the defined cartridge
+ * addresses.
+ * @returns    Returns true if the specified cartridge is present
+ */
+  bool CartridgePresent(uint8_t cartridgeAddress);
+
+/**
  * This function checks to see if the FFF cartridge is removed,
  * to prevent heating
  * @returns    Returns true if an FFF cartridge has been removed

@@ -17,7 +17,11 @@
 
 // Defines for specific commands
 // 127 (50%) is maxy duty cycle for 12V fans
+// TODO: This is unnecessary for Gen 3D, keeping it here for the moment
+//       to ensure back compatability.
 #define MAX_FAN_DUTY  127
+
+
 //===========================================================================
 //============================ Private Variables ============================
 //===========================================================================
@@ -225,6 +229,19 @@ void I2C__GetMaterial(uint8_t cartridge) {
 
     // Send information to Octoprint
     SERIAL_PROTOCOL("Cartridge Material = ");
+
+    // Read from cartridge and report
+    requestAndPrintPacket(cartridge, 1);
+}
+
+/**
+ * Read the material contained by a cartridge and print it on the serial port
+ * @parameter cartridge           Address of the target (cartridge)
+ */ 
+void I2C__GetErrorCode(uint8_t cartridge) {
+    // Send message
+    writeThreeBytePacket(cartridge, EEPROM_READ_ERR, I2C_EMPTY_ADDRESS,
+                         I2C_EMPTY_DATA);
 
     // Read from cartridge and report
     requestAndPrintPacket(cartridge, 1);

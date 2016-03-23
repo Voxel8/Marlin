@@ -38,6 +38,7 @@
 #define EEPROM_READ_MTRL        0x10
 #define EEPROM_READ_TYPE        0x11
 #define EEPROM_READ_PRGMR       0x12
+#define EEPROM_READ_ERR         0x13
 
 //===========================================================================
 //============================= Public Functions ============================
@@ -109,5 +110,11 @@ void I2C__GetSize(uint8_t cartridge);
  * @parameter cartridge           Address of the target (cartridge)
  */ 
 void I2C__GetMaterial(uint8_t cartridge);
+
+/**
+ * Read the material contained by a cartridge and print it on the serial port
+ * @parameter cartridge           Address of the target (cartridge)
+ */ 
+void I2C__GetErrorCode(uint8_t cartridge);
 
 #endif  // MARLIN_VOXEL8_I2C_COMMANDS_H_
