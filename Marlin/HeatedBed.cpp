@@ -28,7 +28,7 @@
 
 bool HeatedBed__Present(void) {
 	bool returnValue = false;
-	if (READ(BED_AVAIL_PIN) == LOW) {
+	if (READ(BED_AVAIL_PIN) == HIGH) {
 		returnValue = true;
 	}
 	else {
