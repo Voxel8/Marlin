@@ -2855,6 +2855,14 @@ inline void gcode_G28() {
   }
 }
 
+#if ENABLED(AUTO_BED_LEVELING_FEATURE)   
+
+  void out_of_range_error(const char *p_edge) {   
+    SERIAL_PROTOCOLPGM("?Probe ");    
+    serialprintPGM(p_edge);   
+    SERIAL_PROTOCOLLNPGM(" position out of range.");    
+  }   
+
 #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
   /*
   * G29 - Custom, more precise auto bed leveling
@@ -6417,12 +6425,6 @@ void process_next_command() {
           gcode_M236();
           break;
       #endif // E_REGULATOR
-
-      #if ENABLED(AUTO_BED_LEVELING_FEATURE) && ENABLED(EXT_ADC)
-        case 237: // M237 - Custom, more precise auto bed leveling
-          gcode_M237();
-          break;
-      #endif
 
       #if ENABLED(EXT_ADC)
         case 238: // M238 - Return ADC value from laser sensor (get distance)
