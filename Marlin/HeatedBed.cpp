@@ -26,6 +26,10 @@
 //============================ Public Functions =============================
 //===========================================================================
 
+/**
+ * Checks to see if the heated bed is present, and reports if it's not
+ * @returns    Returns true if the heated bed is present
+ */
 bool HeatedBed__Present(void) {
 	bool returnValue = false;
 	if (READ(BED_AVAIL_PIN) == HIGH) {
