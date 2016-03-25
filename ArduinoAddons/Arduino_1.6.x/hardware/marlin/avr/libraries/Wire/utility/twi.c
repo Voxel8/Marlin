@@ -59,6 +59,7 @@ static volatile uint8_t twi_rxBufferIndex;
 
 static volatile uint8_t twi_error;
 
+uint8_t twi_tout(uint8_t ini);
 /* 
  * Function twi_init
  * Desc     readys twi pins and sets twi bitrate
@@ -67,6 +68,10 @@ static volatile uint8_t twi_error;
  */
 void twi_init(void)
 {
+
+  // disable twi module (to allow for reinitialize)
+  TWCR = 0;
+  
   // initialize state
   twi_state = TWI_READY;
   twi_sendStop = true;		// default value
@@ -122,7 +127,9 @@ uint8_t twi_readFrom(uint8_t address, uint8_t* data, uint8_t length, uint8_t sen
   }
 
   // wait until twi is ready, become master receiver
+  twi_tout(1);
   while(TWI_READY != twi_state){
+    if (twi_tout(0)) return;
     continue;
   }
   twi_state = TWI_MRX;
@@ -159,7 +166,9 @@ uint8_t twi_readFrom(uint8_t address, uint8_t* data, uint8_t length, uint8_t sen
     TWCR = _BV(TWEN) | _BV(TWIE) | _BV(TWEA) | _BV(TWINT) | _BV(TWSTA);
 
   // wait for read operation to complete
+  twi_tout(1);
   while(TWI_MRX == twi_state){
+    if (twi_tout(0)) return;
     continue;
   }
 
@@ -199,7 +208,9 @@ uint8_t twi_writeTo(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait
   }
 
   // wait until twi is ready, become master transmitter
+  twi_tout(1);
   while(TWI_READY != twi_state){
+    if (twi_tout(0)) return;
     continue;
   }
   twi_state = TWI_MTX;
@@ -239,7 +250,9 @@ uint8_t twi_writeTo(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait
     TWCR = _BV(TWINT) | _BV(TWEA) | _BV(TWEN) | _BV(TWIE) | _BV(TWSTA);	// enable INTs
 
   // wait for write operation to complete
+  twi_tout(1);
   while(wait && (TWI_MTX == twi_state)){
+    if (twi_tout(0)) return;
     continue;
   }
   
@@ -337,7 +350,9 @@ void twi_stop(void)
 
   // wait for stop condition to be exectued on bus
   // TWINT is not set after a stop condition!
+  twi_tout(1);
   while(TWCR & _BV(TWSTO)){
+    if (twi_tout(0)) return;
     continue;
   }
 
@@ -358,6 +373,19 @@ void twi_releaseBus(void)
 
   // update twi state
   twi_state = TWI_READY;
+}
+
+//Nirea. Time Out
+static volatile uint32_t twi_toutc;
+uint8_t twi_tout(uint8_t ini)
+{
+  if (ini) twi_toutc=0; else twi_toutc++; 
+  if (twi_toutc>=10000UL) {
+    twi_toutc=0;
+    twi_init();
+    return 1;
+  }
+  return 0;  
 }
 
 ISR(TWI_vect)
