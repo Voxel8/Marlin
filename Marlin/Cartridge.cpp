@@ -51,6 +51,19 @@ static void updateCartridgeStatus(void);
 //===========================================================================
 
 /**
+ * Checks to see if a cartridge is present, using the defined cartridge
+ * addresses.
+ * @inputs     0 for Cartridge 0, 1 for Cartridge 1
+ * @returns    Returns true if the specified cartridge is present
+ */
+  bool CartridgePresent(uint8_t cartridgeNumber) {
+    uint8_t returnValue = false;
+    if (cartridgeStatus[cartridgeNumber] == PRESENT)
+        returnValue = true;
+    return returnValue;
+}
+
+/**
  * This function checks to see if a cartridge has been removed from the
  * system, allowing us to make judgement calls for error reporting. This
  * information is updated by calling UpdateCartridgeStatus(). Will also 

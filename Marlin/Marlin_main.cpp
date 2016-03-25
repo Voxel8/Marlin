@@ -53,6 +53,7 @@
 #include "buzzer.h"
 #include "Wire.h"
 #include "Cartridge.h"
+#include "Voxel8_I2C_Commands.h"
 
 #if ENABLED(EXT_ADC)
   #include "ADC.h"
@@ -4145,11 +4146,21 @@ inline void gcode_M105() {
     }
   #endif
 
+  // Get error codes from present cartridges
+  // if (CartridgePresent(0)) {
+  //   SERIAL_PROTOCOL(" C0: ");
+  //   I2C__GetErrorCode(CART0_ADDR);
+  // }
+
+  // if (CartridgePresent(1)) {
+  //   SERIAL_PROTOCOL(" C1: ");
+  //   I2C__GetErrorCode(CART1_ADDR);
+  // }
+
   SERIAL_EOL;
 }
 
 #if HAS_FAN // Uses dedicated FAN_PIN
-
   /**
    * M106: Set Fan Speed
    */
@@ -4166,46 +4177,20 @@ inline void gcode_M105() {
    * M106: Set Fan Speed
    */
 
-  // 127 (50%) is maxy duty cycle for 12V fans
-  #define MAX_FAN_DUTY  127
-
   inline void gcode_M106() {
     // Desired speed given
-    if ((code_seen('S')) && (code_value() <= MAX_FAN_DUTY)) {
-      fanSpeed = code_value();
-    }
-    // No speed given, defaults to MAX_FAN_DUTY
-    else {
-      fanSpeed = MAX_FAN_DUTY;
+    if ((code_seen('S'))) {
+      fanSpeed = (uint8_t)code_value();
     }
 
-    Wire.beginTransmission(CART_HOLDER_ADDR);
-    Wire.write(SET_FAN_DRIVE_0_PWM);
-    Wire.write(fanSpeed);
-    Wire.endTransmission();
-
-    #if defined(DEBUG)
-      SERIAL_PROTOCOLLNPGM("Command: 'Set Fan Speed' Sent");
-      SERIAL_PROTOCOL("fanSpeed = ");
-      SERIAL_PROTOCOL(fanSpeed);
-    #endif // end DEBUG
+    I2C__SetFanDrive0PWM(fanSpeed);
   }
 
   /**
    * M107: Fan Off
    */
   inline void gcode_M107() {
-    fanSpeed = 0;
-    Wire.beginTransmission(CART_HOLDER_ADDR);
-    Wire.write(SET_FAN_DRIVE_0_PWM);
-    Wire.write(fanSpeed);
-    Wire.endTransmission();
-
-    #if defined(DEBUG)
-      SERIAL_PROTOCOLLNPGM("Command: 'Fan Off' Sent");
-      SERIAL_PROTOCOL("fanSpeed = ");
-      SERIAL_PROTOCOL(fanSpeed);
-    #endif // end DEBUG
+    I2C__SetFanOff();
   }
 
 #endif // HAS_FAN
@@ -5413,6 +5398,197 @@ inline void gcode_M226() {
     enqueuecommand(cmd);
   }
 #endif
+
+/*
+* M242 - General I2C Message Interface
+*   A - 4 - 127 7-bit decimal device address
+*   P - 0 - 255 Process ID (See I2C Commands in Voxel8_I2C_Commands.h)
+*   D - 0 - 255 Data to write
+*   E - 0 - 255 EEPROM address, if applicable
+*/
+inline void gcode_M242() {
+  int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
+  if (verbose_level < 0 || verbose_level > 4) {
+    SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
+    return;
+  }
+
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
+  bool hasA, hasP, hasD, hasE;
+  uint8_t i2c_address        = 0xFF;
+  uint8_t i2c_process_id     = 0xFF;
+  uint8_t i2c_eeprom_address = 0xFF;
+  uint8_t i2c_data           = 0xFF;
+  
+  // Desired address for peripheral device
+  if (hasA = code_seen('A')) {
+    i2c_address = (uint8_t)code_value();
+  }
+  // Desired process command given
+  if (hasP = code_seen('P')) {
+    i2c_process_id = (uint8_t)code_value();
+  }        
+  // Desired data given
+  if (hasD = code_seen('D')) {
+    i2c_data = (uint8_t)code_value();
+  }
+
+  // EEPROM address, if applicable
+  if (hasE = code_seen('E')) {
+    i2c_eeprom_address = (uint8_t)code_value();
+  }
+
+  if (!hasA){
+    SERIAL_ECHOLNPGM("No peripheral address given");
+    return;
+  }
+  if (!hasP){
+    SERIAL_ECHOLNPGM("No process command given");
+    return;
+  }
+  if (!hasD){
+    SERIAL_ECHOLNPGM("No data given");
+    return;
+  }
+  if (!hasE){
+    SERIAL_ECHOLNPGM("No eeprom address given");
+  }
+
+  I2C__GeneralCommand(i2c_address, i2c_process_id, i2c_eeprom_address, i2c_data);
+}
+
+/*
+* M243 - Cartridge EEPROM Write
+*   C - 0 - 1   Cartridge Address (0 or 1)
+*   E - 0 - 255 Cartridge EEPROM Address
+*   D - 0 - 255 Value to write
+*/
+inline void gcode_M243() {
+  uint8_t i2c_address        = 0xFF;
+  uint8_t i2c_data           = 0xFF;
+  uint8_t i2c_eeprom_address = 0xFF;
+  
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
+  bool hasC, hasE, hasD;
+
+  // Desired address for peripheral device
+  if (hasC = code_seen('C')) {
+    switch(int(code_value())) {
+      case 0:
+        i2c_address = CART0_ADDR;
+        break;
+      case 1:
+        i2c_address = CART1_ADDR;
+        break;
+    }
+  }
+  // Desired EEPROM address
+  if (hasE = code_seen('E')) {
+    i2c_eeprom_address = (uint8_t)code_value();
+    SERIAL_PROTOCOL(i2c_eeprom_address);
+  }
+
+  // Desired data to write
+  if (hasD = code_seen('D')) {
+    i2c_data = (uint8_t)code_value();
+    SERIAL_PROTOCOL(i2c_data);
+  }
+
+  if (!hasC){
+    SERIAL_ECHOLNPGM("No cartridge address given");
+    return;
+  }
+  if (!hasD){
+    SERIAL_ECHOLNPGM("No data given");
+    return;
+  }
+  if (!hasE){
+    SERIAL_ECHOLNPGM("No eeprom address given");
+    return;
+  }
+
+  I2C__EEPROMWrite(i2c_address, i2c_eeprom_address, i2c_data);
+}
+
+/*
+* M244 - Cartridge EEPROM Read
+*   C - 0 - 1   Cartridge Address (0 or 1)
+*   E - 0 - 255 Cartridge EEPROM Address
+*/
+inline void gcode_M244() {
+  uint8_t i2c_address        = 0xFF;
+  uint8_t i2c_eeprom_address = 0xFF;
+
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
+  bool hasC, hasE;
+
+  // Desired address for peripheral device
+  if (hasC = code_seen('C')) {
+    switch(int(code_value())) {
+      case 0:
+        i2c_address = CART0_ADDR;
+        break;
+      case 1:
+        i2c_address = CART1_ADDR;
+        break;
+    }
+  }
+  // Desired EEPROM address
+  if (hasE = code_seen('E')) {
+    i2c_eeprom_address = (uint8_t)code_value();
+  }
+
+  if (!hasC){
+    SERIAL_ECHOLNPGM("No cartridge address given");
+    return;
+  }
+
+  if (!hasE){
+    SERIAL_ECHOLNPGM("No eeprom address given");
+    return;
+  }
+
+  I2C__EEPROMRead(i2c_address, i2c_eeprom_address);
+}
+
+/*
+* M245 - Cartridge Diagnostics Readout
+*   C - 0 - 1   Cartridge Address (0 or 1)
+*/
+inline void gcode_M245() {
+  uint8_t i2c_address = 0xFF;
+
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
+  bool hasC;
+
+  // Desired address for peripheral device
+  if (hasC = code_seen('C')) {
+    switch(int(code_value())) {
+      case 0:
+        i2c_address = CART0_ADDR;
+        break;
+      case 1:
+        i2c_address = CART1_ADDR;
+        break;
+    }
+  }
+  
+  if (!hasC){
+    SERIAL_ECHOLNPGM("No cartridge address given");
+    return;
+  }
+
+  I2C__GetSerial(i2c_address);
+  I2C__GetProgrammerStation(i2c_address);
+  I2C__GetCartridgeType(i2c_address);
+  I2C__GetSize(i2c_address);
+  I2C__GetMaterial(i2c_address);
+
+}
 
 #if HAS_SERVOS
 
@@ -6886,6 +7062,26 @@ void process_next_command() {
           break;
       #endif
 
+      case 242: // M242 - I2C General Command 
+                // A - 4 - 127 7-bit decimal device address
+                // P - 0 - 255 Process ID (See I2C Commands in Voxel8_I2C_Commands.h)
+                // D - 0 - 255 Data to write
+                // E - 0 - 255 EEPROM address, if applicable
+        gcode_M242();
+        break;
+
+      case 243: // M243 - I2C EEPROM Write C: Cartridge E: EEPROM Address D: Data
+        gcode_M243();
+        break;
+
+      case 244: // M244 - I2C EEPROM Read C: Cartridge E: EEPROM Address
+        gcode_M244();
+        break;
+
+      case 245: // M245 - I2C Diagnostics Readout C: Cartridge
+        gcode_M245();
+        break;
+        
       #if HAS_SERVOS
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
           gcode_M280();
