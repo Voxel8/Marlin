@@ -644,8 +644,8 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
       #define Z_SAFE_HOMING_X_POINT (100 + X_PROBE_OFFSET_FROM_EXTRUDER)    // X point for Z homing when homing all axis (G28)
       #define Z_SAFE_HOMING_Y_POINT (150 + Y_PROBE_OFFSET_FROM_EXTRUDER)    // Y point for Z homing when homing all axis (G28)
     #else
-      #define Z_SAFE_HOMING_X_POINT (113.6 + X_PROBE_OFFSET_FROM_EXTRUDER)    // X point for Z homing when homing all axis (G28)
-      #define Z_SAFE_HOMING_Y_POINT (66.0  + Y_PROBE_OFFSET_FROM_EXTRUDER)    // Y point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_X_POINT (113.6)    // X point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_Y_POINT (66.0 )    // Y point for Z homing when homing all axis (G28)
     #endif
   #endif
 
