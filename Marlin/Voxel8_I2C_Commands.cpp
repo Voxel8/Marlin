@@ -16,10 +16,9 @@
 //===========================================================================
 
 // Defines for specific commands
-// 127 (50%) is maxy duty cycle for 12V fans
-// TODO: This is unnecessary for Gen 3D, keeping it here for the moment
-//       to ensure back compatability.
-#define MAX_FAN_DUTY  127
+// 127 (50%) is maxy duty cycle for 12V fans wired in parallel. 255 should be
+// fine for those wired in series (Gen 3D, and beyond).
+#define MAX_FAN_DUTY  255
 
 
 //===========================================================================
