@@ -274,8 +274,18 @@ void requestAndPrintPacket(uint8_t I2C_target_address,
                            uint8_t bytes) {
     // Read from cartridge and report
     Wire.requestFrom(I2C_target_address, bytes);
-    while (Wire.available()) {
+    if (!Wire.available()) {
+      SERIAL_PROTOCOL(" No Packet Available ");
+    }
+    else {
+      while (Wire.available()) {
         SERIAL_PROTOCOL(Wire.read());
+        if (Wire.twi_getTimeoutFlag()) {
+          SERIAL_PROTOCOL(" I2C Timeout occurred ");
+          SERIAL_PROTOCOL(Wire.twi_getTimeoutFlag());
+          Wire.twi_resetTimeoutFlag();
+        }
+      }
     }
     SERIAL_EOL;
 }
