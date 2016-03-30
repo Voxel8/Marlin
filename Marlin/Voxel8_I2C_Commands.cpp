@@ -44,6 +44,8 @@ void writeThreeBytePacket(uint8_t I2C_target_address,
 
 void requestAndPrintPacket(uint8_t I2C_target_address,
                            uint8_t bytes);
+
+void requestAndPrintSerial(uint8_t I2C_target_address);
 //===========================================================================
 //============================ Public Functions =============================
 //===========================================================================
@@ -305,15 +307,15 @@ void requestAndPrintSerial(uint8_t I2C_target_address) {
     uint8_t buffer[CARTRIDGE_SERIAL_LENGTH - 1];
     uint8_t index = 0;
     uint16_t serialNumberSum = 0;
-    wire.requestFrom(I2C_target_address, CARTRIDGE_SERIAL_LENGTH);
+    Wire.requestFrom(I2C_target_address, uint8_t(CARTRIDGE_SERIAL_LENGTH));
     while (Wire.available()) {
         buffer[index] = Wire.read();
         index++;
     }
     SERIAL_PROTOCOL(buffer[CARTRIDGE_SERIAL_PROGRAMMER_STATION]);
-    SERIAL_PROTOCOL(-);
+    SERIAL_PROTOCOL("-");
     SERIAL_PROTOCOL(buffer[CARTRIDGE_SERIAL_TYPE]);
-    SERIAL_PROTOCOL(-);
+    SERIAL_PROTOCOL("-");
     serialNumberSum = (buffer[CARTRIDGE_SERIAL_NUMBER_0] < -BYTE_SIZE) +
                       buffer[CARTRIDGE_SERIAL_NUMBER_1];
     SERIAL_PROTOCOL(serialNumberSum);
