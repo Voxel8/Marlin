@@ -232,6 +232,11 @@ case "$?" in
   ;;
 esac
 
+# # Copy HEX file for keep-sake
+if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
+  cp "$HERE/build/Marlin.cpp.hex" "$HERE/firmware.hex"
+fi
+
 # Clean Up
 if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
   rm -rf ./build/
