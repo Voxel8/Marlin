@@ -1,0 +1,47 @@
+/**
+ * HeatedBed.cpp - Used to keep track of the status of the heated bed.
+ * Author: Dan Thompson (danthompson41@gmail.com)
+ * Date: 3/24/2016
+ * Used to keep track of all information about the headed bed, for use
+ * in decision making in other parts of the program
+ * Copyright (C) 2016 Voxel8
+ */
+
+#include "Marlin.h"
+#include "HeatedBed.h"
+
+//===========================================================================
+//=============================== Definitions ===============================
+//===========================================================================
+
+//===========================================================================
+//============================ Private Variables ============================
+//===========================================================================
+
+//===========================================================================
+//====================== Private Functions Prototypes =======================
+//===========================================================================
+
+//===========================================================================
+//============================ Public Functions =============================
+//===========================================================================
+
+/**
+ * Checks to see if the heated bed is present, and reports if it's not
+ * @returns    Returns true if the heated bed is present
+ */
+bool HeatedBed__Present(void) {
+	bool returnValue = false;
+	if (READ(BED_AVAIL_PIN) == HIGH) {
+		returnValue = true;
+	}
+	else {
+		SERIAL_PROTOCOL("Heated Bed Removed!");
+		SERIAL_EOL;
+	}
+	return returnValue;
+}
+
+//===========================================================================
+//============================ Private Functions ============================
+//===========================================================================

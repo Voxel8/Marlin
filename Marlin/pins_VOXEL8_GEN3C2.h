@@ -71,7 +71,7 @@ DIGITAL POTENTIOMETER PINS
 /*************************
     HEATED BED PINS
 *************************/
-#define BED_AVAIL_PIN           82  // From key circuit
+#define BED_AVAIL_PIN           72  // From key circuit
 #define HEATER_BED_PIN          4   // Drive the heated bed
 #define TEMP_BED_PIN            2   // Heated bed thermistor
 

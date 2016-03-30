@@ -378,6 +378,9 @@ Here are some standard links for getting your machine calibrated:
 // Define this if you are using the electro-pneumatic regulator
 #define E_REGULATOR
 
+// Define this if you don't want to home in  the center of the bed.
+//#define HOME_AT_BACK
+
 // Define this if you are using dual pneumatics
 //#define DUAL_PNEUMATICS
 
@@ -637,10 +640,13 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
                           // - Block Z homing only when the Z probe is outside bed area.
 
   #if ENABLED(Z_SAFE_HOMING)
-
-    #define Z_SAFE_HOMING_X_POINT (100+X_PROBE_OFFSET_FROM_EXTRUDER)    // X point for Z homing when homing all axis (G28)
-    #define Z_SAFE_HOMING_Y_POINT (150+Y_PROBE_OFFSET_FROM_EXTRUDER)    // Y point for Z homing when homing all axis (G28)
-
+    #if ENABLED(HOME_AT_BACK)
+      #define Z_SAFE_HOMING_X_POINT (100 + X_PROBE_OFFSET_FROM_EXTRUDER)    // X point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_Y_POINT (150 + Y_PROBE_OFFSET_FROM_EXTRUDER)    // Y point for Z homing when homing all axis (G28)
+    #else
+      #define Z_SAFE_HOMING_X_POINT (113.6)    // X point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_Y_POINT (66.0 )    // Y point for Z homing when homing all axis (G28)
+    #endif
   #endif
 
   // Support for a dedicated Z probe endstop separate from the Z min endstop.
