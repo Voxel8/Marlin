@@ -46,6 +46,8 @@ void requestAndPrintPacket(uint8_t I2C_target_address,
                            uint8_t bytes);
 
 void requestAndPrintSerial(uint8_t I2C_target_address);
+
+void printPrecedingZero(int number, uint8_t precision);
 //===========================================================================
 //============================ Public Functions =============================
 //===========================================================================
@@ -177,6 +179,7 @@ void I2C__GetSerial(uint8_t cartridge) {
 
     // Read from cartridge and report
     requestAndPrintSerial(cartridge);
+    //requestAndPrintPacket(cartridge,4);
 }
 
 /**
@@ -304,20 +307,38 @@ void requestAndPrintPacket(uint8_t I2C_target_address,
 }
 
 void requestAndPrintSerial(uint8_t I2C_target_address) {
-    uint8_t buffer[CARTRIDGE_SERIAL_LENGTH - 1];
+    int buffer[CARTRIDGE_SERIAL_LENGTH] = {};
     uint8_t index = 0;
     uint16_t serialNumberSum = 0;
     Wire.requestFrom(I2C_target_address, uint8_t(CARTRIDGE_SERIAL_LENGTH));
     while (Wire.available()) {
-        buffer[index] = Wire.read();
+      buffer[index] = Wire.read();
+      if (index < CARTRIDGE_SERIAL_LENGTH) {
         index++;
+      }
     }
-    SERIAL_PROTOCOL(buffer[CARTRIDGE_SERIAL_PROGRAMMER_STATION]);
-    SERIAL_PROTOCOL("-");
+
     SERIAL_PROTOCOL(buffer[CARTRIDGE_SERIAL_TYPE]);
-    SERIAL_PROTOCOL("-");
-    serialNumberSum = (buffer[CARTRIDGE_SERIAL_NUMBER_0] < -BYTE_SIZE) +
+    SERIAL_PROTOCOL(buffer[CARTRIDGE_SERIAL_PROGRAMMER_STATION]);
+    
+    serialNumberSum = (buffer[CARTRIDGE_SERIAL_NUMBER_0] * 255) +
                       buffer[CARTRIDGE_SERIAL_NUMBER_1];
+
+    printPrecedingZero(serialNumberSum, 4);
     SERIAL_PROTOCOL(serialNumberSum);
+    
     SERIAL_EOL;
+}
+
+void printPrecedingZero(int number, uint8_t precision) {
+    uint16_t decimalLimit = 1;
+    if (precision > 10) {
+        precision = 10;
+    }
+    for (int i = 0; i < precision; i++) {
+        if ((number < decimalLimit) ) {
+            SERIAL_PROTOCOL("0");
+        }
+        decimalLimit = decimalLimit * 10;
+    }
 }
