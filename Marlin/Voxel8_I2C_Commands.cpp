@@ -15,12 +15,21 @@
 //=============================== Definitions ===============================
 //===========================================================================
 
+// General Defines
+ #define BYTE_SIZE                          (8)
+
 // Defines for specific commands
+
 // 127 (50%) is maxy duty cycle for 12V fans wired in parallel. 255 should be
 // fine for those wired in series (Gen 3D, and beyond).
-#define MAX_FAN_DUTY  255
+#define MAX_FAN_DUTY                        (255)
 
-
+// Defines for use with requesting serial number from Cartridges
+#define CARTRIDGE_SERIAL_LENGTH             (4)
+#define CARTRIDGE_SERIAL_PROGRAMMER_STATION (0)
+#define CARTRIDGE_SERIAL_TYPE               (1)
+#define CARTRIDGE_SERIAL_NUMBER_0           (2)
+#define CARTRIDGE_SERIAL_NUMBER_1           (3)
 //===========================================================================
 //============================ Private Variables ============================
 //===========================================================================
@@ -35,6 +44,10 @@ void writeThreeBytePacket(uint8_t I2C_target_address,
 
 void requestAndPrintPacket(uint8_t I2C_target_address,
                            uint8_t bytes);
+
+void requestAndPrintSerial(uint8_t I2C_target_address);
+
+void printPrecedingZero(int number, uint8_t precision);
 //===========================================================================
 //============================ Public Functions =============================
 //===========================================================================
@@ -165,7 +178,8 @@ void I2C__GetSerial(uint8_t cartridge) {
     SERIAL_PROTOCOL("Serial Number = ");
 
     // Read from cartridge and report
-    requestAndPrintPacket(cartridge, 2);
+    requestAndPrintSerial(cartridge);
+    //requestAndPrintPacket(cartridge,4);
 }
 
 /**
@@ -246,6 +260,19 @@ void I2C__GetErrorCode(uint8_t cartridge) {
     requestAndPrintPacket(cartridge, 1);
 }
 
+/**
+ * Read the firmware version by a cartridge and print it on the serial port
+ * @parameter cartridge           Address of the target (cartridge)
+ */ 
+void I2C__GetFirmwareVersion(uint8_t cartridge) {
+    // Send message
+    writeThreeBytePacket(cartridge, EEPROM_READ_FRMWRE, I2C_EMPTY_ADDRESS,
+                         I2C_EMPTY_DATA);
+    SERIAL_PROTOCOL("Cartridge Firmware Version = ");
+    // Read from cartridge and report
+    requestAndPrintPacket(cartridge, 1);
+}
+
 //===========================================================================
 //============================ Private Functions ============================
 //===========================================================================
@@ -277,4 +304,41 @@ void requestAndPrintPacket(uint8_t I2C_target_address,
         SERIAL_PROTOCOL(Wire.read());
     }
     SERIAL_EOL;
+}
+
+void requestAndPrintSerial(uint8_t I2C_target_address) {
+    int buffer[CARTRIDGE_SERIAL_LENGTH] = {};
+    uint8_t index = 0;
+    uint16_t serialNumberSum = 0;
+    Wire.requestFrom(I2C_target_address, uint8_t(CARTRIDGE_SERIAL_LENGTH));
+    while (Wire.available()) {
+      buffer[index] = Wire.read();
+      if (index < CARTRIDGE_SERIAL_LENGTH) {
+        index++;
+      }
+    }
+
+    SERIAL_PROTOCOL(buffer[CARTRIDGE_SERIAL_TYPE]);
+    SERIAL_PROTOCOL(buffer[CARTRIDGE_SERIAL_PROGRAMMER_STATION]);
+    
+    serialNumberSum = (buffer[CARTRIDGE_SERIAL_NUMBER_0] * 255) +
+                      buffer[CARTRIDGE_SERIAL_NUMBER_1];
+
+    printPrecedingZero(serialNumberSum, 4);
+    SERIAL_PROTOCOL(serialNumberSum);
+    
+    SERIAL_EOL;
+}
+
+void printPrecedingZero(int number, uint8_t precision) {
+    uint16_t decimalLimit = 1;
+    if (precision > 10) {
+        precision = 10;
+    }
+    for (int i = 0; i < precision; i++) {
+        if ((number < decimalLimit) ) {
+            SERIAL_PROTOCOL("0");
+        }
+        decimalLimit = decimalLimit * 10;
+    }
 }
