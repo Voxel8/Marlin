@@ -2491,7 +2491,7 @@ inline void gcode_G28() {
 
   // Set this as a safety critical section, causing some errors to kill the printer
   START_SAFETY_CRITICAL_SECTION;
-  if (HeatedBed__Present()) {
+  if (HeatedBed__PresentCheck()) {
     // Wait for planner moves to finish!
     st_synchronize();
   
@@ -2868,7 +2868,7 @@ inline void gcode_G28() {
   * G29 - Custom, more precise auto bed leveling
   */
   inline void gcode_G29() {
-    if (HeatedBed__Present()) {
+    if (HeatedBed__PresentCheck()) {
       if (!axis_known_position[X_AXIS] || !axis_known_position[Y_AXIS]) {
         LCD_MESSAGEPGM(MSG_POSITION_UNKNOWN);
         SERIAL_ECHO_START;
