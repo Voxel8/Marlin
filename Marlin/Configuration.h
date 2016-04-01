@@ -384,6 +384,9 @@ Here are some standard links for getting your machine calibrated:
 // Define this if you are using dual pneumatics
 //#define DUAL_PNEUMATICS
 
+// Define to prevent printing without heated bed.
+#define HEATED_BED_PRESENT_CHECK
+ 
 #if ENABLED(E_REGULATOR)
  // Set E-regulator Sensor Type HERE:
  // ---------------------------------
