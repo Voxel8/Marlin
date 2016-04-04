@@ -4988,18 +4988,18 @@ inline void gcode_M246() {
   bool hasE;
 
   // Desired address for peripheral device
-  if (hasC = code_seen('E')) {
+  if (hasE = code_seen('E')) {
     switch(int(code_value())) {
       case 0:
-        HeatedBed__SetPresentCheck(false)
+        HeatedBed__SetPresentCheck(false);
         break;
       case 1:
-        HeatedBed__SetPresentCheck(true)
+        HeatedBed__SetPresentCheck(true);
         break;
     }
   }
   
-  if (!hasC){
+  if (!hasE){
     SERIAL_ECHOLNPGM("Enable (E1) or Disable (E0) not given");
     return;
   }

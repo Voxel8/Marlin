@@ -36,7 +36,7 @@ void heatedBedRemovedError(void);
  * @returns    Returns true if the heated bed is present
  */
 bool HeatedBed__PresentCheck(void) {
-	if (bedRemovalCheckEnabled && HEATED_BED_PRESENT_CHECK) {
+	if (bedRemovalCheckEnabled && ENABLED(HEATED_BED_PRESENT_CHECK)) {
 		bool returnValue = false;
 		if (READ(BED_AVAIL_PIN) == HIGH) {
 			returnValue = true;
@@ -53,17 +53,17 @@ bool HeatedBed__PresentCheck(void) {
 
 void HeatedBed__SetPresentCheck(bool value) {
 	if (value == true) {
-		SERIAL_PROTOCOL("Heated Bed Check Enabled")
-		SERIAL_EOL
-		bedRemovalCheckEnabled = 1
+		SERIAL_PROTOCOL("Heated Bed Check Enabled");
+		SERIAL_EOL;
+		bedRemovalCheckEnabled = 1;
 	}
 	else if (value == false) {
-		SERIAL_PROTOCOL("Heated Bed Check Disabled")
+		SERIAL_PROTOCOL("Heated Bed Check Disabled");
 		SERIAL_EOL;
-		bedRemovalCheckEnabled = 0
+		bedRemovalCheckEnabled = 0;
 	}
 	else {
-		SERIAL_PROTOCOL("Invalid value for Heated Bed Check Set")
+		SERIAL_PROTOCOL("Invalid value for Heated Bed Check Set");
 		SERIAL_EOL;
 		return;
 	}
