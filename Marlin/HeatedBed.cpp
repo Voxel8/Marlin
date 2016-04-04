@@ -37,7 +37,7 @@ void heatedBedRemovedError(void);
 bool HeatedBed__PresentCheck(void) {
 	#if ENABLED(HEATED_BED_PRESENT_CHECK)
 		bool returnValue = false;
-		if (READ(BED_AVAIL_PIN) == HIGH) {
+		if (current_temperature_bed > BED_MINTEMP) {
 			returnValue = true;
 		}
 		else {
