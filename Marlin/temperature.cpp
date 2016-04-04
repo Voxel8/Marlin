@@ -28,6 +28,7 @@
 
 #include "Sd2PinMap.h"
 #include "Cartridge.h"
+#include "HeatedBed.h"
 
 //===========================================================================
 //================================== macros =================================
@@ -1544,7 +1545,9 @@ ISR(TIMER0_COMPB_vect) {
 
       #if HAS_HEATER_BED
         soft_pwm_BED = soft_pwm_bed;
-        WRITE_HEATER_BED(soft_pwm_BED > 0 ? 1 : 0);
+        if (HeatedBed__PresentCheck){
+          WRITE_HEATER_BED(soft_pwm_BED > 0 ? 1 : 0);
+        }
       #endif
       #if ENABLED(FAN_SOFT_PWM)
         soft_pwm_fan = fanSpeedSoftPwm / 2;
