@@ -4979,10 +4979,10 @@ inline void gcode_M245() {
 }
 
 /*
-* M246 - Enable / Disable Heated Bed Check
+* M249 - Enable / Disable Heated Bed Check
 *   E - 0 - 1   1 = Enable, 0 = Disable
 */
-inline void gcode_M246() {
+inline void gcode_M249() {
   // Used to see if we've been given arguments, and to warn you through the
   // serial port if they're not seen.
   bool hasE;
@@ -6486,8 +6486,8 @@ void process_next_command() {
         gcode_M245();
         break;
       
-      case 246: // M246 - Enable / Disable Heated Bed Check
-        gcode_M246();
+      case 249: // M249 - Enable / Disable Heated Bed Check
+        gcode_M249();
         break;
 
       #if HAS_SERVOS
