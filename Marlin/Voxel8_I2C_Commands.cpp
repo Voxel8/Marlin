@@ -190,7 +190,7 @@ void I2C__EEPROMRead(uint8_t cartridge,
  * Read the serial number from a cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetSerial(uint8_t cartridge) {
+void I2C__PrintSerial(uint8_t cartridge) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_READ_SERIAL, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
@@ -208,7 +208,7 @@ void I2C__GetSerial(uint8_t cartridge) {
  * the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetProgrammerStation(uint8_t cartridge) {
+void I2C__PrintProgrammerStation(uint8_t cartridge) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_READ_PRGMR, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
@@ -225,7 +225,7 @@ void I2C__GetProgrammerStation(uint8_t cartridge) {
  * Read the variety of cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetCartridgeType(uint8_t cartridge) {
+void I2C__PrintCartridgeType(uint8_t cartridge) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_READ_TYPE, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
@@ -242,7 +242,7 @@ void I2C__GetCartridgeType(uint8_t cartridge) {
  * Read the size of the nozzle from cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetSize(uint8_t cartridge) {
+void I2C__PrintSize(uint8_t cartridge) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_READ_SIZE, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
@@ -259,7 +259,7 @@ void I2C__GetSize(uint8_t cartridge) {
  * Read the material contained by a cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetMaterial(uint8_t cartridge) {
+void I2C__PrintMaterial(uint8_t cartridge) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_READ_MTRL, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
@@ -276,7 +276,7 @@ void I2C__GetMaterial(uint8_t cartridge) {
  * Read the material contained by a cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetErrorCode(uint8_t cartridge) {
+void I2C__PrintErrorCode(uint8_t cartridge) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_READ_ERR, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
@@ -289,7 +289,7 @@ void I2C__GetErrorCode(uint8_t cartridge) {
  * Read the firmware version by a cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetFirmwareVersion(uint8_t cartridge) {
+void I2C__PrintFirmwareVersion(uint8_t cartridge) {
     // Send message
     writeThreeBytePacket(cartridge, EEPROM_READ_FRMWRE, I2C_EMPTY_ADDRESS,
                          I2C_EMPTY_DATA);
@@ -309,6 +309,21 @@ void I2C__ClearError(uint8_t cartridge) {
                          I2C_EMPTY_DATA);
     SERIAL_PROTOCOL("Cleared Error State");
     SERIAL_EOL;
+}
+
+/**
+ * Read the type of a cartridge, and return it.
+ * @parameter cartridge           Address of the target (cartridge)
+ * @return    cartridgeType       Returns the type of cartridge in the slot.
+ */ 
+int I2C__GetCartridgeType(uint8_t cartridge) {
+    // Send message
+    int returnValue = 0xFF;
+    writeThreeBytePacket(cartridge, EEPROM_READ_TYPE, I2C_EMPTY_ADDRESS,
+                         I2C_EMPTY_DATA);
+    // Read from cartridge and return
+    returnValue = requestByte(cartridge);
+    return returnValue;
 }
 
 //===========================================================================
@@ -332,6 +347,16 @@ void writeThreeBytePacket(uint8_t I2C_target_address,
     Wire.write(data);
     Wire.write(address);
     Wire.endTransmission();
+}
+
+int requestByte(uint8_t I2C_target_address) {
+    int returnValue = 0xFF;
+    // Read from cartridge
+    Wire.requestFrom(I2C_target_address, 1);
+    while (Wire.available()) {
+        returnValue = Wire.read());
+    }
+    return returnValue;
 }
 
 void requestAndPrintPacket(uint8_t I2C_target_address,

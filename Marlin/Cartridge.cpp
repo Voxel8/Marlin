@@ -9,6 +9,7 @@
 
 #include "Marlin.h"
 #include "Cartridge.h"
+#include "Voxel8_I2C_Commands.h"
 
 #include "./temperature.h"  // for disable_all_heaters()
 #include "./stepper.h"      // for quickStop()
@@ -24,9 +25,15 @@
 #define SILVER_INDEX                       (1)
 
 typedef enum _CartridgeStatus {
-    PRESENT,
+    FFF,
+    SILVER,
     ABSENT,
     REMOVED
+} CARTRIDGE_STATUS;
+
+typedef enum _CartridgeType {
+    FFF,
+    SILVER,
 } CARTRIDGE_STATUS;
 
 //===========================================================================
@@ -60,7 +67,7 @@ static void updateCartridgeStatus(void);
  */
   bool CartridgePresent(uint8_t cartridgeNumber) {
     uint8_t returnValue = false;
-    if (cartridgeStatus[cartridgeNumber] == PRESENT)
+    if (cartridgeStatus[cartridgeNumber] != (ABSENT || REMOVED))
         returnValue = true;
     return returnValue;
 }
@@ -87,7 +94,7 @@ bool CartridgeRemoved(void) {
     // Set up addition condition beyond cartridgeRemovedCheck that
     // could result in an the cartridge needing to be reported as missing.
     bool removedCondition =
-        (cartridgeStatus[FFF_INDEX] != PRESENT);
+        (cartridgeStatus[FFF_INDEX] == (ABSENT || REMOVED));
 
     // If a cartridge is seen to be removed, set the hysteresis counter.
     // If the appropriate cartridges are absent but we don't see that a
@@ -116,7 +123,7 @@ bool CartridgeRemoved(void) {
  */
 bool CartridgeRemovedFFF(void) {
     updateCartridgeStatus();
-    return (cartridgeStatus[FFF_INDEX] != PRESENT);
+    return (cartridgeStatus[FFF_INDEX] == (ABSENT || REMOVED));
 }
 
 /**
@@ -209,13 +216,14 @@ static void updateCartridgeStatus(void) {
  * marks it as removed
  */
 static void cartridgeAbsentUpdate(uint8_t cartNumber) {
-    if (cartridgeStatus[cartNumber] == PRESENT) {
+    if (cartridgeStatus[cartNumber] != (ABSENT || REMOVED)) {
         cartridgeStatus[cartNumber] = REMOVED;
-        switch (cartNumber) {
-            case FFF_INDEX:
+        int cartridgetype = I2C__GetCartridgeType(cartNumber);
+        switch (cartridgetype) {
+            case FFF:
                 SERIAL_ECHOLN("FFF Cartridge Removed");
                 break;
-            case SILVER_INDEX:
+            case SILVER:
                 // Prevents the silver extruder from being lowered
                 // unintentionally
                 WRITE(CART1_SIG1_PIN, LOW);
@@ -232,19 +240,21 @@ static void cartridgeAbsentUpdate(uint8_t cartNumber) {
  * this will clear it.
  */
 static void cartridgePresentUpdate(uint8_t cartNumber) {
-    if (cartridgeStatus[cartNumber] != PRESENT) {
-        switch (cartNumber) {
-            case FFF_INDEX:
+    if (cartridgeStatus[cartNumber] == (ABSENT || REMOVED)) {
+        int cartridgetype = I2C__GetCartridgeType(cartNumber);
+        switch (cartridgetype) {
+            case FFF:
                 SERIAL_ECHOLN("FFF Cartridge Inserted");
+                cartridgeStatus[cartNumber] = FFF;
                 break;
-            case SILVER_INDEX:
+            case SILVER:
                 SERIAL_ECHOLN("Silver Cartridge Inserted");
+                cartridgeStatus[cartNumber] = SILVER;
                 break;
             default:
-                SERIAL_ECHOLN("Cartridge Inserted");
+                SERIAL_ECHOLN("Unknown Cartridge Inserted");
         }
     }
-    cartridgeStatus[cartNumber] = PRESENT;
 }
 
 /**

@@ -3614,6 +3614,7 @@ inline void gcode_M105() {
   #endif
 
   // Get error codes from present cartridges
+<<<<<<< HEAD
   if (CartridgePresent(0)) {
     SERIAL_PROTOCOL(" C0: ");
     I2C__GetErrorCode(CART0_ADDR);
@@ -3623,6 +3624,17 @@ inline void gcode_M105() {
     SERIAL_PROTOCOL(" C1: ");
     I2C__GetErrorCode(CART1_ADDR);
   }
+=======
+  // if (CartridgePresent(0)) {
+  //   SERIAL_PROTOCOL(" C0: ");
+  //   I2C__PrintErrorCode(CART0_ADDR);
+  // }
+
+  // if (CartridgePresent(1)) {
+  //   SERIAL_PROTOCOL(" C1: ");
+  //   I2C__PrintErrorCode(CART1_ADDR);
+  // }
+>>>>>>> Initial Commit, untested. Should be possible with present cartridge firmware. Untested
 
   SERIAL_EOL;
 }
@@ -4974,12 +4986,12 @@ inline void gcode_M245() {
     return;
   }
 
-  I2C__GetSerial(i2c_address);
-  I2C__GetProgrammerStation(i2c_address);
-  I2C__GetCartridgeType(i2c_address);
-  I2C__GetSize(i2c_address);
-  I2C__GetMaterial(i2c_address);
-  I2C__GetFirmwareVersion(i2c_address);
+  I2C__PrintSerial(i2c_address);
+  I2C__PrintProgrammerStation(i2c_address);
+  I2C__PrintCartridgeType(i2c_address);
+  I2C__PrintSize(i2c_address);
+  I2C__PrintMaterial(i2c_address);
+  I2C__PrintFirmwareVersion(i2c_address);
 
 }
 

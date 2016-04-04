@@ -92,44 +92,51 @@ void I2C__EEPROMRead(uint8_t cartridge, uint8_t address);
  * Read the serial number from a cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetSerial(uint8_t cartridge);
+void I2C__PrintSerial(uint8_t cartridge);
 
 /**
  * Read the number of the programmer used on a cartridge and print it on
  * the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetProgrammerStation(uint8_t cartridge);
+void I2C__PrintProgrammerStation(uint8_t cartridge);
 
 /**
  * Read the variety of cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetCartridgeType(uint8_t cartridge);
+void I2C__PrintCartridgeType(uint8_t cartridge);
 
 /**
  * Read the size of the nozzle from cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetSize(uint8_t cartridge);
+void I2C__PrintSize(uint8_t cartridge);
 
 /**
  * Read the material contained by a cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetMaterial(uint8_t cartridge);
+void I2C__PrintMaterial(uint8_t cartridge);
 
 /**
  * Read the material contained by a cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetErrorCode(uint8_t cartridge);
+void I2C__PrintErrorCode(uint8_t cartridge);
 
 /**
  * Read the firmware version by a cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
  */ 
-void I2C__GetFirmwareVersion(uint8_t cartridge);
+void I2C__PrintFirmwareVersion(uint8_t cartridge);
+
+/**
+ * Read the type of a cartridge, and return it.
+ * @parameter cartridge           Address of the target (cartridge)
+ * @return    cartridgeType       Returns the type of cartridge in the slot.
+ */ 
+int I2C__GetCartridgeType(uint8_t cartridge);
 
 /**
  * Clear the error flag for a particular cartridge if it's set
