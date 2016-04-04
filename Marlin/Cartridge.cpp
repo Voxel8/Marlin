@@ -31,11 +31,6 @@ typedef enum _CartridgeStatus {
     REMOVED
 } CARTRIDGE_STATUS;
 
-typedef enum _CartridgeType {
-    FFF,
-    SILVER,
-} CARTRIDGE_STATUS;
-
 //===========================================================================
 //============================ Private Variables ============================
 //===========================================================================
@@ -278,7 +273,7 @@ static bool cartridgesRemovedCheck(void) {
  */
 static bool cartridgesPresentCheck(void) {
     for (uint8_t i= 0; i < NUMBER_OF_CARTRIDGES; i++) {
-        if (cartridgeStatus[i] == PRESENT) {
+        if (cartridgeStatus[i] != (ABSENT || REMOVED)) {
             return true;
         }
     }

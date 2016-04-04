@@ -16,8 +16,8 @@
 //===========================================================================
 
 // General Defines
- #define BYTE_SIZE                          (8)
-
+#define BYTE_SIZE                           (8)
+#define ONE_BYTE                            (1)
 // Defines for specific commands
 
 // 127 (50%) is maxy duty cycle for 12V fans wired in parallel. 255 should be
@@ -48,6 +48,9 @@ void requestAndPrintPacket(uint8_t I2C_target_address,
 void requestAndPrintSerial(uint8_t I2C_target_address);
 
 void printPrecedingZero(int number, uint8_t precision);
+
+int requestByte(uint8_t I2C_target_address);
+
 //===========================================================================
 //============================ Public Functions =============================
 //===========================================================================
@@ -352,9 +355,9 @@ void writeThreeBytePacket(uint8_t I2C_target_address,
 int requestByte(uint8_t I2C_target_address) {
     int returnValue = 0xFF;
     // Read from cartridge
-    Wire.requestFrom(I2C_target_address, 1);
+    Wire.requestFrom(I2C_target_address, uint8_t(1));
     while (Wire.available()) {
-        returnValue = Wire.read());
+        returnValue = Wire.read();
     }
     return returnValue;
 }
