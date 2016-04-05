@@ -3517,7 +3517,7 @@ inline void gcode_M104() {
     //SERIAL_ERROR_START;
     serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
     SERIAL_EOL;
-    SERIAL_ECHOLN("// action:pause");
+    SERIAL_ECHOLN("// action:cancel");
   }
   else
   {
@@ -3665,7 +3665,7 @@ inline void gcode_M105() {
       // SERIAL_ERROR_START;
       serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
       SERIAL_EOL;
-      SERIAL_ECHOLN("// action:pause");
+      SERIAL_ECHOLN("// action:cancel");
     } 
     else {
       if (setTargetedHotend(109)) return;
