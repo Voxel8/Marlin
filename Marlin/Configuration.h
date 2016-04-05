@@ -516,10 +516,10 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 // @section machine
 
 // Travel limits after homing (units are in mm)
-#define X_MIN_POS 0
+#define X_MIN_POS -38
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
-#define X_MAX_POS 188
+#define X_MAX_POS 150
 #define Y_MAX_POS 188
 #define Z_MAX_POS 105
 
@@ -608,11 +608,11 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 
       // Arbitrary points to probe. A simple cross-product
       // is used to estimate the plane of the bed.
-      #define ABL_PROBE_PT_1_X 0 + 25 + X_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_1_X X_MIN_POS + 25 + X_PROBE_OFFSET_FROM_EXTRUDER
       #define ABL_PROBE_PT_1_Y 60 + Y_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_2_X (190/2) + X_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_2_X X_MAX_POS/2
       #define ABL_PROBE_PT_2_Y 175 + Y_PROBE_OFFSET_FROM_EXTRUDER   // you can't use x_max or y_max as variables because we made the bed size larger than it actually is
-      #define ABL_PROBE_PT_3_X 190 - 25 + X_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_3_X X_MAX_POS - 25 + X_PROBE_OFFSET_FROM_EXTRUDER
       #define ABL_PROBE_PT_3_Y 60 + Y_PROBE_OFFSET_FROM_EXTRUDER
 
   #endif // AUTO_BED_LEVELING_GRID
@@ -644,11 +644,11 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 
   #if ENABLED(Z_SAFE_HOMING)
     #if ENABLED(HOME_AT_BACK)
-      #define Z_SAFE_HOMING_X_POINT (100 + X_PROBE_OFFSET_FROM_EXTRUDER)    // X point for Z homing when homing all axis (G28)
-      #define Z_SAFE_HOMING_Y_POINT (150 + Y_PROBE_OFFSET_FROM_EXTRUDER)    // Y point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_X_POINT (100 + X_MIN_POS + X_PROBE_OFFSET_FROM_EXTRUDER)    // X point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_Y_POINT (150 + Y_MIN_POS + Y_PROBE_OFFSET_FROM_EXTRUDER)    // Y point for Z homing when homing all axis (G28)
     #else
-      #define Z_SAFE_HOMING_X_POINT (113.6)    // X point for Z homing when homing all axis (G28)
-      #define Z_SAFE_HOMING_Y_POINT (66.0 )    // Y point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_X_POINT (113.6 + X_MIN_POS)    // X point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_Y_POINT (66.0 + Y_MIN_POS)     // Y point for Z homing when homing all axis (G28)
     #endif
   #endif
 
