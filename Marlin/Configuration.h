@@ -610,7 +610,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
       // is used to estimate the plane of the bed.
       #define ABL_PROBE_PT_1_X X_MIN_POS + 25 + X_PROBE_OFFSET_FROM_EXTRUDER
       #define ABL_PROBE_PT_1_Y 60 + Y_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_2_X (X_MAX_POS/2) + X_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_2_X X_MAX_POS/2
       #define ABL_PROBE_PT_2_Y 175 + Y_PROBE_OFFSET_FROM_EXTRUDER   // you can't use x_max or y_max as variables because we made the bed size larger than it actually is
       #define ABL_PROBE_PT_3_X X_MAX_POS - 25 + X_PROBE_OFFSET_FROM_EXTRUDER
       #define ABL_PROBE_PT_3_Y 60 + Y_PROBE_OFFSET_FROM_EXTRUDER
