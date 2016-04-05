@@ -61,7 +61,7 @@ void heatedBedRemovedError(void) {
         disable_all_steppers();
         SERIAL_PROTOCOL("Heated Bed Removed!");
         SERIAL_EOL;
-        SERIAL_ECHOLN("// action:pause");
+        SERIAL_ECHOLN("// action:cancel");
     }
     timeSinceLastRemoval = millis();
 }

@@ -146,7 +146,7 @@ void _cartridge_removed_error(const char *serial_msg) {
             disable_all_steppers();
             serialprintPGM(serial_msg);
             SERIAL_EOL;
-            SERIAL_ECHOLN("// action:pause");
+            SERIAL_ECHOLN("// action:cancel");
         }
     }
     timeSinceLastRemoval = millis();
