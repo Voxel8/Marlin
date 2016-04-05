@@ -5002,6 +5002,7 @@ inline void gcode_M245() {
     Wire.beginTransmission(CART_HOLDER_ADDR);
     Wire.write(SET_LED_UV_0_PWM);
     Wire.write(i2c_data);
+    Wire.write(0xFF);
     Wire.endTransmission();
 
     #if defined(DEBUG)
@@ -6525,10 +6526,6 @@ void process_next_command() {
 
       case 241: // M241 - Dwell for a given amount of time in milliseconds (500 by default)
         gcode_M241();
-        break;
-
-      case 242: // - Handle general I2C command
-        gcode_M242();
         break;
         
       case 247: // UV LED Enable/Disable
