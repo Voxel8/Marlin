@@ -19,5 +19,6 @@
  * @returns    Returns true if the heated bed is present
  */
 bool HeatedBed__PresentCheck(void);
+void HeatedBed__SetPresentCheck(bool value);
 
 #endif  // MARLIN_HEATED_BED_H_

@@ -4978,6 +4978,33 @@ inline void gcode_M245() {
 
 }
 
+/*
+* M249 - Enable / Disable Heated Bed Check
+*   E - 0 - 1   1 = Enable, 0 = Disable
+*/
+inline void gcode_M249() {
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
+  bool hasE;
+
+  // Desired address for peripheral device
+  if (hasE = code_seen('E')) {
+    switch(int(code_value())) {
+      case 0:
+        HeatedBed__SetPresentCheck(false);
+        break;
+      case 1:
+        HeatedBed__SetPresentCheck(true);
+        break;
+    }
+  }
+  
+  if (!hasE){
+    SERIAL_ECHOLNPGM("Enable (E1) or Disable (E0) not given");
+    return;
+  }
+}
+
 #if HAS_SERVOS
 
   /**
@@ -6458,7 +6485,11 @@ void process_next_command() {
       case 245: // M245 - I2C Diagnostics Readout C: Cartridge
         gcode_M245();
         break;
-        
+      
+      case 249: // M249 - Enable / Disable Heated Bed Check
+        gcode_M249();
+        break;
+
       #if HAS_SERVOS
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
           gcode_M280();
