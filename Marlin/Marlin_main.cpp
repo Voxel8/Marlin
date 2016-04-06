@@ -238,8 +238,11 @@
  *
  * ************ Custom codes - This can change to suit future G-code regulations
  * M100 - Watch Free Memory (For Debugging Only)
+
+ * M850 - Display firmware version
+
  * M851 - Set Z probe's Z offset (mm above extruder -- The value will always be negative)
-                                     *
+
  * M852 - Automaticaly adjust the Z probe's Z offset so that the current position is set to 0.
 
 
@@ -5796,6 +5799,27 @@ inline void gcode_M503() {
 
 #endif // DUAL_X_CARRIAGE
 
+/**
+* M850 - Display firmware version
+*/
+
+inline void gcode_M850() {
+  SERIAL_ECHOPGM("Version ");
+  SERIAL_ECHOLNPGM(DETAILED_BUILD_VERSION);
+
+  #ifdef STRING_DISTRIBUTION_DATE
+    #ifdef STRING_CONFIG_H_AUTHOR
+      SERIAL_ECHO_START;
+      SERIAL_ECHOPGM(MSG_CONFIGURATION_VER);
+      SERIAL_ECHOPGM(STRING_DISTRIBUTION_DATE);
+      SERIAL_ECHOPGM(MSG_AUTHOR);
+      SERIAL_ECHOLNPGM(STRING_CONFIG_H_AUTHOR);
+      SERIAL_ECHOPGM("Compiled: ");
+      SERIAL_ECHOLNPGM(__DATE__);
+    #endif // STRING_CONFIG_H_AUTHOR
+  #endif // STRING_DISTRIBUTION_DATE
+}
+
 /*
 * M852 - Set new bed zero point. This mcode modifies the zprobe offset to make
 *        the current position 0 after homing. The new offset is stored in
@@ -6646,6 +6670,10 @@ void process_next_command() {
           break;
 
       #endif // HAS_MICROSTEPS
+
+      case 850:
+        gcode_M850(); // M850 - Display firmware version
+        break;
 
       case 852:
         gcode_M852(); // M852 - Set new bed zero point
