@@ -4980,38 +4980,27 @@ inline void gcode_M245() {
 
 }
 
-    /*
-  * M247 - UV LED Enable/Disable
-  *   S - 0 - 255 value to send
-  */
-  inline void gcode_M247() {
-    int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
-    if (verbose_level < 0 || verbose_level > 4) {
-      SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
-      return;
-    }
-    
-    uint8_t i2c_data;
-    
-    // Desired value given
-    if (code_seen('S')) {
-      i2c_data = code_value();
-    }
-    // TODO: add check whether S param is in bounds.
-
-    Wire.beginTransmission(CART_HOLDER_ADDR);
-    Wire.write(SET_LED_UV_0_PWM);
-    Wire.write(i2c_data);
-    Wire.write(0xFF);
-    Wire.endTransmission();
-
-    #if defined(DEBUG)
-      SERIAL_PROTOCOLLNPGM("Command: 'I2C Command' Sent");
-      SERIAL_PROTOCOL("data = ");
-      SERIAL_PROTOCOL((int)i2c_data);
-      SERIAL_EOL;
-    #endif // end DEBUG
+/**
+* M247 - UV LED Enable/Disable
+*   S - 0 - 255 value to send
+*/
+inline void gcode_M247() {
+  int verbose_level = code_seen('V') || code_seen('v') ? code_value_short() : 0;
+  if (verbose_level < 0 || verbose_level > 4) {
+    SERIAL_ECHOLNPGM("?(V)erbose Level is implausible (0-4).");
+    return;
   }
+
+  uint8_t i2c_data;
+
+  // Desired value given
+  if (code_seen('S')) {
+    i2c_data = code_value();
+  }
+  // TODO: add check whether S param is in bounds.
+
+  I2C__ToggleUV(i2c_data);
+}
 
 #if HAS_SERVOS
 

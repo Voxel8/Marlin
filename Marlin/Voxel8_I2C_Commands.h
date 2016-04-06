@@ -67,6 +67,12 @@ void I2C__SetFanDrive0PWM(uint8_t fanSpeed);
 void I2C__SetFanOff(void);
 
 /**
+ * Toggles the UV LED
+ * @parameter data                0 to disable, enabled on call otherwise
+ */
+void I2C__ToggleUV(uint8_t data);
+
+/**
  * Writes data to a specific EEPROM address on a cartridge
  * @parameter cartridge           Address of the target (cartridge)
  * @parameter address             The EEPROM address being written to

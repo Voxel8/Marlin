@@ -125,6 +125,28 @@ void I2C__SetFanOff(void) {
 }
 
 /**
+ * Toggles the UV LED
+ * @parameter data                0 to disable, enabled on call otherwise
+ */
+void I2C__ToggleUV(uint8_t data) {
+
+    // Send message
+    Wire.beginTransmission(CART_HOLDER_ADDR);
+    Wire.write(SET_LED_UV_0_PWM);
+    Wire.write(data);
+    Wire.write(0xFF);
+    Wire.endTransmission();
+
+    // Send information to Octoprint
+    #if defined(DEBUG)
+      SERIAL_PROTOCOLLNPGM("Command: 'I2C Command' Sent");
+      SERIAL_PROTOCOL("data = ");
+      SERIAL_PROTOCOL((int)data);
+      SERIAL_EOL;
+    #endif // end DEBUG
+}
+
+/**
  * Writes data to a specific EEPROM address on a cartridge
  * @parameter cartridge           Address of the target (cartridge)
  * @parameter address             The EEPROM address being written to
