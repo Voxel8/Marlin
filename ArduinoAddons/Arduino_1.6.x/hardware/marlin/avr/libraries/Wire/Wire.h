@@ -66,6 +66,8 @@ class TwoWire : public Stream
     virtual void flush(void);
     void onReceive( void (*)(int) );
     void onRequest( void (*)(void) );
+    void twi_resetTimeoutFlag(void);
+    uint8_t twi_getTimeoutFlag(void);
 
     inline size_t write(unsigned long n) { return write((uint8_t)n); }
     inline size_t write(long n) { return write((uint8_t)n); }

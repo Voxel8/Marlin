@@ -127,17 +127,17 @@ void TwoWire::beginTransmission(int address)
 }
 
 //
-//	Originally, 'endTransmission' was an f(void) function.
-//	It has been modified to take one parameter indicating
-//	whether or not a STOP should be performed on the bus.
-//	Calling endTransmission(false) allows a sketch to 
-//	perform a repeated start. 
+//  Originally, 'endTransmission' was an f(void) function.
+//  It has been modified to take one parameter indicating
+//  whether or not a STOP should be performed on the bus.
+//  Calling endTransmission(false) allows a sketch to 
+//  perform a repeated start. 
 //
-//	WARNING: Nothing in the library keeps track of whether
-//	the bus tenure has been properly ended with a STOP. It
-//	is very possible to leave the bus in a hung state if
-//	no call to endTransmission(true) is made. Some I2C
-//	devices will behave oddly if they do not see a STOP.
+//  WARNING: Nothing in the library keeps track of whether
+//  the bus tenure has been properly ended with a STOP. It
+//  is very possible to leave the bus in a hung state if
+//  no call to endTransmission(true) is made. Some I2C
+//  devices will behave oddly if they do not see a STOP.
 //
 uint8_t TwoWire::endTransmission(uint8_t sendStop)
 {
@@ -151,8 +151,8 @@ uint8_t TwoWire::endTransmission(uint8_t sendStop)
   return ret;
 }
 
-//	This provides backwards compatibility with the original
-//	definition, and expected behaviour, of endTransmission
+//  This provides backwards compatibility with the original
+//  definition, and expected behaviour, of endTransmission
 //
 uint8_t TwoWire::endTransmission(void)
 {
@@ -295,6 +295,14 @@ void TwoWire::onReceive( void (*function)(int) )
 void TwoWire::onRequest( void (*function)(void) )
 {
   user_onRequest = function;
+}
+
+uint8_t TwoWire::twi_getTimeoutFlag(void) {
+  return (twi_getTFlag());
+}
+
+void TwoWire::twi_resetTimeoutFlag(void) {
+  twi_resetTFlag();
 }
 
 // Preinstantiate Objects //////////////////////////////////////////////////////
