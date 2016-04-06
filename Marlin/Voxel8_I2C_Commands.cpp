@@ -145,6 +145,7 @@ void I2C__EEPROMWrite(uint8_t cartridge,
 
     // Read from cartridge and report
     requestAndPrintPacket(cartridge, 1);
+    SERIAL_EOL;
 }
 
 /**
@@ -163,6 +164,7 @@ void I2C__EEPROMRead(uint8_t cartridge,
 
     // Read from cartridge and report
     requestAndPrintPacket(cartridge, 1);
+    SERIAL_EOL;
 }
 
 /**
@@ -179,7 +181,7 @@ void I2C__GetSerial(uint8_t cartridge) {
 
     // Read from cartridge and report
     requestAndPrintSerial(cartridge);
-    //requestAndPrintPacket(cartridge,4);
+    SERIAL_EOL;
 }
 
 /**
@@ -197,6 +199,7 @@ void I2C__GetProgrammerStation(uint8_t cartridge) {
 
     // Read from cartridge and report
     requestAndPrintPacket(cartridge, 1);
+    SERIAL_EOL;
 }
 
 /**
@@ -213,6 +216,7 @@ void I2C__GetCartridgeType(uint8_t cartridge) {
 
     // Read from cartridge and report
     requestAndPrintPacket(cartridge, 1);
+    SERIAL_EOL;
 }
 
 /**
@@ -229,6 +233,7 @@ void I2C__GetSize(uint8_t cartridge) {
 
     // Read from cartridge and report
     requestAndPrintPacket(cartridge, 1);
+    SERIAL_EOL;
 }
 
 /**
@@ -245,6 +250,7 @@ void I2C__GetMaterial(uint8_t cartridge) {
 
     // Read from cartridge and report
     requestAndPrintPacket(cartridge, 1);
+    SERIAL_EOL;
 }
 
 /**
@@ -271,6 +277,7 @@ void I2C__GetFirmwareVersion(uint8_t cartridge) {
     SERIAL_PROTOCOL("Cartridge Firmware Version = ");
     // Read from cartridge and report
     requestAndPrintPacket(cartridge, 1);
+    SERIAL_EOL;
 }
 
 //===========================================================================
@@ -303,7 +310,6 @@ void requestAndPrintPacket(uint8_t I2C_target_address,
     while (Wire.available()) {
         SERIAL_PROTOCOL(Wire.read());
     }
-    SERIAL_EOL;
 }
 
 void requestAndPrintSerial(uint8_t I2C_target_address) {
