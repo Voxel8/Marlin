@@ -3609,15 +3609,15 @@ inline void gcode_M105() {
   #endif
 
   // Get error codes from present cartridges
-  // if (CartridgePresent(0)) {
-  //   SERIAL_PROTOCOL(" C0: ");
-  //   I2C__GetErrorCode(CART0_ADDR);
-  // }
+  if (CartridgePresent(0)) {
+    SERIAL_PROTOCOL(" C0: ");
+    I2C__GetErrorCode(CART0_ADDR);
+  }
 
-  // if (CartridgePresent(1)) {
-  //   SERIAL_PROTOCOL(" C1: ");
-  //   I2C__GetErrorCode(CART1_ADDR);
-  // }
+  if (CartridgePresent(1)) {
+    SERIAL_PROTOCOL(" C1: ");
+    I2C__GetErrorCode(CART1_ADDR);
+  }
 
   SERIAL_EOL;
 }
