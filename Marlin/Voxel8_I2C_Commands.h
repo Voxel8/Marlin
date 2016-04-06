@@ -41,6 +41,7 @@
 #define EEPROM_READ_ERR         0x13
 #define EEPROM_READ_FRMWRE      0x14
 #define CLEAR_ERROR             0x15
+#define EEPROM_READ_TEMP        0x16
 
 //===========================================================================
 //============================= Public Functions ============================
@@ -136,5 +137,11 @@ void I2C__GetFirmwareVersion(uint8_t cartridge);
  * @parameter cartridge           Address of the target (cartridge)
  */ 
 void I2C__ClearError(uint8_t cartridge);
+
+/**
+ * Read the temperature of a cartridge and print it on the serial port
+ * @parameter cartridge           Address of the target (cartridge)
+ */ 
+void I2C__PrintTemperature(uint8_t cartridge);
 
 #endif  // MARLIN_VOXEL8_I2C_COMMANDS_H_

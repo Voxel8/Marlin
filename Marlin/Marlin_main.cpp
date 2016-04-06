@@ -3619,11 +3619,15 @@ inline void gcode_M105() {
   if (CartridgePresent(0)) {
     SERIAL_PROTOCOL(" C0: ");
     I2C__GetErrorCode(CART0_ADDR);
+    SERIAL_PROTOCOL(" T: ");
+    I2C__PrintTemperature(CART0_ADDR);
   }
 
   if (CartridgePresent(1)) {
     SERIAL_PROTOCOL(" C1: ");
     I2C__GetErrorCode(CART1_ADDR);
+    SERIAL_PROTOCOL(" T: ");
+    I2C__PrintTemperature(CART1_ADDR);
   }
 
   SERIAL_EOL;
@@ -4982,6 +4986,7 @@ inline void gcode_M245() {
   I2C__GetSize(i2c_address);
   I2C__GetMaterial(i2c_address);
   I2C__GetFirmwareVersion(i2c_address);
+  I2C__PrintTemperature(i2c_address);
 
 }
 

@@ -311,6 +311,19 @@ void I2C__ClearError(uint8_t cartridge) {
     SERIAL_EOL;
 }
 
+/**
+ * Read the temperature of a cartridge and print it on the serial port
+ * @parameter cartridge           Address of the target (cartridge)
+ */ 
+void I2C__PrintTemperature(uint8_t cartridge) {
+    // Send message
+    writeThreeBytePacket(cartridge, EEPROM_READ_TEMP, I2C_EMPTY_ADDRESS,
+                         I2C_EMPTY_DATA);
+    SERIAL_PROTOCOL("Cartridge MCU Temperature = ");
+    // Read from cartridge and report
+    requestAndPrintPacket(cartridge, 1);
+}
+
 //===========================================================================
 //============================ Private Functions ============================
 //===========================================================================
