@@ -131,11 +131,8 @@ void I2C__SetFanOff(void) {
 void I2C__ToggleUV(uint8_t data) {
 
     // Send message
-    Wire.beginTransmission(CART_HOLDER_ADDR);
-    Wire.write(SET_LED_UV_0_PWM);
-    Wire.write(data);
-    Wire.write(0xFF);
-    Wire.endTransmission();
+    writeThreeBytePacket(CART_HOLDER_ADDR, SET_LED_UV_0_PWM,
+                         I2C_EMPTY_ADDRESS, data);
 
     // Send information to Octoprint
     #if defined(DEBUG)
