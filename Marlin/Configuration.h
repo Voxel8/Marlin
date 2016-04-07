@@ -522,7 +522,10 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 #define X_MAX_POS 150
 #define Y_MAX_POS 188
 #define Z_MAX_POS 105
-
+#define X_BED_MAX 150
+#define Y_BED_MAX 150
+#define X_BED_CENTER (X_BED_MAX / 2)
+#define Y_BED_CENTER (Y_BED_MAX / 2) 
 //===========================================================================
 //========================= Filament Runout Sensor ==========================
 //===========================================================================
@@ -647,8 +650,8 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
       #define Z_SAFE_HOMING_X_POINT (100 + X_MIN_POS + X_PROBE_OFFSET_FROM_EXTRUDER)    // X point for Z homing when homing all axis (G28)
       #define Z_SAFE_HOMING_Y_POINT (150 + Y_MIN_POS + Y_PROBE_OFFSET_FROM_EXTRUDER)    // Y point for Z homing when homing all axis (G28)
     #else
-      #define Z_SAFE_HOMING_X_POINT (113.6 + X_MIN_POS)    // X point for Z homing when homing all axis (G28)
-      #define Z_SAFE_HOMING_Y_POINT (66.0 + Y_MIN_POS)     // Y point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_X_POINT (X_BED_CENTER)    // X point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_Y_POINT (Y_BED_CENTER)    // Y point for Z homing when homing all axis (G28)
     #endif
   #endif
 
