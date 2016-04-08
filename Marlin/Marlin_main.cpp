@@ -55,6 +55,8 @@
 #include "Cartridge.h"
 #include "Voxel8_I2C_Commands.h"
 #include "HeatedBed.h"
+#include "GCodes.h"
+#include "GCodeUtility.h"
 
 #if ENABLED(EXT_ADC)
   #include "ADC.h"
