@@ -5006,6 +5006,33 @@ inline void gcode_M247() {
 }
 
 /*
+* M248 - Enable / Disable Cartridge Present Check
+*   E - 0 - 1   1 = Enable, 0 = Disable
+*/
+inline void gcode_M248() {
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
+  bool hasE;
+
+  // Desired address for peripheral device
+  if (hasE = code_seen('E')) {
+    switch(int(code_value())) {
+      case 0:
+        Cartridge__SetPresentCheck(false);
+        break;
+      case 1:
+        Cartridge__SetPresentCheck(true);
+        break;
+    }
+  }
+
+  if (!hasE){
+    SERIAL_ECHOLNPGM("Enable (E1) or Disable (E0) not given");
+    return;
+  }
+}
+
+/*
 * M249 - Enable / Disable Heated Bed Check
 *   E - 0 - 1   1 = Enable, 0 = Disable
 */
@@ -6533,7 +6560,11 @@ void process_next_command() {
       case 245: // M245 - I2C Diagnostics Readout C: Cartridge
         gcode_M245();
         break;
-      
+
+      case 248: // M248 - Enable / Disable Cartridge Check
+        gcode_M248();
+        break;
+
       case 249: // M249 - Enable / Disable Heated Bed Check
         gcode_M249();
         break;

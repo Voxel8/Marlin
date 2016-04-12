@@ -36,6 +36,8 @@ typedef enum _CartridgeStatus {
 static CARTRIDGE_STATUS cartridgeStatus[NUMBER_OF_CARTRIDGES] = {ABSENT,
                                                                  ABSENT};
 
+static bool cartridgeRemovalCheckEnabled = 1;
+
 //===========================================================================
 //====================== Private Functions Prototypes =======================
 //===========================================================================
@@ -152,6 +154,25 @@ void _cartridge_removed_error(const char *serial_msg) {
     timeSinceLastRemoval = millis();
 }
 
+void Cartridge__SetPresentCheck(bool value) {
+	if (value == true) {
+		SERIAL_PROTOCOL("Cartridge Check Enabled");
+		SERIAL_EOL;
+		cartridgeRemovalCheckEnabled = 1;
+	}
+	else if (value == false) {
+		SERIAL_PROTOCOL("Cartridge Check Disabled");
+		SERIAL_EOL;
+		cartridgeRemovalCheckEnabled = 0;
+	}
+	else {
+		SERIAL_PROTOCOL("Invalid value for Cartridge Check Set");
+		SERIAL_EOL;
+		return;
+	}
+	cartridgeRemovalCheckEnabled = value;
+}
+
 //===========================================================================
 //============================ Private Functions ============================
 //===========================================================================
@@ -163,17 +184,23 @@ void _cartridge_removed_error(const char *serial_msg) {
  * CartridgeRemoved()
  */
 static void updateCartridgeStatus(void) {
-    // Cartridge zero is pulled low by default
-    if (READ(CART0_SIG2_PIN) == HIGH) {
-        cartridgePresentUpdate(0);
-    } else {
-        cartridgeAbsentUpdate(0);
+    if (cartridgeRemovalCheckEnabled == true) {
+        // Cartridge zero is pulled low by default
+        if (READ(CART0_SIG2_PIN) == HIGH) {
+            cartridgePresentUpdate(0);
+        } else {
+            cartridgeAbsentUpdate(0);
+        }
+        // Cartridge one is pulled high by default
+        if (READ(CART1_SIG2_PIN) == LOW) {
+            cartridgePresentUpdate(1);
+        } else {
+            cartridgeAbsentUpdate(1);
+        }
     }
-    // Cartridge one is pulled high by default
-    if (READ(CART1_SIG2_PIN) == LOW) {
+    else {
+        cartridgePresentUpdate(0);
         cartridgePresentUpdate(1);
-    } else {
-        cartridgeAbsentUpdate(1);
     }
 }
 
