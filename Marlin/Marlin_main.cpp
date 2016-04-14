@@ -3614,15 +3614,15 @@ inline void gcode_M105() {
   #endif
 
   // Get error codes from present cartridges
-  // if (CartridgePresent(0)) {
-  //   SERIAL_PROTOCOL(" C0: ");
-  //   I2C__GetErrorCode(CART0_ADDR);
-  // }
+  if (CartridgePresent(0)) {
+    SERIAL_PROTOCOL(" C0: ");
+    I2C__GetErrorCode(CART0_ADDR);
+  }
 
-  // if (CartridgePresent(1)) {
-  //   SERIAL_PROTOCOL(" C1: ");
-  //   I2C__GetErrorCode(CART1_ADDR);
-  // }
+  if (CartridgePresent(1)) {
+    SERIAL_PROTOCOL(" C1: ");
+    I2C__GetErrorCode(CART1_ADDR);
+  }
 
   SERIAL_EOL;
 }
@@ -5057,6 +5057,32 @@ inline void gcode_M249() {
     SERIAL_ECHOLNPGM("Enable (E1) or Disable (E0) not given");
     return;
   }
+}
+
+inline void gcode_M252() {
+  uint8_t i2c_address = 0xFF;
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
+  bool hasC;
+
+  // Desired address for peripheral device
+  if (hasC = code_seen('C')) {
+    switch(int(code_value())) {
+      case 0:
+        i2c_address = CART0_ADDR;
+        break;
+      case 1:
+        i2c_address = CART1_ADDR;
+        break;
+    }
+  }
+  
+  if (!hasC){
+    SERIAL_ECHOLNPGM("No cartridge address given");
+    return;
+  }
+
+  I2C__ClearError(i2c_address);
 }
 
 #if HAS_SERVOS
@@ -6612,6 +6638,10 @@ void process_next_command() {
           gcode_M250();
           break;
       #endif // HAS_LCD_CONTRAST
+
+      case 252:
+        gcode_M252();
+        break;
 
       #if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
         case 302: // allow cold extrudes, or set the minimum extrude temperature
