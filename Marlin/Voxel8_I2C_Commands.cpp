@@ -299,6 +299,18 @@ void I2C__GetFirmwareVersion(uint8_t cartridge) {
     SERIAL_EOL;
 }
 
+/**
+ * Clear the error flag for a particular cartridge if it's set
+ * @parameter cartridge           Address of the target (cartridge)
+ */ 
+void I2C__ClearError(uint8_t cartridge) {
+    // Send message
+    writeThreeBytePacket(cartridge, CLEAR_ERROR, I2C_EMPTY_ADDRESS,
+                         I2C_EMPTY_DATA);
+    SERIAL_PROTOCOL("Cleared Error State");
+    SERIAL_EOL;
+}
+
 //===========================================================================
 //============================ Private Functions ============================
 //===========================================================================
