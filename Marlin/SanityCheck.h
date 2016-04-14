@@ -312,16 +312,8 @@
       #endif
     #endif
 
-    #if EXTRUDERS > 1 || ENABLED(HEATERS_PARALLEL)
-      #if !HAS_HEATER_1
-        #error HEATER_1_PIN not defined for this board.
-      #endif
-    #endif
-
     #if TEMP_SENSOR_1 == 0
-      #if EXTRUDERS > 1
-        #error TEMP_SENSOR_1 is required with 2 or more EXTRUDERS.
-      #elif ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
+      #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
         #error TEMP_SENSOR_1 is required with TEMP_SENSOR_1_AS_REDUNDANT.
       #endif
     #endif
