@@ -344,11 +344,12 @@ void requestAndPrintPacket(uint8_t I2C_target_address,
     else {
       while (Wire.available()) {
         SERIAL_PROTOCOL(Wire.read());
+/* This block used to call a modified Arduino library, no longer necessary
         if (Wire.twi_getTimeoutFlag()) {
           SERIAL_PROTOCOL(" I2C Timeout occurred ");
           SERIAL_PROTOCOL(Wire.twi_getTimeoutFlag());
           Wire.twi_resetTimeoutFlag();
-        }
+        }*/
       }
     }
 }
