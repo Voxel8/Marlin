@@ -6597,6 +6597,10 @@ void process_next_command() {
         gcode_M249();
         break;
 
+      case 272:
+        gcode_M272();
+        break;
+
       #if HAS_SERVOS
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
           gcode_M280();

@@ -15,7 +15,7 @@
 //============================= Public Functions ============================
 //===========================================================================
 
-inline void gcode_M272(void) {
+void gcode_M272(void) {
   for (int8_t i = 0; i < NUM_AXIS; i++) {
     if (code_seen(axis_codes[i])) {
       if (i == E_AXIS) {
@@ -30,7 +30,8 @@ inline void gcode_M272(void) {
         }
         axis_steps_per_unit[i] = value;
       } else {
-        axis_steps_per_unit[i] = code_value();
+        float value = (213.3333333 / (1 + (code_value() / 1000)));
+        axis_steps_per_unit[i] = value;
       }
     }
   }
