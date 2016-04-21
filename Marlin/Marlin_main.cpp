@@ -55,6 +55,8 @@
 #include "Cartridge.h"
 #include "Voxel8_I2C_Commands.h"
 #include "HeatedBed.h"
+#include "GCodes.h"
+#include "GCodeUtility.h"
 
 #if ENABLED(EXT_ADC)
   #include "ADC.h"
@@ -6593,6 +6595,10 @@ void process_next_command() {
 
       case 249: // M249 - Enable / Disable Heated Bed Check
         gcode_M249();
+        break;
+
+      case 272:
+        gcode_M272();
         break;
 
       #if HAS_SERVOS
