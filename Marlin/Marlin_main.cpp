@@ -4876,6 +4876,9 @@ inline void gcode_M243() {
       case 1:
         i2c_address = CART1_ADDR;
         break;
+      case 2:
+        i2c_address = CART_HOLDER_ADDR;
+        break;
     }
   }
   // Desired EEPROM address
@@ -4928,6 +4931,9 @@ inline void gcode_M244() {
       case 1:
         i2c_address = CART1_ADDR;
         break;
+      case 2:
+        i2c_address = CART_HOLDER_ADDR;
+        break;
     }
   }
   // Desired EEPROM address
@@ -4967,6 +4973,9 @@ inline void gcode_M245() {
         break;
       case 1:
         i2c_address = CART1_ADDR;
+        break;
+      case 2:
+        i2c_address = CART_HOLDER_ADDR;
         break;
     }
   }
@@ -5075,6 +5084,9 @@ inline void gcode_M252() {
         break;
       case 1:
         i2c_address = CART1_ADDR;
+        break;
+      case 2:
+        i2c_address = CART_HOLDER_ADDR;
         break;
     }
   }
