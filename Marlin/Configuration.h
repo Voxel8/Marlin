@@ -612,11 +612,11 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
       // Arbitrary points to probe. A simple cross-product
       // is used to estimate the plane of the bed.
       #define ABL_PROBE_PT_1_X X_MIN_POS + 25 + X_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_1_Y 60 + Y_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_1_Y 60 + Y_PROBE_OFFSET_FROM_EXTRUDER - 3
       #define ABL_PROBE_PT_2_X X_MAX_POS/2
-      #define ABL_PROBE_PT_2_Y 175 + Y_PROBE_OFFSET_FROM_EXTRUDER   // you can't use x_max or y_max as variables because we made the bed size larger than it actually is
+      #define ABL_PROBE_PT_2_Y 175 + Y_PROBE_OFFSET_FROM_EXTRUDER - 3   // you can't use x_max or y_max as variables because we made the bed size larger than it actually is
       #define ABL_PROBE_PT_3_X X_MAX_POS - 25 + X_PROBE_OFFSET_FROM_EXTRUDER
-      #define ABL_PROBE_PT_3_Y 60 + Y_PROBE_OFFSET_FROM_EXTRUDER
+      #define ABL_PROBE_PT_3_Y 60 + Y_PROBE_OFFSET_FROM_EXTRUDER + 3
 
   #endif // AUTO_BED_LEVELING_GRID
 
@@ -651,7 +651,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
       #define Z_SAFE_HOMING_Y_POINT (150 + Y_MIN_POS + Y_PROBE_OFFSET_FROM_EXTRUDER)    // Y point for Z homing when homing all axis (G28)
     #else
       #define Z_SAFE_HOMING_X_POINT (X_BED_CENTER)    // X point for Z homing when homing all axis (G28)
-      #define Z_SAFE_HOMING_Y_POINT (Y_BED_CENTER)    // Y point for Z homing when homing all axis (G28)
+      #define Z_SAFE_HOMING_Y_POINT (Y_BED_CENTER) + 2    // Y point for Z homing when homing all axis (G28)
     #endif
   #endif
 
