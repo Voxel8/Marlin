@@ -13,7 +13,10 @@
 //============================= Public Functions ============================
 //===========================================================================
 
+// Returns if a specific identifier letter was used in an MCode. 
 bool  code_seen(char code);
+
+// Returns the value of the last item identified by code_seen.
 float code_value(void);
 
 //===========================================================================

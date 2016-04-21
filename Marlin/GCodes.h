@@ -22,10 +22,17 @@
 //============================= Public Functions ============================
 //===========================================================================
 
+
+/**
+ * M272: Set axis steps-per-unit for one or more axes, X, Y, Z, and E using
+ *       the defualt ball-bar units
+ *      (Follows the same syntax as G92)
+ */
 inline void gcode_M272(void) {
   for (int8_t i = 0; i < NUM_AXIS; i++) {
     if (code_seen(axis_codes[i])) {
       if (i == E_AXIS) {
+        /* conversion from ball-bar units to um */
         float value = (213.3333333 / (1 + (code_value() / 1000)));
         if (value < 20.0) {
           float factor =
@@ -37,6 +44,7 @@ inline void gcode_M272(void) {
         }
         axis_steps_per_unit[i] = value;
       } else {
+        /* conversion from ball-bar units to um */
         float value = (213.3333333 / (1 + (code_value() / 1000)));
         axis_steps_per_unit[i] = value;
       }
