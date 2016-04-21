@@ -33,7 +33,7 @@ inline void gcode_M272(void) {
     if (code_seen(axis_codes[i])) {
       if (i == E_AXIS) {
         /* conversion from ball-bar units to um */
-        float value = (213.3333333 / (1 + (code_value() / 1000)));
+        float value = (213.3333333 / (1 + (code_value() / MM_TO_UM)));
         if (value < 20.0) {
           float factor =
               axis_steps_per_unit[i] /
@@ -45,7 +45,7 @@ inline void gcode_M272(void) {
         axis_steps_per_unit[i] = value;
       } else {
         /* conversion from ball-bar units to um */
-        float value = (213.3333333 / (1 + (code_value() / 1000)));
+        float value = (213.3333333 / (1 + (code_value() / MM_TO_UM)));
         axis_steps_per_unit[i] = value;
       }
     }

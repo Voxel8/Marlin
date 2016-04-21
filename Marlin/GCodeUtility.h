@@ -10,10 +10,16 @@
 #define G_CODE_UTILITY_H_
 
 //===========================================================================
+//=============================== Definitions ===============================
+//===========================================================================
+
+#define MM_TO_UM (1000)
+
+//===========================================================================
 //============================= Public Functions ============================
 //===========================================================================
 
-// Returns if a specific identifier letter was used in an MCode. 
+// Returns if a specific identifier letter was used in an MCode.
 bool  code_seen(char code);
 
 // Returns the value of the last item identified by code_seen.
