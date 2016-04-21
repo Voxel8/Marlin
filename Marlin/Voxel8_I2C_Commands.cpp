@@ -95,7 +95,7 @@ void I2C__SetFanDrive0PWM(uint8_t fanSpeed) {
     }
 
     // Send message
-    writeThreeBytePacket(CART_HOLDER_ADDR, SET_FAN_DRIVE_0_PWM,
+    writeThreeBytePacket(CART_HOLDER_ADDR, SET_FAN_DRIVE_PWM,
                          I2C_EMPTY_ADDRESS, fanSpeed);
 
     // Send information to Octoprint
@@ -113,7 +113,7 @@ void I2C__SetFanOff(void) {
     uint8_t fanSpeed = 0;
 
     // Send message
-    writeThreeBytePacket(CART_HOLDER_ADDR, SET_FAN_DRIVE_0_PWM,
+    writeThreeBytePacket(CART_HOLDER_ADDR, SET_FAN_DRIVE_PWM,
                          I2C_EMPTY_ADDRESS, fanSpeed);
 
     // Send information to Octoprint
@@ -131,7 +131,7 @@ void I2C__SetFanOff(void) {
 void I2C__ToggleUV(uint8_t data) {
 
     // Send message
-    writeThreeBytePacket(CART_HOLDER_ADDR, SET_LED_UV_0_PWM,
+    writeThreeBytePacket(CART_HOLDER_ADDR, SET_LED_UV_PWM,
                          I2C_EMPTY_ADDRESS, data);
 
     // Send information to Octoprint

@@ -26,11 +26,11 @@
 #define I2C_EMPTY_DATA          0xFF
 
 // I2C Commands
-#define SET_FAN_DRIVE_0_PWM     0x01
+#define SET_FAN_DRIVE_PWM       0x01
 #define RESERVED_CMD_02         0x02
-#define SET_LED_WHITE_1_PWM     0x03
-#define SET_LED_RED_0_PWM       0x04
-#define SET_LED_UV_0_PWM        0x05
+#define SET_LED_WHITE_PWM       0x03
+#define SET_LED_RED_PWM         0x04
+#define SET_LED_UV_PWM          0x05
 #define EEPROM_WRITE            0x06
 #define EEPROM_READ             0x07
 #define EEPROM_READ_SERIAL      0x08
