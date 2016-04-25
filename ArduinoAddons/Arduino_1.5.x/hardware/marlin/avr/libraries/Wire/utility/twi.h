@@ -48,6 +48,8 @@
   void twi_reply(uint8_t);
   void twi_stop(void);
   void twi_releaseBus(void);
+  uint8_t twi_getTFlag(void);
+  void twi_resetTFlag(void);
 
 #endif
 
