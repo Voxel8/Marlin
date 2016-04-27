@@ -46,7 +46,6 @@ static void cartridgeAbsentUpdate(uint8_t cartNumber);
 static void cartridgePresentUpdate(uint8_t cartNumber);
 static bool cartridgesRemovedCheck(void);
 static bool cartridgesPresentCheck(void);
-static void updateCartridgeStatus(void);
 
 //===========================================================================
 //============================ Public Functions =============================
@@ -76,37 +75,34 @@ static void updateCartridgeStatus(void);
  * @returns    Returns true if a cartridge has been removed, or no 
  *             cartridge is present WITH HYSTERESIS
  */
-bool CartridgeRemoved(void) {
-    bool returnValue = false;
-    static uint8_t cartridgeRemovalHysteresis = 0;
 
-    // Update Cartridge Status so that we have fresh information for the 
-    // function
-    updateCartridgeStatus();
-
-    // Set up addition condition beyond cartridgeRemovedCheck that
-    // could result in an the cartridge needing to be reported as missing.
-    bool removedCondition = 0;
-
-    // If a cartridge is seen to be removed, set the hysteresis counter.
-    // If the appropriate cartridges are absent but we don't see that a
-    // cartridge has been removed, we started up with it missing and will also
-    // mark it as removed.
-    if (cartridgesRemovedCheck() || removedCondition) {
-        cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
+ /**
+ * Check to see if cartridges are present or absent. Flags internally if 
+ * one has been removed, or clears the removed flag if it's present. 
+ * The status of cartridge removal can be found with 
+ * CartridgeRemoved()
+ */
+void UpdateCartridgeStatus(void) {
+    if (cartridgeRemovalCheckEnabled == true) {
+        // Cartridge zero is pulled low by default
+        if (READ(CART0_SIG2_PIN) == HIGH) {
+            cartridgePresentUpdate(0);
+        } else {
+            cartridgeAbsentUpdate(0);
+        }
+        // Cartridge one is pulled high by default
+        if (READ(CART1_SIG2_PIN) == LOW) {
+            cartridgePresentUpdate(1);
+        } else {
+            cartridgeAbsentUpdate(1);
+        }
     }
-
-    // We have this hysteresis here to accomodate putting the cartridge
-    // back in. Without it, Marlin will recognize the cartridge has been
-    // reinserted before the temperature updates from its maximum value and
-    // will throw a high temperature error.
-    if (cartridgeRemovalHysteresis > 0) {
-        cartridgeRemovalHysteresis--;
-        returnValue = true;
+    else {
+        cartridgePresentUpdate(0);
+        cartridgePresentUpdate(1);
     }
-
-    return returnValue;
 }
+
 
 /**
  * This function checks to see if the FFF cartridge is removed,
@@ -114,15 +110,22 @@ bool CartridgeRemoved(void) {
  * @returns    Returns true if an FFF cartridge has been removed
  */
 bool CartridgeRemovedFFF(void) {
-    updateCartridgeStatus();
+    UpdateCartridgeStatus();
     return (cartridgeStatus[FFF_INDEX] != PRESENT);
 }
 
+/**
+ * This function checks to see if the FFF cartridge is removed,
+ * to prevent heating, with hysteresis for when the cartridge 
+ * is reinserted.
+ * @returns    Returns true if an FFF cartridge has been removed
+ */
 bool CartridgeRemovedFFFHysteresis(void) {
     bool returnValue = false;
     static uint8_t cartridgeRemovalHysteresis = 0;
 
-    updateCartridgeStatus();
+    UpdateCartridgeStatus();
+    
     if (cartridgeStatus[FFF_INDEX] != PRESENT) {
         cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
     }
@@ -170,7 +173,11 @@ void _cartridge_removed_error(const char *serial_msg) {
         }
     }
 
-
+ /** 
+  * Allows all cartridge checks to be disabled by making the printer think
+  * cartridges are always present.
+  * @value     true = enable, false = no check.
+  */
 void Cartridge__SetPresentCheck(bool value) {
 	if (value == true) {
 		SERIAL_PROTOCOL("Cartridge Check Enabled");
@@ -194,32 +201,6 @@ void Cartridge__SetPresentCheck(bool value) {
 //============================ Private Functions ============================
 //===========================================================================
 
- /**
- * Check to see if cartridges are present or absent. Flags internally if 
- * one has been removed, or clears the removed flag if it's present. 
- * The status of cartridge removal can be found with 
- * CartridgeRemoved()
- */
-static void updateCartridgeStatus(void) {
-    if (cartridgeRemovalCheckEnabled == true) {
-        // Cartridge zero is pulled low by default
-        if (READ(CART0_SIG2_PIN) == HIGH) {
-            cartridgePresentUpdate(0);
-        } else {
-            cartridgeAbsentUpdate(0);
-        }
-        // Cartridge one is pulled high by default
-        if (READ(CART1_SIG2_PIN) == LOW) {
-            cartridgePresentUpdate(1);
-        } else {
-            cartridgeAbsentUpdate(1);
-        }
-    }
-    else {
-        cartridgePresentUpdate(0);
-        cartridgePresentUpdate(1);
-    }
-}
 
 /**
  * Reports that a cartridge is absent. If there was a cartridge present,
@@ -245,6 +226,7 @@ static void cartridgeAbsentUpdate(uint8_t cartNumber) {
     }
     cartridgeStatus[cartNumber] = ABSENT;
 }
+
 /**
  * Reports that a cartridge is present. If it was marked as removed,
  * this will clear it.

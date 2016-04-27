@@ -27,6 +27,13 @@
  * @returns    Returns true if an FFF cartridge has been removed
  */
   bool CartridgeRemovedFFF(void);
+
+ /**
+ * This function checks to see if the FFF cartridge is removed,
+ * to prevent heating, with hysteresis for when the cartridge 
+ * is reinserted.
+ * @returns    Returns true if an FFF cartridge has been removed
+ */
   bool CartridgeRemovedFFFHysteresis(void);
 /**
  * This function checks to see if a cartridge has been removed from the
@@ -36,6 +43,14 @@
  */
   bool CartridgeRemoved(void);
 
+ /**
+ * Check to see if cartridges are present or absent. Flags internally if 
+ * one has been removed, or clears the removed flag if it's present. 
+ * The status of cartridge removal can be found with 
+ * CartridgeRemoved()
+ */
+  void UpdateCartridgeStatus(void);
+
 /**
  * This is the error handler for when we see the cartridge removed error. It 
  * reports to octoprint that we should pause the print, as well as disabling
@@ -43,6 +58,12 @@
  * called once if it's been called multiple times in quick succession.
  */
   void _cartridge_removed_error(const char *serial_msg);
+
+ /** 
+  * Allows all cartridge checks to be disabled by making the printer think
+  * cartridges are always present.
+  * @value     true = enable, false = no check.
+  */
   void Cartridge__SetPresentCheck(bool value);
 
 #endif  // MARLIN_CARTRIDGE_H_
