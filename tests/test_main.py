@@ -15,7 +15,7 @@ class MarlinTestCase(unittest.TestCase):
             direct_write=True,
             direct_write_mode='serial',
             #printer_port="/dev/tty.usbmodem1421",
-            printer_port="COM4",
+            printer_port="COM5",
         )
 
     def tearDown(self):
@@ -248,6 +248,11 @@ class MarlinTestCase(unittest.TestCase):
         # Reset printer to previous state
         g.write('M236 S0')
         g.write('M125 S0')
+
+    def test_i2c(self):
+        g = self.g
+        resp = g.write('M245 C0', resp_needed = True);
+        print(resp);
 
 
 if __name__ == '__main__':
