@@ -27,7 +27,7 @@
  * @returns    Returns true if an FFF cartridge has been removed
  */
   bool CartridgeRemovedFFF(void);
-
+  bool CartridgeRemovedFFFHysteresis(void);
 /**
  * This function checks to see if a cartridge has been removed from the
  * system, allowing us to make judgement calls for error reporting. This 

@@ -86,8 +86,7 @@ bool CartridgeRemoved(void) {
 
     // Set up addition condition beyond cartridgeRemovedCheck that
     // could result in an the cartridge needing to be reported as missing.
-    bool removedCondition =
-        (cartridgeStatus[FFF_INDEX] != PRESENT);
+    bool removedCondition = 0;
 
     // If a cartridge is seen to be removed, set the hysteresis counter.
     // If the appropriate cartridges are absent but we don't see that a
@@ -119,6 +118,27 @@ bool CartridgeRemovedFFF(void) {
     return (cartridgeStatus[FFF_INDEX] != PRESENT);
 }
 
+bool CartridgeRemovedFFFHysteresis(void) {
+    bool returnValue = false;
+    static uint8_t cartridgeRemovalHysteresis = 0;
+
+    updateCartridgeStatus();
+    if (cartridgeStatus[FFF_INDEX] != PRESENT) {
+        cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
+    }
+
+    // We have this hysteresis here to accomodate putting the cartridge
+    // back in. Without it, Marlin will recognize the cartridge has been
+    // reinserted before the temperature updates from its maximum value and
+    // will throw a high temperature error.
+    if (cartridgeRemovalHysteresis > 0) {
+        cartridgeRemovalHysteresis--;
+        returnValue = true;
+    }
+
+    return returnValue;
+}
+
 /**
  * This is the error handler for when we see the cartridge removed error. It 
  * reports to octoprint that we should pause the print, as well as disabling
@@ -127,8 +147,6 @@ bool CartridgeRemovedFFF(void) {
  * @inputs     An input that will be displayed on the serial monitor
  */
 void _cartridge_removed_error(const char *serial_msg) {
-    static millis_t timeSinceLastRemoval = {0};
-    if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERR_INTERVAL) {
         if (IsSafetyCriticalSection()) {
             static bool killed = false;
             if (IsRunning()) {
@@ -151,8 +169,7 @@ void _cartridge_removed_error(const char *serial_msg) {
             SERIAL_ECHOLN("// action:cancel");
         }
     }
-    timeSinceLastRemoval = millis();
-}
+
 
 void Cartridge__SetPresentCheck(bool value) {
 	if (value == true) {
@@ -224,9 +241,10 @@ static void cartridgeAbsentUpdate(uint8_t cartNumber) {
             default:
                 SERIAL_ECHOLN("Cartridge Removed");
         }
+        _cartridge_removed_error((PSTR(MSG_T_CARTRIDGE_REMOVED)));
     }
+    cartridgeStatus[cartNumber] = ABSENT;
 }
-
 /**
  * Reports that a cartridge is present. If it was marked as removed,
  * this will clear it.
