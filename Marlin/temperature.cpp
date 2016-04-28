@@ -707,6 +707,8 @@ void manage_heater() {
       thermal_runaway_protection(&thermal_runaway_state_machine[e], &thermal_runaway_timer[e], current_temperature[e], target_temperature[e], e, THERMAL_PROTECTION_PERIOD, THERMAL_PROTECTION_HYSTERESIS);
     #endif
 
+    Regulator__Update();
+    
     float pid_output = get_pid_output(e);
 
     // Check if temperature is within the correct range
