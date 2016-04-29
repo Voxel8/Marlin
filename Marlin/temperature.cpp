@@ -516,7 +516,7 @@ void max_temp_error(uint8_t e) {
   }
 // There has been a recent error, if was more than a second ago, it is probably an error
   else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
-    if(!CartridgeRemovedFFFHysteresis()) 
+    if(!Cartridge__FFFNotPresentHysteresis()) 
       _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
   }
 }
@@ -1484,7 +1484,7 @@ ISR(TIMER0_COMPB_vect) {
    
   // Update Cartridge Status so that we have fresh information for the 
   // function
-  UpdateCartridgeStatus();
+  Cartridge__Update();
   
   // Static members for each heater
   #if ENABLED(SLOW_PWM_HEATERS)
