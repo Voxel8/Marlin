@@ -19,22 +19,30 @@
  * addresses.
  * @returns    Returns true if the specified cartridge is present
  */
-  bool CartridgePresent(uint8_t cartridgeAddress);
+  bool Cartridge__Present(uint8_t cartridgeAddress);
 
 /**
  * This function checks to see if the FFF cartridge is removed,
  * to prevent heating
  * @returns    Returns true if an FFF cartridge has been removed
  */
-  bool CartridgeRemovedFFF(void);
+  bool Cartridge__FFFNotPresent(void);
 
-/**
- * This function checks to see if a cartridge has been removed from the
- * system, allowing us to make judgement calls for error reporting. This 
- * also updates the cartridge status.
- * @returns    Returns true if a cartridge has been removed 
+ /**
+ * This function checks to see if the FFF cartridge is removed,
+ * to prevent heating, with hysteresis for when the cartridge 
+ * is reinserted.
+ * @returns    Returns true if an FFF cartridge has been removed
  */
-  bool CartridgeRemoved(void);
+  bool Cartridge__FFFNotPresentHysteresis(void);
+
+ /**
+ * Check to see if cartridges are present or absent. Flags internally if 
+ * one has been removed, or clears the removed flag if it's present. 
+ * The status of cartridge removal can be found with 
+ * CartridgeRemoved()
+ */
+  void Cartridge__Update(void);
 
 /**
  * This is the error handler for when we see the cartridge removed error. It 
@@ -42,7 +50,12 @@
  * all heaters and stopping the currently queued commands. This will only get
  * called once if it's been called multiple times in quick succession.
  */
-  void _cartridge_removed_error(const char *serial_msg);
+
+ /** 
+  * Allows all cartridge checks to be disabled by making the printer think
+  * cartridges are always present.
+  * @value     true = enable, false = no check.
+  */
   void Cartridge__SetPresentCheck(bool value);
 
 #endif  // MARLIN_CARTRIDGE_H_

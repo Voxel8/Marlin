@@ -3519,7 +3519,7 @@ inline void gcode_M42() {
  * M104: Set hot end temperature
  */
 inline void gcode_M104() {
-  if (CartridgeRemovedFFF())
+  if (Cartridge__FFFNotPresent())
   {
     //SERIAL_ERROR_START;
     serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
@@ -3616,12 +3616,12 @@ inline void gcode_M105() {
   #endif
 
   // Get error codes from present cartridges
-  // if (CartridgePresent(0)) {
+  // if (Cartridge__Present(0)) {
   //   SERIAL_PROTOCOL(" C0: ");
   //   I2C__GetErrorCode(CART0_ADDR);
   // }
 
-  // if (CartridgePresent(1)) {
+  // if (Cartridge__Present(1)) {
   //   SERIAL_PROTOCOL(" C1: ");
   //   I2C__GetErrorCode(CART1_ADDR);
   // }
@@ -3668,7 +3668,7 @@ inline void gcode_M105() {
    * M109: Wait for extruder(s) to reach temperature
    */
   inline void gcode_M109() {
-    if (CartridgeRemovedFFF()) {
+    if (Cartridge__FFFNotPresent()) {
       // SERIAL_ERROR_START;
       serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
       SERIAL_EOL;
@@ -3716,12 +3716,12 @@ inline void gcode_M105() {
                (residency_start_ms >= 0 &&
                 (((unsigned int)(millis() - residency_start_ms)) <
                  (TEMP_RESIDENCY_TIME * 1000UL))))) &&
-             !CartridgeRemovedFFF())
+             !Cartridge__FFFNotPresent())
 #else
       while ((target_direction ? (isHeatingHotend(target_extruder))
                                : (isCoolingHotend(target_extruder) &&
                                   (no_wait_for_cooling == false))) &&
-             !CartridgeRemovedFFF())
+             !Cartridge__FFFNotPresent())
 #endif  // TEMP_RESIDENCY_TIME
 
       {  // while loop

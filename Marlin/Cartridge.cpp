@@ -46,7 +46,7 @@ static void cartridgeAbsentUpdate(uint8_t cartNumber);
 static void cartridgePresentUpdate(uint8_t cartNumber);
 static bool cartridgesRemovedCheck(void);
 static bool cartridgesPresentCheck(void);
-static void updateCartridgeStatus(void);
+static void _cartridge_removed_error(const char *serial_msg);
 
 //===========================================================================
 //============================ Public Functions =============================
@@ -58,42 +58,65 @@ static void updateCartridgeStatus(void);
  * @inputs     0 for Cartridge 0, 1 for Cartridge 1
  * @returns    Returns true if the specified cartridge is present
  */
-  bool CartridgePresent(uint8_t cartridgeNumber) {
+  bool Cartridge__Present(uint8_t cartridgeNumber) {
     uint8_t returnValue = false;
     if (cartridgeStatus[cartridgeNumber] == PRESENT)
         returnValue = true;
     return returnValue;
 }
 
-/**
- * This function checks to see if a cartridge has been removed from the
- * system, allowing us to make judgement calls for error reporting. This
- * information is updated by calling UpdateCartridgeStatus(). Will also 
- * return true if no cartridges are present. This version includes hysteresis
- * so that when the cartridge is re-inserted, we don't immediately throw a 
- * temperature error (we'll read max temp when a cartridge is removed and
- * this may not update immediately when we call this function)
- * @returns    Returns true if a cartridge has been removed, or no 
- *             cartridge is present WITH HYSTERESIS
+
+ /**
+ * Check to see if cartridges are present or absent. Flags internally if 
+ * one has been removed, or clears the removed flag if it's present. 
+ * The status of cartridge removal can be found with 
+ * CartridgeRemoved()
  */
-bool CartridgeRemoved(void) {
+void Cartridge__Update(void) {
+    if (cartridgeRemovalCheckEnabled == true) {
+        // Cartridge zero is pulled low by default
+        if (READ(CART0_SIG2_PIN) == HIGH) {
+            cartridgePresentUpdate(0);
+        } else {
+            cartridgeAbsentUpdate(0);
+        }
+        // Cartridge one is pulled high by default
+        if (READ(CART1_SIG2_PIN) == LOW) {
+            cartridgePresentUpdate(1);
+        } else {
+            cartridgeAbsentUpdate(1);
+        }
+    }
+    else {
+        cartridgePresentUpdate(0);
+        cartridgePresentUpdate(1);
+    }
+}
+
+
+/**
+ * This function checks to see if the FFF cartridge is removed,
+ * to prevent heating
+ * @returns    Returns true if an FFF cartridge has been removed
+ */
+bool Cartridge__FFFNotPresent(void) {
+    Cartridge__Update();
+    return (cartridgeStatus[FFF_INDEX] != PRESENT);
+}
+
+/**
+ * This function checks to see if the FFF cartridge is removed,
+ * to prevent heating, with hysteresis for when the cartridge 
+ * is reinserted.
+ * @returns    Returns true if an FFF cartridge has been removed
+ */
+bool Cartridge__FFFNotPresentHysteresis(void) {
     bool returnValue = false;
     static uint8_t cartridgeRemovalHysteresis = 0;
 
-    // Update Cartridge Status so that we have fresh information for the 
-    // function
-    updateCartridgeStatus();
-
-    // Set up addition condition beyond cartridgeRemovedCheck that
-    // could result in an the cartridge needing to be reported as missing.
-    bool removedCondition =
-        (cartridgeStatus[FFF_INDEX] != PRESENT);
-
-    // If a cartridge is seen to be removed, set the hysteresis counter.
-    // If the appropriate cartridges are absent but we don't see that a
-    // cartridge has been removed, we started up with it missing and will also
-    // mark it as removed.
-    if (cartridgesRemovedCheck() || removedCondition) {
+    Cartridge__Update();
+    
+    if (cartridgeStatus[FFF_INDEX] != PRESENT) {
         cartridgeRemovalHysteresis = CARTRIDGE_REMOVAL_HYSTERESIS_COUNT;
     }
 
@@ -109,51 +132,11 @@ bool CartridgeRemoved(void) {
     return returnValue;
 }
 
-/**
- * This function checks to see if the FFF cartridge is removed,
- * to prevent heating
- * @returns    Returns true if an FFF cartridge has been removed
- */
-bool CartridgeRemovedFFF(void) {
-    updateCartridgeStatus();
-    return (cartridgeStatus[FFF_INDEX] != PRESENT);
-}
-
-/**
- * This is the error handler for when we see the cartridge removed error. It 
- * reports to octoprint that we should pause the print, as well as disabling
- * all heaters and stopping the currently queued commands. This will only get
- * called once if it's been called multiple times in quick succession.
- * @inputs     An input that will be displayed on the serial monitor
- */
-void _cartridge_removed_error(const char *serial_msg) {
-    static millis_t timeSinceLastRemoval = {0};
-    if (millis() > timeSinceLastRemoval + CARTRIDGE_REMOVED_ERR_INTERVAL) {
-        if (IsSafetyCriticalSection()) {
-            static bool killed = false;
-            if (IsRunning()) {
-                SERIAL_ERROR_START;
-                serialprintPGM(serial_msg);
-                SERIAL_EOL;
-            }   
-            if (!killed) {
-                Running = false;
-                killed = true;
-                kill(serial_msg);
-            }
-        }
-        else {
-            quickStop();
-            disable_all_heaters();
-            disable_all_steppers();
-            serialprintPGM(serial_msg);
-            SERIAL_EOL;
-            SERIAL_ECHOLN("// action:cancel");
-        }
-    }
-    timeSinceLastRemoval = millis();
-}
-
+ /** 
+  * Allows all cartridge checks to be disabled by making the printer think
+  * cartridges are always present.
+  * @value     true = enable, false = no check.
+  */
 void Cartridge__SetPresentCheck(bool value) {
 	if (value == true) {
 		SERIAL_PROTOCOL("Cartridge Check Enabled");
@@ -177,32 +160,6 @@ void Cartridge__SetPresentCheck(bool value) {
 //============================ Private Functions ============================
 //===========================================================================
 
- /**
- * Check to see if cartridges are present or absent. Flags internally if 
- * one has been removed, or clears the removed flag if it's present. 
- * The status of cartridge removal can be found with 
- * CartridgeRemoved()
- */
-static void updateCartridgeStatus(void) {
-    if (cartridgeRemovalCheckEnabled == true) {
-        // Cartridge zero is pulled low by default
-        if (READ(CART0_SIG2_PIN) == HIGH) {
-            cartridgePresentUpdate(0);
-        } else {
-            cartridgeAbsentUpdate(0);
-        }
-        // Cartridge one is pulled high by default
-        if (READ(CART1_SIG2_PIN) == LOW) {
-            cartridgePresentUpdate(1);
-        } else {
-            cartridgeAbsentUpdate(1);
-        }
-    }
-    else {
-        cartridgePresentUpdate(0);
-        cartridgePresentUpdate(1);
-    }
-}
 
 /**
  * Reports that a cartridge is absent. If there was a cartridge present,
@@ -224,7 +181,9 @@ static void cartridgeAbsentUpdate(uint8_t cartNumber) {
             default:
                 SERIAL_ECHOLN("Cartridge Removed");
         }
+        _cartridge_removed_error((PSTR(MSG_T_CARTRIDGE_REMOVED)));
     }
+    cartridgeStatus[cartNumber] = ABSENT;
 }
 
 /**
@@ -273,4 +232,35 @@ static bool cartridgesPresentCheck(void) {
         }
     }
     return false;
+}
+
+/**
+ * This is the error handler for when we see the cartridge removed error. It 
+ * reports to octoprint that we should pause the print, as well as disabling
+ * all heaters and stopping the currently queued commands. This will only get
+ * called once if it's been called multiple times in quick succession.
+ * @inputs     An input that will be displayed on the serial monitor
+ */
+static void _cartridge_removed_error(const char *serial_msg) {
+    if (IsSafetyCriticalSection()) {
+        static bool killed = false;
+        if (IsRunning()) {
+            SERIAL_ERROR_START;
+            serialprintPGM(serial_msg);
+            SERIAL_EOL;
+        }   
+        if (!killed) {
+            Running = false;
+            killed = true;
+            kill(serial_msg);
+        }
+    }
+    else {
+        quickStop();
+        disable_all_heaters();
+        disable_all_steppers();
+        serialprintPGM(serial_msg);
+        SERIAL_EOL;
+        SERIAL_ECHOLN("// action:cancel");
+    }
 }
