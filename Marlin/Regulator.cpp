@@ -19,9 +19,6 @@
 // #define PNEUMATIC_PIN         5   // A5 Input analog tank pressure reading
 // #define PNEUMATIC_CART1_PIN   4   // A4 Cartridge 2 analog pressure reading
 
-#define REGULATOR_PROTECTION_TIME_S (5)
-#define REGULATOR_PROTECTION_BAND   (4)
-
 //===========================================================================
 //============================ Private Variables ============================
 //===========================================================================

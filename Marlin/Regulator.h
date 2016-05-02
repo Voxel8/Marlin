@@ -40,6 +40,8 @@
 #endif // E_REGULATOR_SENSOR
 #define REGULATOR_LOW_P 2
 
+#define REGULATOR_PROTECTION_TIME_S (5)
+#define REGULATOR_PROTECTION_BAND   (4)
 
 /*================================================================================*/
 /* Function Prototypes */
