@@ -84,7 +84,10 @@ void Regulator__Update() {
   * Error handler when marlin detects a regulator leak 
   */
 static void _regulator_leak_error() {
-  SERIAL_PROTOCOL(
+  quickStop();
+  disable_all_heaters();
+  disable_all_steppers();
+  SERIAL_PROTOCOL(  
       "Pressure Leak Error. Canceling print, check the pressure hose");
   SERIAL_EOL;
   SERIAL_ECHOLN("// action:cancel");
@@ -96,6 +99,9 @@ static void _regulator_leak_error() {
   * Error handler when marlin detects a regulator pressure that's too high
   */
 static void _regulator_runaway_error() {
+  quickStop();
+  disable_all_heaters();
+  disable_all_steppers();
   SERIAL_PROTOCOL("Runaway Pressure Error. Canceling print.");
   SERIAL_EOL;
   SERIAL_ECHOLN("// action:cancel");
