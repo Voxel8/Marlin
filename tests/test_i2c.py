@@ -8,7 +8,7 @@ import re
 from colorlog import ColoredFormatter
 import logging
 
-logging.basicConfig(level=logging.INFO,  # DEBUG, INFO, WARNING
+logging.basicConfig(level=logging.DEBUG,  # DEBUG, INFO, WARNING
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     datefmt='%d-%m-%y %H:%M:%S',
                     filename='console.log',
@@ -56,18 +56,18 @@ class I2CTestCase(unittest.TestCase):
         g = self.g
         resp = g.write(
             command + ' ' + p1 + ' ' + p2 + ' ' + p3, resp_needed=True)
-        logging.debug(str(command + ' ' + p1 + ' ' + p2 + ' ' + p3))
+        logging.debug(str(command + ' ' + p1 + ' ' + p2 + ' ' + p3 +'  Response: ' + resp))
         PacketSplit = re.findall('Packet', resp)
         TimeoutSplit = re.findall('Timeout', resp)
         if len(PacketSplit):
             logging.error(
                 "Dropped " + str(len(PacketSplit)) + " Packets from address " + str(p1) + ". " + str(p1) + " is either not present or not communicating.")
             resp = 0
-            self.assertEqual(PacketSplit, 1)
+            self.assertEqual(len(PacketSplit), 0, "Dropped packets, target is either not connected or not programmed")
         if len(TimeoutSplit):
             logging.error(str(len(TimeoutSplit)) + " Timeouts from " + str(p1))
             resp = 0
-            self.assertEqual(TimeoutSplit, 1)
+            self.assertEqual(len(TimeoutSplit), 0, "Timed out I2C, one of the peripherals is likely holding the data line low")
         return resp
 
     def parseCartridgeStatus(self, cartridgeStatus, cartridgeNumber):
@@ -100,27 +100,36 @@ class I2CTestCase(unittest.TestCase):
     ###########################################################################
 
     def test_i2c_alltargets(self):
+        logging.info("Testing all I2C Targets")
         for i in range(0, 30):
             string = 'E'+str(i)
-            self.commandparser('M244', 'C1', string)
             self.commandparser('M244', 'C0', string)
+            self.commandparser('M244', 'C1', string)
+            self.commandparser('M244', 'C2', string)
 
     def test_i2c_cart0(self):
+        logging.info("Testing Cartridge 0 I2C")
         for i in range(0, 30):
             string = 'E'+str(i)
             self.commandparser('M244', 'C0', string)
 
-
-    def test_i2c_cart2(self):
+    def test_i2c_cart1(self):
+        logging.info("Testing Cartridge 1 I2C")
         for i in range(0, 30):
             string = 'E'+str(i)
             self.commandparser('M244', 'C1', string)
 
-    def test_cart1(self):
+    def test_i2c_cartridgeHolder(self):
+        logging.info("Testing Cartridge Holder I2C")
+        for i in range(0, 30):
+            string = 'E'+str(i)
+            self.commandparser('M244', 'C2', string)
+
+    def test_cart1_info(self):
         cart0status = self.commandparser('M245', 'C0')
         self.parseCartridgeStatus(cart0status, "Cartridge 0")
 
-    def test_cart2(self):
+    def test_cart2_info(self):
         cart1status = self.commandparser('M245', 'C1')
         self.parseCartridgeStatus(cart1status, "Cartridge 1")
 
