@@ -40,8 +40,11 @@ static void pressure_protection(float pressure, float target_pressure);
 //============================= Public Functions ============================
 //===========================================================================
 
-// Set the output pressure (in psi) of the regulator.
-<<<<<<< 7d30f7313b0d45f4e940d82533faaa473e9181db
+/**
+ * Set the output pressure (in psi) of the regulator.
+ * @desired_pressure  The pressure that the function is attempting to 
+ *                    reach.
+ */
 void Regulator__SetOutputPressure(float desired_pressure) {
     uint16_t digital_val = 0;
     // Set to zero
@@ -65,6 +68,10 @@ void Regulator__SetOutputPressure(float desired_pressure) {
     DAC_write(MCP4725_I2C_ADDRESS, digital_val);
 }
 
+
+/**
+ * Updates the protection function, called regularly in the main loop.
+ */
 void Regulator__Update() {
   pressure_protection(current_target_pressure, pressureRegulator());
 }
@@ -73,6 +80,9 @@ void Regulator__Update() {
 //============================ Private Functions ============================
 //===========================================================================
 
+ /** 
+  * Error handler when marlin detects a regulator leak 
+  */
 static void _regulator_leak_error() {
   SERIAL_PROTOCOL(
       "Pressure Leak Error. Canceling print, check the pressure hose");
@@ -82,6 +92,9 @@ static void _regulator_leak_error() {
   Regulator__SetOutputPressure(0.0);
 }
 
+ /** 
+  * Error handler when marlin detects a regulator pressure that's too high
+  */
 static void _regulator_runaway_error() {
   SERIAL_PROTOCOL("Runaway Pressure Error. Canceling print.");
   SERIAL_EOL;
@@ -90,6 +103,13 @@ static void _regulator_runaway_error() {
   Regulator__SetOutputPressure(0.0);
 }
 
+ /** 
+  * Allows us to determine if the pressure is too high or low, indicating
+  * a serious issue. Checks the target temperature vs. the desired, and 
+  * throws an error if outside the bounds for too long.
+  * @target_pressure  The pressure you're attempting to reach
+  * @pressure         The actual current pressure 
+  */
 static void pressure_protection(float target_pressure, float pressure) {
   static const int period_seconds = REGULATOR_PROTECTION_TIME_S;
   static float prev_target_pressure = 0;

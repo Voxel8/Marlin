@@ -45,8 +45,16 @@
 /* Function Prototypes */
 /*================================================================================*/
 
+/**
+ * Set the output pressure (in psi) of the regulator.
+ * @input desired_pressure  The pressure that the function is attempting to 
+ *                          reach.
+ */
 void Regulator__SetOutputPressure(float pressure);
 
+/**
+ * Updates the protection function, called regularly in the main loop.
+ */
 void Regulator__Update();
 
 #endif
