@@ -101,6 +101,12 @@ if [ "$OPERATING_SYSTEM" = "Linux" ]; then
   sudo cp -r . /usr/share/arduino/libraries/
   cd "$HERE"
   rm -rf ./libraries/
+  cd /usr/share/arduino/libraries
+  if [ -d "Wire" ]; then
+    sudo mv Wire "$HERE/Wire"
+  fi
+  sudo cp -r "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/libraries/Wire" Wire
+  cd "$HERE"
 fi
 
 # Generate _Version.h using Git repo info
@@ -258,4 +264,8 @@ else
     sudo rm "$ARDUINO_DEP/boards.txt"
     sudo mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
   fi
+  cd /usr/share/arduino/libraries
+  sudo rm -rf Wire
+  sudo mv "$HERE/Wire" Wire
+  cd "$HERE"
 fi
