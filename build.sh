@@ -1,5 +1,23 @@
 #!/bin/bash
 # Correct Syntax: ./build.sh [port [*upload | verify]]
+
+abort()
+{
+    if [ "$OPERATING_SYSTEM" = "Linux" ]; then
+      echo "Moving old Wire library back..." >&2
+      if [ -d "$HERE/Wire-backup" ]; then
+        cd /usr/share/arduino/libraries
+        sudo rm -rf Wire
+        sudo mv "$HERE/Wire-backup" Wire
+        cd "$HERE"
+      fi
+    fi
+    echo "Exiting..." >&2
+    exit 1
+}
+
+trap 'abort' 0
+
 set -e
 HERE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$HERE"
@@ -103,7 +121,7 @@ if [ "$OPERATING_SYSTEM" = "Linux" ]; then
   rm -rf ./libraries/
   cd /usr/share/arduino/libraries
   if [ -d "Wire" ]; then
-    sudo mv Wire "$HERE/Wire"
+    sudo mv Wire "$HERE/Wire-backup"
   fi
   sudo cp -r "$HERE/ArduinoAddons/Arduino_1.6.x/hardware/marlin/avr/libraries/Wire" Wire
   cd "$HERE"
@@ -266,6 +284,8 @@ else
   fi
   cd /usr/share/arduino/libraries
   sudo rm -rf Wire
-  sudo mv "$HERE/Wire" Wire
+  sudo mv "$HERE/Wire-backup" Wire
   cd "$HERE"
 fi
+
+trap : 0
