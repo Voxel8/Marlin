@@ -792,7 +792,7 @@ void manage_heater() {
     
     previous_millis_regulator_value = millis();
     //Is output pressure more than what is available?
-    if((pressureRegulator() >= pressurePneumatic()) && (pressurePneumatic() >= 1)) {
+    if((pressureRegulator() >= pressurePneumatic()) && (pressurePneumatic() >= 1) && (pressureRegulator() != REGULATOR_NOT_PRESENT_VALUE)) {
       // Shut down
       if(IsRunning()) {
         SERIAL_ERROR_START;

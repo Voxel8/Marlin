@@ -43,6 +43,8 @@
 #define REGULATOR_PROTECTION_TIME_S (5)
 #define REGULATOR_PROTECTION_BAND   (4)
 
+#define REGULATOR_NOT_PRESENT_VALUE (130.5)
+
 /*================================================================================*/
 /* Function Prototypes */
 /*================================================================================*/
