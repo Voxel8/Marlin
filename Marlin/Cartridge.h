@@ -58,4 +58,5 @@
   */
   void Cartridge__SetPresentCheck(bool value);
 
+  bool Cartridge__GetPresentCheck(void);
 #endif  // MARLIN_CARTRIDGE_H_

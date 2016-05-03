@@ -156,6 +156,10 @@ void Cartridge__SetPresentCheck(bool value) {
 	cartridgeRemovalCheckEnabled = value;
 }
 
+bool Cartridge__GetPresentCheck(void) {
+    return cartridgeRemovalCheckEnabled;
+}
+
 //===========================================================================
 //============================ Private Functions ============================
 //===========================================================================
