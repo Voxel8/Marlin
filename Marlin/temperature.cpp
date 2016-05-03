@@ -511,13 +511,15 @@ inline void _temp_error(int e, const char *serial_msg, const char *lcd_msg) {
 
 void max_temp_error(uint8_t e) {
 // Temp error has been reset
-  if (time_since_last_err[e] == 0) {
-    time_since_last_err[e] = millis();
-  }
-// There has been a recent error, if was more than a second ago, it is probably an error
-  else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
-    if(!Cartridge__FFFNotPresentHysteresis()) 
-      _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
+  if (Cartridge__GetPresentCheck()){
+    if (time_since_last_err[e] == 0) {
+      time_since_last_err[e] = millis();
+    }
+  // There has been a recent error, if was more than a second ago, it is probably an error
+    else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
+      if(!Cartridge__FFFNotPresentHysteresis()) 
+        _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
+    }
   }
 }
 
