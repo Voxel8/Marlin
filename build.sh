@@ -1,18 +1,43 @@
 #!/bin/bash
 # Correct Syntax: ./build.sh [port [*upload | verify]]
 
+cleanup()
+{
+  if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
+    rm -rf ./build/
+    if [ -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
+      rm -rf "$ARDUINO_DEP/variants/rambo/"
+      mv "$ARDUINO_DEP/variants/rambo_backup/" "$ARDUINO_DEP/variants/rambo/"
+    fi
+    if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
+      rm "$ARDUINO_DEP/boards.txt"
+      mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
+    fi
+  else
+    if [ -f ./.build/mega2560/firmware.hex ]; then
+      rm ./.build/mega2560/firmware.hex
+    fi
+    if [ -d "$ARDUINO_DEP/variants/standard_backup" ]; then
+      sudo rm -rf "$ARDUINO_DEP/variants/standard/"
+      sudo mv "$ARDUINO_DEP/variants/standard_backup/" "$ARDUINO_DEP/variants/standard/"
+    fi
+    if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
+      sudo rm "$ARDUINO_DEP/boards.txt"
+      sudo mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
+    fi
+    if [ -d "$HERE/Wire-backup" ]; then
+      cd /usr/share/arduino/libraries
+      sudo rm -rf Wire
+      sudo mv "$HERE/Wire-backup" Wire
+      cd "$HERE"
+    fi
+  fi
+}
+
 abort()
 {
-    if [ "$OPERATING_SYSTEM" = "Linux" ]; then
-      echo "Moving old Wire library back..." >&2
-      if [ -d "$HERE/Wire-backup" ]; then
-        cd /usr/share/arduino/libraries
-        sudo rm -rf Wire
-        sudo mv "$HERE/Wire-backup" Wire
-        cd "$HERE"
-      fi
-    fi
-    echo "Exiting..." >&2
+    cleanup
+    echo "Build files cleaned up, exiting..." >&2
     exit 1
 }
 
@@ -261,31 +286,6 @@ if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
   cp "$HERE/build/Marlin.cpp.hex" "$HERE/firmware.hex"
 fi
 
-# Clean Up
-if [ ! "$OPERATING_SYSTEM" = "Linux" ]; then
-  rm -rf ./build/
-  if [ -d "$ARDUINO_DEP/variants/rambo_backup" ]; then
-    rm -rf "$ARDUINO_DEP/variants/rambo/"
-    mv "$ARDUINO_DEP/variants/rambo_backup/" "$ARDUINO_DEP/variants/rambo/"
-  fi
-  if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
-    rm "$ARDUINO_DEP/boards.txt"
-    mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
-  fi
-else 
-  rm ./.build/mega2560/firmware.hex
-  if [ -d "$ARDUINO_DEP/variants/standard_backup" ]; then
-    sudo rm -rf "$ARDUINO_DEP/variants/standard/"
-    sudo mv "$ARDUINO_DEP/variants/standard_backup/" "$ARDUINO_DEP/variants/standard/"
-  fi
-  if [ -f "$ARDUINO_DEP/boards_backup.txt" ]; then
-    sudo rm "$ARDUINO_DEP/boards.txt"
-    sudo mv "$ARDUINO_DEP/boards_backup.txt" "$ARDUINO_DEP/boards.txt"
-  fi
-  cd /usr/share/arduino/libraries
-  sudo rm -rf Wire
-  sudo mv "$HERE/Wire-backup" Wire
-  cd "$HERE"
-fi
+cleanup
 
 trap : 0
