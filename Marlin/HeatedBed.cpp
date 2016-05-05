@@ -54,17 +54,17 @@ bool HeatedBed__PresentCheck(void) {
 
 void HeatedBed__SetPresentCheck(bool value) {
 	if (value == true) {
-		SERIAL_PROTOCOL("Heated Bed Check Enabled");
+		SERIAL_PROTOCOLPGM("Heated Bed Check Enabled");
 		SERIAL_EOL;
 		bedRemovalCheckEnabled = 1;
 	}
 	else if (value == false) {
-		SERIAL_PROTOCOL("Heated Bed Check Disabled");
+		SERIAL_PROTOCOLPGM("Heated Bed Check Disabled");
 		SERIAL_EOL;
 		bedRemovalCheckEnabled = 0;
 	}
 	else {
-		SERIAL_PROTOCOL("Invalid value for Heated Bed Check Set");
+		SERIAL_PROTOCOLPGM("Invalid value for Heated Bed Check Set");
 		SERIAL_EOL;
 		return;
 	}
@@ -81,9 +81,9 @@ void heatedBedRemovedError(void) {
         quickStop();
         disable_all_heaters();
         disable_all_steppers();
-        SERIAL_PROTOCOL("Heated Bed Removed!");
+        SERIAL_PROTOCOLPGM("Heated Bed Removed!");
         SERIAL_EOL;
-        SERIAL_ECHOLN("// action:cancel");
+        SERIAL_PROTOCOLLNPGM("// action:cancel");
     }
     timeSinceLastRemoval = millis();
 }
