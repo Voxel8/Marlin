@@ -7,7 +7,27 @@ from time import sleep
 import re
 from colorlog import ColoredFormatter
 import logging
+import argparse
 
+
+parser = argparse.ArgumentParser(
+    description='A script for testing the I2C communications of a Voxel8 Printer'
+)
+
+parser.add_argument(
+    '-v', '--verbose',
+    help="Increase verbosity",
+    action="store_const", dest="loglevel", const=logging.INFO,
+    default=logging.WARNING,
+)
+args = parser.parse_args()   
+
+logging.basicConfig(level=logging.DEBUG,  # DEBUG, INFO, WARNING
+                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    datefmt='%d-%m-%y %H:%M:%S',
+                    filename='console.log',
+                    filemode='w'
+                    )
 logging.basicConfig(level=logging.DEBUG,  # DEBUG, INFO, WARNING
                     format='%(asctime)s %(levelname)-8s %(message)s',
                     datefmt='%d-%m-%y %H:%M:%S',
@@ -16,7 +36,7 @@ logging.basicConfig(level=logging.DEBUG,  # DEBUG, INFO, WARNING
                     )
 
 console = logging.StreamHandler()
-console.setLevel(logging.ERROR)
+console.setLevel(args.loglevel)
 formatter = ColoredFormatter(
     "%(black,bg_white)s%(asctime)s%(reset)s %(log_color)s%(levelname)-8s%(reset)s %(white)s%(message)s",
     datefmt='%d-%m-%y %H:%M:%S',

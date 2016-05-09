@@ -7,6 +7,20 @@ from time import sleep
 import re
 from colorlog import ColoredFormatter
 import logging
+import argparse
+
+
+parser = argparse.ArgumentParser(
+    description='A script for testing the I2C communications of a Voxel8 Printer'
+)
+
+parser.add_argument(
+    '-v', '--verbose',
+    help="Increase verbosity",
+    action="store_const", dest="loglevel", const=logging.INFO,
+    default=logging.WARNING,
+)
+args = parser.parse_args()   
 
 logging.basicConfig(level=logging.DEBUG,  # DEBUG, INFO, WARNING
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -16,7 +30,9 @@ logging.basicConfig(level=logging.DEBUG,  # DEBUG, INFO, WARNING
                     )
 
 console = logging.StreamHandler()
-console.setLevel(logging.ERROR)
+
+console.setLevel(args.loglevel)
+
 formatter = ColoredFormatter(
     "%(black,bg_white)s%(asctime)s%(reset)s %(log_color)s%(levelname)-8s%(reset)s %(white)s%(message)s",
     datefmt='%d-%m-%y %H:%M:%S',
@@ -56,18 +72,21 @@ class I2CTestCase(unittest.TestCase):
         g = self.g
         resp = g.write(
             command + ' ' + p1 + ' ' + p2 + ' ' + p3, resp_needed=True)
-        logging.debug(str(command + ' ' + p1 + ' ' + p2 + ' ' + p3 +'  Response: ' + resp))
+        logging.debug(
+            str(command + ' ' + p1 + ' ' + p2 + ' ' + p3 + '  Response: ' + resp))
         PacketSplit = re.findall('Packet', resp)
         TimeoutSplit = re.findall('Timeout', resp)
         if len(PacketSplit):
             logging.error(
                 "Dropped " + str(len(PacketSplit)) + " Packets from address " + str(p1) + ". " + str(p1) + " is either not present or not communicating.")
             resp = 0
-            self.assertEqual(len(PacketSplit), 0, "Dropped packets, target is either not connected or not programmed")
+            self.assertEqual(len(
+                PacketSplit), 0, "Dropped packets, target is either not connected or not programmed")
         if len(TimeoutSplit):
             logging.error(str(len(TimeoutSplit)) + " Timeouts from " + str(p1))
             resp = 0
-            self.assertEqual(len(TimeoutSplit), 0, "Timed out I2C, one of the peripherals is likely holding the data line low")
+            self.assertEqual(len(
+                TimeoutSplit), 0, "Timed out I2C, one of the peripherals is likely holding the data line low")
         return resp
 
     def parseCartridgeStatus(self, cartridgeStatus, cartridgeNumber):
@@ -86,12 +105,14 @@ class I2CTestCase(unittest.TestCase):
             logging.error(
                 "%s FLASH not loaded properly, or cartridge is out of date", cartridgeNumber)
             logging.info(' ')
-            self.assertNotEqual(int(infoList[18]), 255,"Cartridge FLASH not loaded properly, or cartridge is out of date")
+            self.assertNotEqual(int(infoList[
+                                18]), 255, "Cartridge FLASH not loaded properly, or cartridge is out of date")
 
         if (int(infoList[8]) == 15) and (cartridgeNumber != "Cartridge Holder"):
             logging.error("%s EEPROM not loaded properly", cartridgeNumber)
             logging.info(' ')
-            self.assertNotEqual(int(infoList[8]), 15, "Cartridge EEPROM not loaded properly")
+            self.assertNotEqual(
+                int(infoList[8]), 15, "Cartridge EEPROM not loaded properly")
         logging.info(' ')
     ###########################################################################
     #
