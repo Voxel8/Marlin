@@ -18,7 +18,7 @@
 
 #define REG_OFFSET      2  // psi
 #define REG_HYSTERESIS  0.0 // psi
-#define MCP_CONST       (REG_OFFSET - (REG_HYSTERESIS/2.0))
+#define MCP_CONST       (REG_OFFSET - REG_HYSTERESIS)
 #define REGULATOR_LOW_P 2
 
 /*================================================================================*/
