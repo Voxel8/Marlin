@@ -11,21 +11,26 @@
 
 // Set the output pressure (in psi) of the regulator.
 void setOutputPressure(float desired_pressure) {
-    uint16_t digital_val = 0;
-    // Increasing pressure
-    if(desired_pressure > pressureRegulator()) {
-        // Add half of hysteresis range to desired pressure
-        desired_pressure += (REG_HYSTERESIS/2.0);
-    }
-    // Decreasing pressure
-    else if(desired_pressure < pressureRegulator()) {
-        // Subtract half of hysteresis range from desired pressure
-        desired_pressure -= (REG_HYSTERESIS/2.0);
-    }
+  uint16_t digital_val = 0;
+  // Set to zero
+  if (desired_pressure <= (REG_OFFSET + REG_HYSTERESIS)) {
+    digital_val = 0;
+  }
+  // Increasing pressure
+  else if (desired_pressure > pressureRegulator()) {
+    // Add half of hysteresis range to desired pressure
+    digital_val = (uint16_t)(BITS_PER_PSI *
+                             (desired_pressure - REG_OFFSET + REG_HYSTERESIS));
+  }
+  // Decreasing pressure
+  else if (desired_pressure < pressureRegulator()) {
+    // Subtract half of hysteresis range from desired pressure
+    digital_val = (uint16_t)(BITS_PER_PSI *
+                             (desired_pressure - REG_OFFSET - REG_HYSTERESIS));
+  }
 
-	digital_val = (uint16_t)(BITS_PER_PSI * (desired_pressure + MCP_CONST));
-	// Write value to DAC
-	DAC_write(MCP4725_I2C_ADDRESS, digital_val);
+  // Write value to DAC
+  DAC_write(MCP4725_I2C_ADDRESS, digital_val);
 }
 
-#endif // ENABLED(E_REGULATOR)
+#endif  // ENABLED(E_REGULATOR)
