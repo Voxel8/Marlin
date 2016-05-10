@@ -86,11 +86,9 @@ static void _regulator_sled_removed_error() {
     //quickStop();
     //disable_all_heaters();
     //disable_all_steppers();
-    SERIAL_PROTOCOL(  
+    SERIAL_PROTOCOLLNPGM(  
       "Sled not detected. Canceling print, check pneumatics sled.");
-    SERIAL_EOL;
-    SERIAL_ECHOLN("// action:cancel");
-    SERIAL_EOL;
+    SERIAL_PROTOCOLLNPGM("// action:cancel");
     sled_present = false;
   }
 }
@@ -102,11 +100,9 @@ static void _regulator_leak_error() {
   quickStop();
   disable_all_heaters();
   disable_all_steppers();
-  SERIAL_PROTOCOL(  
+  SERIAL_PROTOCOLLNPGM(  
       "Pressure Leak Error. Canceling print, check the pressure hose");
-  SERIAL_EOL;
-  SERIAL_ECHOLN("// action:cancel");
-  SERIAL_EOL;
+  SERIAL_PROTOCOLLNPGM("// action:cancel");
   Regulator__SetOutputPressure(0.0);
   sled_present = true;
 }
@@ -118,10 +114,8 @@ static void _regulator_runaway_error() {
   quickStop();
   disable_all_heaters();
   disable_all_steppers();
-  SERIAL_PROTOCOL("Runaway Pressure Error. Canceling print.");
-  SERIAL_EOL;
-  SERIAL_ECHOLN("// action:cancel");
-  SERIAL_EOL;
+  SERIAL_PROTOCOLLNPGM("Runaway Pressure Error. Canceling print.");
+  SERIAL_PROTOCOLLNPGM("// action:cancel");
   Regulator__SetOutputPressure(0.0);
   sled_present = true;
 }
@@ -146,9 +140,9 @@ static void pressure_protection(float target_pressure, float pressure) {
   if (regulatorOver || regulatorUnder) {
     if (millis() > (regulatorTimer + REGULATOR_PROTECTION_TIME_S * 1000UL)) {
       if (sled_present == true) {
-        SERIAL_PROTOCOL(" Target Pressure ");
+        SERIAL_PROTOCOLPGM(" Target Pressure ");
         SERIAL_PROTOCOL(target_pressure);
-        SERIAL_PROTOCOL(" Actual Pressure ");
+        SERIAL_PROTOCOLPGM(" Actual Pressure ");
         SERIAL_PROTOCOL(pressure);
         SERIAL_EOL;
       }

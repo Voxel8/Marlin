@@ -689,6 +689,7 @@ void manage_heater() {
   if (!temp_meas_ready) return;
 
   updateTemperaturesFromRawValues();
+  Regulator__Update();
 
   #if ENABLED(HEATER_0_USES_MAX6675)
     float ct = current_temperature[0];
@@ -706,8 +707,6 @@ void manage_heater() {
     #if ENABLED(THERMAL_PROTECTION_HOTENDS)
       thermal_runaway_protection(&thermal_runaway_state_machine[e], &thermal_runaway_timer[e], current_temperature[e], target_temperature[e], e, THERMAL_PROTECTION_PERIOD, THERMAL_PROTECTION_HYSTERESIS);
     #endif
-
-    Regulator__Update();
     
     float pid_output = get_pid_output(e);
 
