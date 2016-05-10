@@ -107,8 +107,10 @@ FORCE_INLINE void serialprintPGM(const char *str) {
     str++;
   }
 }
-
-int freeRam ();
+extern "C"
+{
+  int freeMemory();
+}
 void get_command();
 
 void idle(); // the standard idle routine calls manage_inactivity(false)

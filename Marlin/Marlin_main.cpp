@@ -488,12 +488,6 @@ void plan_arc(float target[NUM_AXIS], float *offset, uint8_t clockwise);
 
 bool setTargetedHotend(int code);
 
-int freeRam () {
-  extern int __heap_start, *__brkval; 
-  int v; 
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
-}
-
 void serial_echopair_P(const char *s_P, int v)           { serialprintPGM(s_P); SERIAL_ECHO(v); }
 void serial_echopair_P(const char *s_P, long v)          { serialprintPGM(s_P); SERIAL_ECHO(v); }
 void serial_echopair_P(const char *s_P, float v)         { serialprintPGM(s_P); SERIAL_ECHO(v); }
@@ -3638,10 +3632,12 @@ inline void gcode_M105() {
     SERIAL_PROTOCOLPGM(" C1: ");
     I2C__GetErrorCode(CART1_ADDR);
   }
-  
-  SERIAL_PROTOCOLPGM(" FREE RAM: ");
-  SERIAL_PROTOCOL(freeRam());
 
+#if ENABLED(RAM_DEBUG)
+  SERIAL_PROTOCOLPGM(" FREE RAM: ");
+  SERIAL_PROTOCOL(freeMemory());
+#endif  // ENABLED(RAM_DEBUG)
+  
   SERIAL_EOL;
 }
 

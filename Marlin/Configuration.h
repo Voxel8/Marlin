@@ -755,6 +755,9 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 //define this to enable EEPROM support
 #define EEPROM_SETTINGS
 
+// RAM checking
+//#define RAM_DEBUG
+
 #if ENABLED(EEPROM_SETTINGS)
   // To disable EEPROM Serial responses and decrease program space by ~1700 byte: comment this out:
   #define EEPROM_CHITCHAT // Please keep turned on if you can.

@@ -1913,13 +1913,14 @@ ISR(TIMER0_COMPB_vect) {
       }
     }
   #endif //BABYSTEPPING
-  int frees = freeRam(); 
-  if (frees < 400) {
-    SERIAL_PROTOCOLPGM(" Free RAM: ");
-    SERIAL_PROTOCOL(frees);
-    SERIAL_EOL;
-  }
 
+    int freeMem = freeMemory();
+    if (freeMem < 400) {
+      SERIAL_PROTOCOLPGM(" Free RAM Low: ");
+      SERIAL_PROTOCOL(freeMem);
+      SERIAL_PROTOCOLPGM("// action:cancel");
+      SERIAL_EOL;
+    }
 }
 
 #if ENABLED(PIDTEMP)
