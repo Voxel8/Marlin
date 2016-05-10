@@ -131,16 +131,13 @@ bool Cartridge__FFFNotPresentHysteresis(void) {
  */
 void Cartridge__SetPresentCheck(bool value) {
   if (value == true) {
-    SERIAL_PROTOCOL("Cartridge Check Enabled");
-    SERIAL_EOL;
+    SERIAL_PROTOCOLLNPGM("Cartridge Check Enabled");
     cartridgeRemovalCheckEnabled = 1;
   } else if (value == false) {
-    SERIAL_PROTOCOL("Cartridge Check Disabled");
-    SERIAL_EOL;
+    SERIAL_PROTOCOLLNPGM("Cartridge Check Disabled");
     cartridgeRemovalCheckEnabled = 0;
   } else {
-    SERIAL_PROTOCOL("Invalid value for Cartridge Check Set");
-    SERIAL_EOL;
+    SERIAL_PROTOCOLLNPGM("Invalid value for Cartridge Check Set");
     return;
   }
   cartridgeRemovalCheckEnabled = value;
@@ -161,16 +158,16 @@ static void cartridgeAbsentUpdate(uint8_t cartNumber) {
     cartridgeStatus[cartNumber] = REMOVED;
     switch (cartNumber) {
       case FFF_INDEX:
-        SERIAL_ECHOLN("FFF Cartridge Removed");
+        SERIAL_PROTOCOLLNPGM("FFF Cartridge Removed");
         break;
       case SILVER_INDEX:
         // Prevents the silver extruder from being lowered
         // unintentionally
         WRITE(CART1_SIG1_PIN, LOW);
-        SERIAL_ECHOLN("Silver Cartridge Removed");
+        SERIAL_PROTOCOLLNPGM("Silver Cartridge Removed");
         break;
       default:
-        SERIAL_ECHOLN("Cartridge Removed");
+        SERIAL_PROTOCOLLNPGM("Cartridge Removed");
     }
     _cartridge_removed_error((PSTR(MSG_T_CARTRIDGE_REMOVED)));
   }
@@ -185,13 +182,13 @@ static void cartridgePresentUpdate(uint8_t cartNumber) {
   if (cartridgeStatus[cartNumber] != PRESENT) {
     switch (cartNumber) {
       case FFF_INDEX:
-        SERIAL_ECHOLN("FFF Cartridge Inserted");
+        SERIAL_PROTOCOLLNPGM("FFF Cartridge Inserted");
         break;
       case SILVER_INDEX:
-        SERIAL_ECHOLN("Silver Cartridge Inserted");
+        SERIAL_PROTOCOLLNPGM("Silver Cartridge Inserted");
         break;
       default:
-        SERIAL_ECHOLN("Cartridge Inserted");
+        SERIAL_PROTOCOLLNPGM("Cartridge Inserted");
     }
   }
   cartridgeStatus[cartNumber] = PRESENT;
@@ -251,6 +248,6 @@ static void _cartridge_removed_error(const char *serial_msg) {
     disable_all_steppers();
     serialprintPGM(serial_msg);
     SERIAL_EOL;
-    SERIAL_ECHOLN("// action:cancel");
+    SERIAL_PROTOCOLLNPGM("// action:cancel");
   }
 }
