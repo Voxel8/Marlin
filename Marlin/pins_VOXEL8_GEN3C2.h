@@ -174,7 +174,7 @@ DIGITAL POTENTIOMETER PINS
 /*************************
     TEST PINS
 *************************/
-#if ENABLED(DEBUG_TEST_PINS)
+#ifdef DEBUG
   #define TEST_POINT_83_PIN     83
-#endif  // ENABLED(DEBUG_TEST_PINS)
+#endif  // DEBUG
     
