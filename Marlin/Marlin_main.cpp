@@ -4563,12 +4563,12 @@ inline void gcode_M221() {
     if (code_seen('T')) {
       if (setTargetedHotend(221)) return;
       SERIAL_PROTOCOL(int(code_value()));
-      SERIAL_PROTOCOL("): ");
+      SERIAL_PROTOCOLPGM("): ");
       SERIAL_PROTOCOLLN(extruder_multiplier[target_extruder]);
     }
     else {
       SERIAL_PROTOCOL(int(code_value()));
-      SERIAL_PROTOCOL("): ");
+      SERIAL_PROTOCOLPGM("): ");
       SERIAL_PROTOCOLLN(extruder_multiplier[active_extruder]);
     }
   }
@@ -5194,7 +5194,7 @@ inline void gcode_M252() {
       updatePID();
       SERIAL_PROTOCOL(MSG_OK);
       #if ENABLED(PID_PARAMS_PER_EXTRUDER)
-        SERIAL_PROTOCOL(" e:"); // specify extruder in serial output
+        SERIAL_PROTOCOLPGM(" e:"); // specify extruder in serial output
         SERIAL_PROTOCOL(e);
       #endif // PID_PARAMS_PER_EXTRUDER
       SERIAL_PROTOCOLPGM(" p:");

@@ -65,16 +65,16 @@ void I2C__GeneralCommand(uint8_t I2C_target_address, uint8_t command,
 
 #if defined(DEBUG)
   SERIAL_PROTOCOLLNPGM("Command: 'I2C Command' Sent");
-  SERIAL_PROTOCOL("Target address = ");
+  SERIAL_PROTOCOLPGM("Target address = ");
   SERIAL_PROTOCOL(I2C_target_address);
   SERIAL_EOL;
-  SERIAL_PROTOCOL("command = ");
+  SERIAL_PROTOCOLPGM("command = ");
   SERIAL_PROTOCOL(command);
   SERIAL_EOL;
-  SERIAL_PROTOCOL("address = ");
+  SERIAL_PROTOCOLPGM("address = ");
   SERIAL_PROTOCOL(address);
   SERIAL_EOL;
-  SERIAL_PROTOCOL("data = ");
+  SERIAL_PROTOCOLPGM("data = ");
   SERIAL_PROTOCOL(data);
   SERIAL_EOL;
 #endif  // end DEBUG
@@ -97,7 +97,7 @@ void I2C__SetFanDrive0PWM(uint8_t fanSpeed) {
 // Send information to Octoprint
 #if defined(DEBUG)
   SERIAL_PROTOCOLLNPGM("Command: 'Set Fan Speed' Sent");
-  SERIAL_PROTOCOL("fanSpeed = ");
+  SERIAL_PROTOCOLPGM("fanSpeed = ");
   SERIAL_PROTOCOL(fanSpeed);
 #endif  // end DEBUG
 }
@@ -115,7 +115,7 @@ void I2C__SetFanOff(void) {
 // Send information to Octoprint
 #if defined(DEBUG)
   SERIAL_PROTOCOLLNPGM("Command: 'Fan Off' Sent");
-  SERIAL_PROTOCOL("fanSpeed = ");
+  SERIAL_PROTOCOLPGM("fanSpeed = ");
   SERIAL_PROTOCOL(fanSpeed);
 #endif  // end DEBUG
 }
@@ -132,7 +132,7 @@ void I2C__ToggleUV(uint8_t data) {
 // Send information to Octoprint
 #if defined(DEBUG)
   SERIAL_PROTOCOLLNPGM("Command: 'I2C Command' Sent");
-  SERIAL_PROTOCOL("data = ");
+  SERIAL_PROTOCOLPGM("data = ");
   SERIAL_PROTOCOL((int)data);
   SERIAL_EOL;
 #endif  // end DEBUG
@@ -150,9 +150,9 @@ void I2C__EEPROMWrite(uint8_t cartridge, uint8_t eeprom_address, uint8_t data) {
 
   // Send information to Octoprint
   SERIAL_PROTOCOLLNPGM("Command: 'EEPROM Write' Sent");
-  SERIAL_PROTOCOL("Value = ");
+  SERIAL_PROTOCOLPGM("Value = ");
   SERIAL_PROTOCOL(data);
-  SERIAL_PROTOCOL("Address = ");
+  SERIAL_PROTOCOLPGM("Address = ");
   SERIAL_PROTOCOL(eeprom_address);
 
   // Read from cartridge and report
@@ -171,7 +171,7 @@ void I2C__EEPROMRead(uint8_t cartridge, uint8_t address) {
 
   // Send information to Octoprint
   SERIAL_PROTOCOLLNPGM("Command: 'EEPROM READ' Sent");
-  SERIAL_PROTOCOL("Value = ");
+  SERIAL_PROTOCOLPGM("Value = ");
 
   // Read from cartridge and report
   requestAndPrintPacket(cartridge, 1);
@@ -188,7 +188,7 @@ void I2C__GetSerial(uint8_t cartridge) {
                        I2C_EMPTY_DATA);
 
   // Send information to Octoprint
-  SERIAL_PROTOCOL("Serial Number = ");
+  SERIAL_PROTOCOLPGM("Serial Number = ");
 
   // Read from cartridge and report
   requestAndPrintSerial(cartridge);
@@ -206,7 +206,7 @@ void I2C__GetProgrammerStation(uint8_t cartridge) {
                        I2C_EMPTY_DATA);
 
   // Send information to Octoprint
-  SERIAL_PROTOCOL("Programmer Station = ");
+  SERIAL_PROTOCOLPGM("Programmer Station = ");
 
   // Read from cartridge and report
   requestAndPrintPacket(cartridge, 1);
@@ -223,7 +223,7 @@ void I2C__GetCartridgeType(uint8_t cartridge) {
                        I2C_EMPTY_DATA);
 
   // Send information to Octoprint
-  SERIAL_PROTOCOL("Cartridge Type = ");
+  SERIAL_PROTOCOLPGM("Cartridge Type = ");
 
   // Read from cartridge and report
   requestAndPrintPacket(cartridge, 1);
@@ -240,7 +240,7 @@ void I2C__GetSize(uint8_t cartridge) {
                        I2C_EMPTY_DATA);
 
   // Send information to Octoprint
-  SERIAL_PROTOCOL("Cartridge Size = ");
+  SERIAL_PROTOCOLPGM("Cartridge Size = ");
 
   // Read from cartridge and report
   requestAndPrintPacket(cartridge, 1);
@@ -257,7 +257,7 @@ void I2C__GetMaterial(uint8_t cartridge) {
                        I2C_EMPTY_DATA);
 
   // Send information to Octoprint
-  SERIAL_PROTOCOL("Cartridge Material = ");
+  SERIAL_PROTOCOLPGM("Cartridge Material = ");
 
   // Read from cartridge and report
   requestAndPrintPacket(cartridge, 1);
@@ -285,7 +285,7 @@ void I2C__GetFirmwareVersion(uint8_t cartridge) {
   // Send message
   writeThreeBytePacket(cartridge, EEPROM_READ_FRMWRE, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
-  SERIAL_PROTOCOL("Cartridge Firmware Version = ");
+  SERIAL_PROTOCOLPGM("Cartridge Firmware Version = ");
   // Read from cartridge and report
   requestAndPrintPacket(cartridge, 1);
   SERIAL_EOL;
@@ -299,7 +299,7 @@ void I2C__ClearError(uint8_t cartridge) {
   // Send message
   writeThreeBytePacket(cartridge, CLEAR_ERROR, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
-  SERIAL_PROTOCOL("Cleared Error State");
+  SERIAL_PROTOCOLPGM("Cleared Error State");
   SERIAL_EOL;
 }
 
@@ -328,12 +328,12 @@ void requestAndPrintPacket(uint8_t I2C_target_address, uint8_t bytes) {
   // Read from cartridge and report
   Wire.requestFrom(I2C_target_address, bytes);
   if (!Wire.available()) {
-    SERIAL_PROTOCOL(" No Packet Available ");
+    SERIAL_PROTOCOLPGM(" No Packet Available ");
   } else {
     while (Wire.available()) {
       SERIAL_PROTOCOL(Wire.read());
       if (Wire.twi_getTimeoutFlag()) {
-        SERIAL_PROTOCOL(" I2C Timeout occurred ");
+        SERIAL_PROTOCOLPGM(" I2C Timeout occurred ");
         SERIAL_PROTOCOL(Wire.twi_getTimeoutFlag());
         Wire.twi_resetTimeoutFlag();
       }
@@ -372,7 +372,7 @@ void printPrecedingZero(int number, uint8_t precision) {
   }
   for (int i = 0; i < precision; i++) {
     if ((number < decimalLimit)) {
-      SERIAL_PROTOCOL("0");
+      SERIAL_PROTOCOLPGM("0");
     }
     decimalLimit = decimalLimit * 10;
   }
