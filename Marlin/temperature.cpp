@@ -659,16 +659,16 @@ float get_pid_output(int e) {
 
     #if ENABLED(PID_BED_DEBUG)
       SERIAL_ECHO_START;
-      SERIAL_ECHO(" PID_BED_DEBUG ");
-      SERIAL_ECHO(": Input ");
+      SERIAL_PROTOCOLPGM(" PID_BED_DEBUG ");
+      SERIAL_PROTOCOLPGM(": Input ");
       SERIAL_ECHO(current_temperature_bed);
-      SERIAL_ECHO(" Output ");
+      SERIAL_PROTOCOLPGM(" Output ");
       SERIAL_ECHO(pid_output);
-      SERIAL_ECHO(" pTerm ");
+      SERIAL_PROTOCOLPGM(" pTerm ");
       SERIAL_ECHO(pTerm_bed);
-      SERIAL_ECHO(" iTerm ");
+      SERIAL_PROTOCOLPGM(" iTerm ");
       SERIAL_ECHO(iTerm_bed);
-      SERIAL_ECHO(" dTerm ");
+      SERIAL_PROTOCOLPGM(" dTerm ");
       SERIAL_ECHOLN(dTerm_bed);
     #endif //PID_BED_DEBUG
 
@@ -791,7 +791,7 @@ void manage_heater() {
     
     previous_millis_regulator_value = millis();
     //Is output pressure more than what is available?
-    if((pressureRegulator() >= pressurePneumatic()) && (pressurePneumatic() >= 1) && (pressureRegulator() != REGULATOR_NOT_PRESENT_VALUE)) {
+    if((pressureRegulator() >= pressurePneumatic()) && (pressurePneumatic() >= REGULATOR_LOW_P) && (pressureRegulator() != REGULATOR_NOT_PRESENT_VALUE)) {
       // Shut down
       if(IsRunning()) {
         SERIAL_ERROR_START;

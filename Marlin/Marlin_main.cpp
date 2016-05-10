@@ -5130,9 +5130,9 @@ inline void gcode_M252() {
         servo[servo_index].move(servo_position);
       else {
         SERIAL_ECHO_START;
-        SERIAL_ECHO("Servo ");
+        SERIAL_PROTOCOLPGM("Servo ");
         SERIAL_ECHO(servo_index);
-        SERIAL_ECHOLN(" out of range");
+        SERIAL_PROTOCOLLNPGM(" out of range");
       }
     }
     else if (servo_index >= 0) {
