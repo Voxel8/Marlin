@@ -170,3 +170,11 @@ DIGITAL POTENTIOMETER PINS
   //Filip added pin for Filament sensor analog input 
   #define FILMNT_SENS_PIN       80  //! Monitor filament low
 #endif
+
+/*************************
+    TEST PINS
+*************************/
+#ifdef DEBUG
+  #define TEST_POINT_83_PIN     83
+#endif  // DEBUG
+    

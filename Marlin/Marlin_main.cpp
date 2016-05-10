@@ -622,13 +622,20 @@ void setup_powerhold() {
   #endif
 }
 
-void setup_cartridgeidpins(void){
+void setup_cartridgeidpins(void) {
   #if HAS_CARTRIDGE_ID
-    SET_OUTPUT(CART1_SIG1_PIN)
-    SET_INPUT(CART0_SIG2_PIN)
-    SET_INPUT(CART1_SIG2_PIN)
+    SET_OUTPUT(CART1_SIG1_PIN);
+    SET_INPUT(CART0_SIG2_PIN);
+    SET_INPUT(CART1_SIG2_PIN);
   #endif
 }
+
+#ifdef DEBUG
+void setup_testpins(void) {
+    OUT_WRITE(TEST_POINT_83_PIN, LOW);
+    SET_OUTPUT(TEST_POINT_83_PIN);
+}
+#endif // DEBUG
 
 /*
   Enable 24V to fans, E-reg, Cartridge Holder, Cartridges
@@ -744,6 +751,10 @@ void setup() {
   setup_filrunoutpin();
   setup_powerhold();
   setup_cartridgeidpins();
+
+  #ifdef DEBUG
+    setup_testpins();
+  #endif // DEBUG
 
   #if HAS_STEPPER_RESET
     disableStepperDrivers();
@@ -3615,16 +3626,22 @@ inline void gcode_M105() {
     }
   #endif
 
-  // Get error codes from present cartridges
+
+  //Get error codes from present cartridges
   // if (Cartridge__Present(0)) {
-  //   SERIAL_PROTOCOL(" C0: ");
+  //   SERIAL_PROTOCOLPGM(" C0: ");
   //   I2C__GetErrorCode(CART0_ADDR);
   // }
 
   // if (Cartridge__Present(1)) {
-  //   SERIAL_PROTOCOL(" C1: ");
+  //   SERIAL_PROTOCOLPGM(" C1: ");
   //   I2C__GetErrorCode(CART1_ADDR);
   // }
+
+#ifdef DEBUG
+  SERIAL_PROTOCOLPGM(" FREE RAM: ");
+  SERIAL_PROTOCOL(freeMemory());
+#endif  // DEBUG
 
   SERIAL_EOL;
 }
@@ -4894,7 +4911,7 @@ inline void gcode_M243() {
   }
 
   if (!hasC){
-    SERIAL_ECHOLNPGM("No cartridge address given");
+    SERIAL_ECHOLNPGM("No addr given");
     return;
   }
   if (!hasD){
@@ -4902,7 +4919,7 @@ inline void gcode_M243() {
     return;
   }
   if (!hasE){
-    SERIAL_ECHOLNPGM("No eeprom address given");
+    SERIAL_ECHOLNPGM("No eeprom addr given");
     return;
   }
 
@@ -5038,7 +5055,7 @@ inline void gcode_M248() {
   }
 
   if (!hasE){
-    SERIAL_ECHOLNPGM("Enable (E1) or Disable (E0) not given");
+    SERIAL_ECHOLNPGM("(E1) or (E0) not given");
     return;
   }
 }
@@ -5120,9 +5137,9 @@ inline void gcode_M252() {
     }
     else if (servo_index >= 0) {
       SERIAL_PROTOCOL(MSG_OK);
-      SERIAL_PROTOCOL(" Servo ");
+      SERIAL_PROTOCOLPGM(" Servo ");
       SERIAL_PROTOCOL(servo_index);
-      SERIAL_PROTOCOL(": ");
+      SERIAL_PROTOCOLPGM(": ");
       SERIAL_PROTOCOL(servo[servo_index].read());
       SERIAL_EOL;
     }
@@ -5180,14 +5197,14 @@ inline void gcode_M252() {
         SERIAL_PROTOCOL(" e:"); // specify extruder in serial output
         SERIAL_PROTOCOL(e);
       #endif // PID_PARAMS_PER_EXTRUDER
-      SERIAL_PROTOCOL(" p:");
+      SERIAL_PROTOCOLPGM(" p:");
       SERIAL_PROTOCOL(PID_PARAM(Kp, e));
-      SERIAL_PROTOCOL(" i:");
+      SERIAL_PROTOCOLPGM(" i:");
       SERIAL_PROTOCOL(unscalePID_i(PID_PARAM(Ki, e)));
-      SERIAL_PROTOCOL(" d:");
+      SERIAL_PROTOCOLPGM(" d:");
       SERIAL_PROTOCOL(unscalePID_d(PID_PARAM(Kd, e)));
       #if ENABLED(PID_ADD_EXTRUSION_RATE)
-        SERIAL_PROTOCOL(" c:");
+        SERIAL_PROTOCOLPGM(" c:");
         //Kc does not have scaling applied above, or in resetting defaults
         SERIAL_PROTOCOL(PID_PARAM(Kc, e));
       #endif
@@ -5210,11 +5227,11 @@ inline void gcode_M252() {
 
     updatePID();
     SERIAL_PROTOCOL(MSG_OK);
-    SERIAL_PROTOCOL(" p:");
+    SERIAL_PROTOCOLPGM(" p:");
     SERIAL_PROTOCOL(bedKp);
-    SERIAL_PROTOCOL(" i:");
+    SERIAL_PROTOCOLPGM(" i:");
     SERIAL_PROTOCOL(unscalePID_i(bedKi));
-    SERIAL_PROTOCOL(" d:");
+    SERIAL_PROTOCOLPGM(" d:");
     SERIAL_PROTOCOL(unscalePID_d(bedKd));
     SERIAL_EOL;
   }
