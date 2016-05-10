@@ -622,7 +622,7 @@ void setup_powerhold() {
   #endif
 }
 
-void setup_cartridgeidpins(void){
+void setup_cartridgeidpins(void) {
   #if HAS_CARTRIDGE_ID
     SET_OUTPUT(CART1_SIG1_PIN);
     SET_INPUT(CART0_SIG2_PIN);
@@ -630,10 +630,12 @@ void setup_cartridgeidpins(void){
   #endif
 }
 
-void setup_testpins(void){
-    OUT_WRITE(TEST_POINT_83, LOW);
-    SET_OUTPUT(TEST_POINT_83);
+#if ENABLED(DEBUG_TEST_PINS)
+void setup_testpins(void) {
+    OUT_WRITE(TEST_POINT_83_PIN, LOW);
+    SET_OUTPUT(TEST_POINT_83_PIN);
 }
+#endif // ENABLED(DEBUG_TEST_PINS)
 
 /*
   Enable 24V to fans, E-reg, Cartridge Holder, Cartridges
@@ -749,7 +751,10 @@ void setup() {
   setup_filrunoutpin();
   setup_powerhold();
   setup_cartridgeidpins();
-  setup_testpins();
+
+  #if ENABLED(DEBUG_TEST_PINS)
+    setup_testpins();
+  #endif // ENABLED(DEBUG_TEST_PINS)
 
   #if HAS_STEPPER_RESET
     disableStepperDrivers();
@@ -3623,21 +3628,21 @@ inline void gcode_M105() {
 
 
   //Get error codes from present cartridges
-  if (Cartridge__Present(0)) {
-    SERIAL_PROTOCOLPGM(" C0: ");
-    I2C__GetErrorCode(CART0_ADDR);
-  }
+  // if (Cartridge__Present(0)) {
+  //   SERIAL_PROTOCOLPGM(" C0: ");
+  //   I2C__GetErrorCode(CART0_ADDR);
+  // }
 
-  if (Cartridge__Present(1)) {
-    SERIAL_PROTOCOLPGM(" C1: ");
-    I2C__GetErrorCode(CART1_ADDR);
-  }
+  // if (Cartridge__Present(1)) {
+  //   SERIAL_PROTOCOLPGM(" C1: ");
+  //   I2C__GetErrorCode(CART1_ADDR);
+  // }
 
 #if ENABLED(RAM_DEBUG)
   SERIAL_PROTOCOLPGM(" FREE RAM: ");
   SERIAL_PROTOCOL(freeMemory());
 #endif  // ENABLED(RAM_DEBUG)
-  
+
   SERIAL_EOL;
 }
 
