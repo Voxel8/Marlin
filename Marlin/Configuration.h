@@ -374,9 +374,9 @@ Here are some standard links for getting your machine calibrated:
 
 // Define this if you are using pneumatic direct write on the RAMBo AND you are not
 // using HEAT_1 output
-#define PNEUMATICS
+// #define PNEUMATICS
 // Define this if you are using the electro-pneumatic regulator
-#define E_REGULATOR
+// #define E_REGULATOR
 
 // Define this if you don't want to home in  the center of the bed.
 //#define HOME_AT_BACK
