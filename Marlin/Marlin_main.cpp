@@ -5631,6 +5631,10 @@ inline void gcode_M410() { quickStop(); }
 
 #endif
 
+inline void gcode_M422() {
+  SERIAL_ERRORLNPGM("yodawg");
+}
+
 /**
  * M428: Set home_offset based on the distance between the
  *       current_position and the nearest "reference point."
@@ -6763,6 +6767,9 @@ void process_next_command() {
           break;
       #endif
 
+      case 422:
+        gcode_M422();
+        break;
       case 428: // M428 Apply current_position to home_offset
         gcode_M428();
         break;
