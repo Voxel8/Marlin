@@ -13,11 +13,11 @@
 // PSI_MAX = 100
 // PSI_MIN = 2
 // BITS_PER_PSI = (2^n/(PSI_MAX - PSI_MIN)) / (R2/(R1 + R2)) = 41.92
-// Empirically tuned to 42.76
+// Empirically tuned to 43.00
 
-#define BITS_PER_PSI    41.08
+#define BITS_PER_PSI    43.00
 
-#define REG_OFFSET      0.5 // psi
+#define REG_OFFSET      0.0  // psi
 #define REG_HYSTERESIS  0.0 // psi
 #define MCP_CONST       (REG_OFFSET - (REG_HYSTERESIS/2.0))
 #define REGULATOR_LOW_P 2
