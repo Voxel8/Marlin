@@ -18,13 +18,13 @@ void setOutputPressure(float desired_pressure) {
     }
     // Increasing pressure
     else if (desired_pressure > pressureRegulator()) {
-        // Add half of hysteresis range to desired pressure
+        // Add hysteresis value to desired pressure
         digital_val = (uint16_t)(BITS_PER_PSI *
                                  (desired_pressure - REG_OFFSET + REG_HYSTERESIS));
     }
     // Decreasing pressure
     else if (desired_pressure < pressureRegulator()) {
-        // Subtract half of hysteresis range from desired pressure
+        // Subtract hysteresis value from desired pressure
         digital_val = (uint16_t)(BITS_PER_PSI *
                                  (desired_pressure - REG_OFFSET - REG_HYSTERESIS));
     }

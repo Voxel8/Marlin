@@ -24,14 +24,13 @@
 
 #if (E_REGULATOR_SENSOR == 1)     // SMC E-Reg
     #define BITS_PER_PSI    33.1
-    #define REG_OFFSET      0.5   // psi
+    #define REG_OFFSET      0.25  // psi
     #define REG_HYSTERESIS  0.2   // psi
 #elif (E_REGULATOR_SENSOR == 2)   // Metalworks E-Reg
     #define BITS_PER_PSI    43.00
     #define REG_OFFSET      0.0   // psi
     #define REG_HYSTERESIS  0.0   // psi
 #endif // E_REGULATOR_SENSOR
-#define MCP_CONST       (REG_OFFSET - (REG_HYSTERESIS/2.0))
 #define REGULATOR_LOW_P 2
 
 /*================================================================================*/
