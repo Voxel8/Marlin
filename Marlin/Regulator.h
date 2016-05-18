@@ -10,9 +10,16 @@
 // R1 = 499
 // R2 (input impedance of sensor) = 168k
 // n = 12
+// Metalworks E-Reg Settings:
+// Type of input: 0/5 V
+// Measure unit: psi
 // PSI_MAX = 100
-// PSI_MIN = 2
-// BITS_PER_PSI = (2^n/(PSI_MAX - PSI_MIN)) / (R2/(R1 + R2)) = 41.92
+// PSI_MIN = 0
+// Minimal pression: 0
+// Speed adjust: 4
+// Filter analog input: 2
+// 
+// BITS_PER_PSI = (2^n/(PSI_MAX - PSI_MIN)) / (R2/(R1 + R2)) = 40.92
 // Empirically tuned to 43.00
 
 #define BITS_PER_PSI    43.00
