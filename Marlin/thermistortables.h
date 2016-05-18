@@ -1206,6 +1206,12 @@ const short regulatortable_1[][2] PROGMEM = {
 };
 #endif
 
+#if (E_REGULATOR_SENSOR == 2) // Internal Pressure Sensor LUT for Regtronic M5
+const short regulatortable_2[][2] PROGMEM = {
+  {0*OVERSAMPLENR,       2},
+  {1023*OVERSAMPLENR, 1500},
+};
+#endif
 
 #define _TT_NAME(_N) temptable_ ## _N
 #define TT_NAME(_N) _TT_NAME(_N)
