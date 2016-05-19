@@ -51,7 +51,7 @@ class I2C_Test:
             logging.debug("Cartridge Type: %s", infoList[8])
             logging.debug("Cartridge Size: %s", infoList[11])
             logging.debug("Cartridge Material: %s", infoList[14])
-            logging.debug("Cartridge Temperature: %s", infoList[21])
+            # logging.debug("Cartridge Temperature: %s", infoList[21])
             if (int(infoList[18]) == 255):
                 self.test.logFailure(
                     "%s FLASH not loaded properly, or cartridge is out of date\n", cartridgeNumber)
