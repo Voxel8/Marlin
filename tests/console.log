@@ -1,421 +1,61 @@
-16-05-16 17:15:39 DEBUG    Logging and Parser Complete
-16-05-16 17:15:39 DEBUG    read_thread started
-16-05-16 17:15:40 DEBUG    Connected to Serial<id=0x35b3828, open=True>(port='COM5', baudrate=250000, bytesize=8, parity='N', stopbits=1, timeout=3, xonxoff=False, rtscts=False, dsrdtr=False)
-16-05-16 17:15:40 DEBUG    print_thread started
-16-05-16 17:15:40 DEBUG    Test initialized
-16-05-16 17:15:40 DEBUG    Initialized I2C Test
-16-05-16 17:15:40 INFO     Querying first 30 EEPROM locations for each cartridge and the cartridge holder
-16-05-16 17:15:41 DEBUG    M244 C0 E0   Response: Command: 'EEPROM READ' Sent
+19-05-16 15:20:41 DEBUG    Logging and Parser Complete
+19-05-16 15:20:41 DEBUG    read_thread started
+19-05-16 15:20:42 DEBUG    Connected to Serial<id=0x3692940, open=True>(port='COM5', baudrate=250000, bytesize=8, parity='N', stopbits=1, timeout=3, xonxoff=False, rtscts=False, dsrdtr=False)
+19-05-16 15:20:42 DEBUG    print_thread started
+19-05-16 15:20:42 DEBUG    Test initialized
+19-05-16 15:20:42 DEBUG    Initialized I2C Test
+19-05-16 15:20:42 INFO     Querying first 30 EEPROM locations for each cartridge and the cartridge holder
+19-05-16 15:20:42 DEBUG    M244 C0 E0   Response: Command: 'EEPROM READ' Sent
 Value = 8
 ok
 
-16-05-16 17:15:41 DEBUG    M244 C1 E0   Response: Command: 'EEPROM READ' Sent
+19-05-16 15:20:42 DEBUG    M244 C1 E0   Response: Command: 'EEPROM READ' Sent
+Value =  No Packet Available 
+ok
+
+19-05-16 15:20:42 ERROR    Dropped 1 Packets from address C1. C1 is either not present or not communicating.
+19-05-16 15:20:42 DEBUG    M244 C2 E0   Response: Command: 'EEPROM READ' Sent
 Value = 255
 ok
 
-16-05-16 17:15:41 DEBUG    M244 C2 E0   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
+19-05-16 15:20:42 INFO     Retrieving Cartridge 0 information
 
-16-05-16 17:15:41 DEBUG    M244 C0 E1   Response: Command: 'EEPROM READ' Sent
-Value = 34
-ok
+19-05-16 15:20:42 DEBUG    M245 C0    Response: Serial Number = 020016
 
-16-05-16 17:15:41 DEBUG    M244 C1 E1   Response: Command: 'EEPROM READ' Sent
-Value = 34
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E1   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E2   Response: Command: 'EEPROM READ' Sent
-Value = 8
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E2   Response: Command: 'EEPROM READ' Sent
-Value = 18
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E2   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E3   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E3   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E3   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E4   Response: Command: 'EEPROM READ' Sent
-Value = 2
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E4   Response: Command: 'EEPROM READ' Sent
-Value = 4
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E4   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E5   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E5   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E5   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E6   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E6   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E6   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E7   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E7   Response: Command: 'EEPROM READ' Sent
-Value = 160
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E7   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E8   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E8   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E8   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E9   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E9   Response: Command: 'EEPROM READ' Sent
-Value = 3
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E9   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E10   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E10   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E10   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E11   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E11   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E11   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E12   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E12   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E12   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C0 E13   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C1 E13   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:41 DEBUG    M244 C2 E13   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E14   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E14   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E14   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E15   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E15   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E15   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E16   Response: Command: 'EEPROM READ' Sent
-Value = 213
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E16   Response: Command: 'EEPROM READ' Sent
-Value = 102
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E16   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E17   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E17   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E17   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E18   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E18   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E18   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E19   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E19   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E19   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E20   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E20   Response: Command: 'EEPROM READ' Sent
-Value = 1
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E20   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E21   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E21   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E21   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E22   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E22   Response: Command: 'EEPROM READ' Sent
-Value = 1
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E22   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E23   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E23   Response: Command: 'EEPROM READ' Sent
-Value = 0
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E23   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E24   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E24   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E24   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E25   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E25   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E25   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E26   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E26   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E26   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C0 E27   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C1 E27   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:42 DEBUG    M244 C2 E27   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:43 DEBUG    M244 C0 E28   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:43 DEBUG    M244 C1 E28   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:43 DEBUG    M244 C2 E28   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:43 DEBUG    M244 C0 E29   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:43 DEBUG    M244 C1 E29   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:43 DEBUG    M244 C2 E29   Response: Command: 'EEPROM READ' Sent
-Value = 255
-ok
-
-16-05-16 17:15:43 INFO     All EEPROM locations successfully queried
-
-16-05-16 17:15:43 INFO     Retrieving Cartridge 0 information
-
-16-05-16 17:15:43 DEBUG    M245 C0    Response: Serial Number = 080002
-
-Programmer Station = 8
+Programmer Station = 2
 Cartridge Type = 0
 Cartridge Size = 15
 Cartridge Material = 15
 Cartridge Firmware Version = 34
 ok
 
-16-05-16 17:15:43 INFO     Cartridge 0 Info
-16-05-16 17:15:43 DEBUG    ['Serial', 'Number', '080002', 'Programmer', 'Station', '8', 'Cartridge', 'Type', '0', 'Cartridge', 'Size', '15', 'Cartridge', 'Material', '15', 'Cartridge', 'Firmware', 'Version', '34', 'ok', '']
-16-05-16 17:15:43 DEBUG    -------------------------------------
-16-05-16 17:15:43 DEBUG    Cartridge Serial Number: 080002
-16-05-16 17:15:43 DEBUG    Cartridge Firmware Version: 34
-16-05-16 17:15:43 DEBUG    Cartridge Programmer Station: 8
-16-05-16 17:15:43 DEBUG    Cartridge Type: 0
-16-05-16 17:15:43 DEBUG    Cartridge Size: 15
-16-05-16 17:15:43 DEBUG    Cartridge Material: 15
-16-05-16 17:15:43 INFO      
-16-05-16 17:15:43 INFO     Cartridge 0 info retrieved successfully
+19-05-16 15:20:42 INFO     Cartridge 0 Info
+19-05-16 15:20:42 DEBUG    ['Serial', 'Number', '020016', 'Programmer', 'Station', '2', 'Cartridge', 'Type', '0', 'Cartridge', 'Size', '15', 'Cartridge', 'Material', '15', 'Cartridge', 'Firmware', 'Version', '34', 'ok', '']
+19-05-16 15:20:42 DEBUG    -------------------------------------
+19-05-16 15:20:42 DEBUG    Cartridge Serial Number: 020016
+19-05-16 15:20:42 DEBUG    Cartridge Firmware Version: 34
+19-05-16 15:20:42 DEBUG    Cartridge Programmer Station: 2
+19-05-16 15:20:42 DEBUG    Cartridge Type: 0
+19-05-16 15:20:42 DEBUG    Cartridge Size: 15
+19-05-16 15:20:42 DEBUG    Cartridge Material: 15
+19-05-16 15:20:42 INFO      
+19-05-16 15:20:42 INFO     Cartridge 0 info retrieved successfully
 
-16-05-16 17:15:43 INFO     Retrieving Cartridge 1 information
+19-05-16 15:20:42 INFO     Retrieving Cartridge 1 information
 
-16-05-16 17:15:43 DEBUG    M245 C1    Response: Serial Number = 120004
+19-05-16 15:20:42 DEBUG    M245 C1    Response: Serial Number = 0000000
 
-Programmer Station = 2
-Cartridge Type = 1
-Cartridge Size = 15
-Cartridge Material = 15
-Cartridge Firmware Version = 34
+Programmer Station =  No Packet Available 
+Cartridge Type =  No Packet Available 
+Cartridge Size =  No Packet Available 
+Cartridge Material =  No Packet Available 
+Cartridge Firmware Version =  No Packet Available 
 ok
 
-16-05-16 17:15:43 INFO     Cartridge 1 Info
-16-05-16 17:15:43 DEBUG    ['Serial', 'Number', '120004', 'Programmer', 'Station', '2', 'Cartridge', 'Type', '1', 'Cartridge', 'Size', '15', 'Cartridge', 'Material', '15', 'Cartridge', 'Firmware', 'Version', '34', 'ok', '']
-16-05-16 17:15:43 DEBUG    -------------------------------------
-16-05-16 17:15:43 DEBUG    Cartridge Serial Number: 120004
-16-05-16 17:15:43 DEBUG    Cartridge Firmware Version: 34
-16-05-16 17:15:43 DEBUG    Cartridge Programmer Station: 2
-16-05-16 17:15:43 DEBUG    Cartridge Type: 1
-16-05-16 17:15:43 DEBUG    Cartridge Size: 15
-16-05-16 17:15:43 DEBUG    Cartridge Material: 15
-16-05-16 17:15:43 INFO      
-16-05-16 17:15:43 INFO     Cartridge 1 info retrieved successfully
+19-05-16 15:20:42 ERROR    Dropped 5 Packets from address C1. C1 is either not present or not communicating.
+19-05-16 15:20:42 INFO     Retrieving Cartridge Holder information
 
-16-05-16 17:15:43 INFO     Retrieving Cartridge Holder information
-
-16-05-16 17:15:43 DEBUG    M245 C2    Response: Serial Number = 151565280
+19-05-16 15:20:42 DEBUG    M245 C2    Response: Serial Number = 151565280
 
 Programmer Station = 15
 Cartridge Type = 15
@@ -424,56 +64,49 @@ Cartridge Material = 15
 Cartridge Firmware Version = 0
 ok
 
-16-05-16 17:15:43 INFO     Cartridge Holder Info
-16-05-16 17:15:43 DEBUG    ['Serial', 'Number', '151565280', 'Programmer', 'Station', '15', 'Cartridge', 'Type', '15', 'Cartridge', 'Size', '15', 'Cartridge', 'Material', '15', 'Cartridge', 'Firmware', 'Version', '0', 'ok', '']
-16-05-16 17:15:43 DEBUG    -------------------------------------
-16-05-16 17:15:43 DEBUG    Cartridge Serial Number: 151565280
-16-05-16 17:15:43 DEBUG    Cartridge Firmware Version: 0
-16-05-16 17:15:43 DEBUG    Cartridge Programmer Station: 15
-16-05-16 17:15:43 DEBUG    Cartridge Type: 15
-16-05-16 17:15:43 DEBUG    Cartridge Size: 15
-16-05-16 17:15:43 DEBUG    Cartridge Material: 15
-16-05-16 17:15:43 INFO      
-16-05-16 17:15:43 INFO     Cartridge Holder info retrieved successfully
+19-05-16 15:20:42 INFO     Cartridge Holder Info
+19-05-16 15:20:42 DEBUG    ['Serial', 'Number', '151565280', 'Programmer', 'Station', '15', 'Cartridge', 'Type', '15', 'Cartridge', 'Size', '15', 'Cartridge', 'Material', '15', 'Cartridge', 'Firmware', 'Version', '0', 'ok', '']
+19-05-16 15:20:42 DEBUG    -------------------------------------
+19-05-16 15:20:42 DEBUG    Cartridge Serial Number: 151565280
+19-05-16 15:20:42 DEBUG    Cartridge Firmware Version: 0
+19-05-16 15:20:42 DEBUG    Cartridge Programmer Station: 15
+19-05-16 15:20:42 DEBUG    Cartridge Type: 15
+19-05-16 15:20:42 DEBUG    Cartridge Size: 15
+19-05-16 15:20:42 DEBUG    Cartridge Material: 15
+19-05-16 15:20:42 INFO      
+19-05-16 15:20:42 INFO     Cartridge Holder info retrieved successfully
 
-16-05-16 17:15:43 INFO     Testing Laser Response
-16-05-16 17:15:43 INFO     Homing to put bed in range for laser
-16-05-16 17:15:52 DEBUG    ok
+19-05-16 15:20:42 INFO     Testing Laser Response
+19-05-16 15:20:42 INFO     Homing to put bed in range for laser
+19-05-16 15:20:50 DEBUG    ok
 
-16-05-16 17:15:52 INFO     Homing Complete
-16-05-16 17:15:52 INFO     Reading Laser
-16-05-16 17:15:52 DEBUG    ['ok', '13393']
-16-05-16 17:15:52 INFO     Laser in Range
-16-05-16 17:15:52 INFO     Reading ADC
-16-05-16 17:15:52 INFO     ADC value valid
-16-05-16 17:15:52 DEBUG    ['ok', '5020']
-16-05-16 17:15:52 INFO     Reading Laser
-16-05-16 17:15:52 DEBUG    ['ok', '13379']
-16-05-16 17:15:52 INFO     Laser in Range
-16-05-16 17:15:52 INFO     Moving Z
-16-05-16 17:15:52 DEBUG    ['ok']
-16-05-16 17:15:52 INFO     Reading Laser
-16-05-16 17:15:52 DEBUG    ['ok', '13256']
-16-05-16 17:15:52 INFO     Laser in Range
-16-05-16 17:15:52 INFO     Reading Laser
-16-05-16 17:15:52 DEBUG    ['ok', '12874']
-16-05-16 17:15:52 INFO     Laser in Range
-16-05-16 17:15:52 INFO     Reading Laser
-16-05-16 17:15:52 DEBUG    ['ok', '12224']
-16-05-16 17:15:52 INFO     Laser in Range
-16-05-16 17:15:52 INFO     Reading Laser
-16-05-16 17:15:52 DEBUG    ['ok', '11411']
-16-05-16 17:15:52 INFO     Laser in Range
-16-05-16 17:15:52 DEBUG    Initialized Ereg Test
-16-05-16 17:15:52 INFO     
-16-05-16 17:15:52 INFO     ----------------------------------------------
-16-05-16 17:15:52 INFO     Final Test Results
-16-05-16 17:15:52 INFO     ----------------------------------------------
-16-05-16 17:15:52 INFO     Tests Passed: 11
-16-05-16 17:15:52 INFO     Tests Failed: 0
-16-05-16 17:15:52 INFO     Test Warnings: 0
-16-05-16 17:15:52 INFO     
-16-05-16 17:15:52 INFO     Test Passed
-16-05-16 17:15:52 INFO     
-16-05-16 17:15:59 DEBUG    Disconnected from printer
-16-05-16 17:15:59 DEBUG    Test Teardown Complete
+19-05-16 15:20:50 INFO     Homing Complete
+19-05-16 15:20:50 INFO     Reading Laser
+19-05-16 15:20:50 DEBUG    ['ok', '13406']
+19-05-16 15:20:50 INFO     Reading ADC
+19-05-16 15:20:50 DEBUG    ['ok', '5013']
+19-05-16 15:20:50 INFO     Moving Z
+19-05-16 15:20:50 DEBUG    ['ok']
+19-05-16 15:20:51 INFO     Reading Laser
+19-05-16 15:20:51 DEBUG    ['ok', '2698']
+19-05-16 15:20:51 DEBUG    Distance Difference Pre and Post: 10708
+19-05-16 15:20:51 INFO     Moving Z
+19-05-16 15:20:52 DEBUG    ['ok']
+19-05-16 15:20:53 INFO     Reading Laser
+19-05-16 15:20:53 DEBUG    ['ok', '13390']
+19-05-16 15:20:53 DEBUG    Distance Difference High 1 and 2: 16
+19-05-16 15:20:53 INFO     Laser Test Passed
+
+19-05-16 15:20:53 DEBUG    Initialized Ereg Test
+19-05-16 15:20:53 INFO     
+19-05-16 15:20:53 INFO     ----------------------------------------------
+19-05-16 15:20:53 INFO     Final Test Results
+19-05-16 15:20:53 INFO     ----------------------------------------------
+19-05-16 15:20:53 INFO     Tests Passed: 3
+19-05-16 15:20:53 INFO     Tests Failed: 2
+19-05-16 15:20:53 INFO     Test Warnings: 0
+19-05-16 15:20:53 INFO     
+19-05-16 15:20:53 ERROR    Test Failed
+19-05-16 15:20:53 INFO     
+19-05-16 15:20:56 DEBUG    Disconnected from printer
+19-05-16 15:20:56 DEBUG    Test Teardown Complete

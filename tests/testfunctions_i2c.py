@@ -8,7 +8,15 @@ from time import sleep
 class I2C_Test:
 
     def __init__(self, test, logging):
-        '''Initialize the I2C test, with the supplied overall test and logger'''
+        """Initialize the I2C test, with the supplied overall test and logger.
+
+        Args:
+            test (testRunner): The testrunner used to call the I2C Test, 
+                allowing the use of test failing / passing / warnings.
+            logging (logger): Allows whatever preconfigured logging module used
+                in the main program to be accessed in this file..
+        
+        """
         self.g = test.g
         self.test = test
         self.testFailed = False
@@ -20,6 +28,19 @@ class I2C_Test:
         logging.debug("Initialized I2C Test")
 
     def commandparser(self, command, p1='', p2='', p3=''):
+        """ Checks for errors on sent commands, returns response.
+
+        Args:
+            command (string): The M or G code being sent
+            p1 (string): first argument for the M Code
+            p2 (string): second argument for the M Code
+            p3 (string): third argument for the M Code
+
+        Returns:
+            int: The response sent from the printer. Returns 0 if the packet was
+            dropped or if the request timed out.
+
+        """
         resp = self.g.write(
             command + ' ' + p1 + ' ' + p2 + ' ' + p3, resp_needed=True)
         logging.debug(
