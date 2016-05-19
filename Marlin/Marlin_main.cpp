@@ -4567,7 +4567,7 @@ inline void gcode_M221() {
       SERIAL_PROTOCOLLN(extruder_multiplier[target_extruder]);
     }
     else {
-      SERIAL_PROTOCOL(int(code_value()));
+      SERIAL_PROTOCOL(int(active_extruder));
       SERIAL_PROTOCOLPGM("): ");
       SERIAL_PROTOCOLLN(extruder_multiplier[active_extruder]);
     }
