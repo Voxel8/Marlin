@@ -292,6 +292,20 @@ void I2C__GetFirmwareVersion(uint8_t cartridge) {
 }
 
 /**
+ * Read the temperature from a peripheral and print it on the serial port
+ * @parameter cartridge           Address of the target (cartridge)
+ */ 
+void I2C__GetTemperature(uint8_t cartridge) {
+  // Send message
+  writeThreeBytePacket(cartridge, READ_TEMPERATURE, I2C_EMPTY_ADDRESS,
+                       I2C_EMPTY_DATA);
+  SERIAL_PROTOCOLPGM("Cartridge Temperature = ");
+  // Read from cartridge and report
+  requestAndPrintPacket(cartridge, 1);
+  SERIAL_EOL;
+}
+
+/**
  * Clear the error flag for a particular cartridge if it's set
  * @parameter cartridge           Address of the target (cartridge)
  */

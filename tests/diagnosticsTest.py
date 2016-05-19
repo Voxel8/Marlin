@@ -128,7 +128,10 @@ class Test:
 test = Test()
 
 I2C = I2C_Test(test,logging)
-I2C.run_all_tests()
+
+while True:
+    I2C.test_cart0_info()
+    sleep(1)
 
 Ereg = Ereg_Test(test,logging)
 

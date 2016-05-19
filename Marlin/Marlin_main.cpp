@@ -5008,6 +5008,7 @@ inline void gcode_M245() {
   I2C__GetSize(i2c_address);
   I2C__GetMaterial(i2c_address);
   I2C__GetFirmwareVersion(i2c_address);
+  I2C__GetTemperature(i2c_address);
 
 }
 
