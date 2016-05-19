@@ -4699,7 +4699,7 @@ inline void gcode_M226() {
     }
     // Desired pressure value given
     if(code_seen('S')) {
-      float psi = code_value();
+      float psi = code_value() * (extruder_multiplier[active_extruder] / 100.0);
       // Desired pressure outside allowed range?
       if((psi > OUTPUT_PSI_MAX) || (psi < OUTPUT_PSI_MIN)) {
         SERIAL_PROTOCOLPGM("ERROR: Desired Pressure Outside Allowed Pressure Range (");
