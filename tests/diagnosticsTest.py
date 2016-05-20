@@ -106,7 +106,11 @@ class Test:
         self.testSuccessCount = self.testSuccessCount + 1
 
     def FinalDisplay(self):
-        '''Display the final counts for passed, failed, and warnings, with test fail or pass'''
+        """Display final test data
+
+        Display the final counts for passed, failed, and warnings, with test fail or pass
+
+        """
         logging.info("")
         logging.info("----------------------------------------------")
         logging.info("Final Test Results")
@@ -128,10 +132,10 @@ class Test:
 test = Test()
 
 I2C = I2C_Test(test,logging)
-I2C.run_all_tests()
+# I2C.run_all_tests()
 
 Pneumatics = Pneumatics_Test(test,logging)
-Pneumatics.run_all_tests()
+Pneumatics.test_solenoid()
 
 
 test.FinalDisplay()
