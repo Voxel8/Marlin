@@ -27,6 +27,10 @@ class I2C_Test:
 
         logging.debug("Initialized I2C Test")
 
+################################################################################
+## Utility Functions
+################################################################################
+
     def commandparser(self, command, p1='', p2='', p3=''):
         """ Checks for errors on sent commands, returns response.
 
@@ -94,6 +98,10 @@ class I2C_Test:
             self.test.logFailure("Too far")
             self.testFailed = True
         return int(M234Response[1])
+
+################################################################################
+## Test Functions
+################################################################################
 
     def run_all_tests(self):
         self.test_i2c_alltargets()

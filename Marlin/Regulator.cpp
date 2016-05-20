@@ -45,6 +45,9 @@ static void pressure_protection(float pressure, float target_pressure);
  */
 void Regulator__SetOutputPressure(float desired_pressure) {
     uint16_t digital_val = 0;
+    
+    // Set current pressure for Regulator__Update()
+    current_target_pressure = desired_pressure;
     // Set to zero
     if (desired_pressure <= (REG_OFFSET + REG_HYSTERESIS)) {
         digital_val = 0;
