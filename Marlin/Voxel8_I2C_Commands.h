@@ -31,6 +31,7 @@
 #define SET_LED_WHITE_PWM       0x03
 #define SET_LED_RED_PWM         0x04
 #define SET_LED_UV_PWM          0x05
+
 #define EEPROM_WRITE            0x06
 #define EEPROM_READ             0x07
 #define EEPROM_READ_SERIAL      0x08
@@ -40,7 +41,13 @@
 #define EEPROM_READ_PRGMR       0x12
 #define EEPROM_READ_ERR         0x13
 #define EEPROM_READ_FRMWRE      0x14
+
+#define GET_GPIO_V_SENSE        0x20
+#define GET_GPIO_SWITCH         0x21
+
 #define CLEAR_ERROR             0x15
+
+#define EEPROM_READ_TEMP        0x16
 
 //===========================================================================
 //============================= Public Functions ============================
@@ -75,7 +82,7 @@ void I2C__ToggleUV(uint8_t data);
 
 /**
  * Writes data to a specific EEPROM address on a cartridge
- * @parameter cartridge           Address of the target (cartridge)
+ * @parameter cartridge           Address of the target
  * @parameter address             The EEPROM address being written to
  * @parameter data                The data being written
  */
@@ -83,57 +90,70 @@ void I2C__EEPROMWrite(uint8_t cartridge, uint8_t eeprom_address, uint8_t data);
 
 /**
  * Reads data from a specific EEPROM address on a cartridge
- * @parameter cartridge           Address of the target (cartridge)
+ * @parameter cartridge           Address of the target
  * @parameter address             The EEPROM address being written to
  */ 
 void I2C__EEPROMRead(uint8_t cartridge, uint8_t address);
 
 /**
  * Read the serial number from a cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @parameter cartridge           Address of the target
  */ 
 void I2C__GetSerial(uint8_t cartridge);
 
 /**
  * Read the number of the programmer used on a cartridge and print it on
  * the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @parameter cartridge           Address of the target
  */ 
 void I2C__GetProgrammerStation(uint8_t cartridge);
 
 /**
  * Read the variety of cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @parameter cartridge           Address of the target
  */ 
 void I2C__GetCartridgeType(uint8_t cartridge);
 
 /**
  * Read the size of the nozzle from cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @parameter cartridge           Address of the target
  */ 
 void I2C__GetSize(uint8_t cartridge);
 
 /**
  * Read the material contained by a cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @parameter cartridge           Address of the target
  */ 
 void I2C__GetMaterial(uint8_t cartridge);
 
 /**
  * Read the material contained by a cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @parameter cartridge           Address of the target
  */ 
 void I2C__GetErrorCode(uint8_t cartridge);
 
 /**
  * Read the firmware version by a cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @parameter cartridge           Address of the target
  */ 
 void I2C__GetFirmwareVersion(uint8_t cartridge);
 
 /**
- * Clear the error flag for a particular cartridge if it's set
+ * Read the voltage sense pin on a cartridge and print it on the serial port
  * @parameter cartridge           Address of the target (cartridge)
+ */ 
+void I2C__GetVoltageSense(uint8_t cartridge);
+
+/**
+ * Read the SYRINGE_ACTIVE pin on a pneumatics cartridge and print it on the 
+ * serial port
+ * @parameter cartridge           Address of the target (pneumatic cartridge)
+ */ 
+void I2C__GetGpioSwitch(uint8_t cartridge);
+
+/**
+ * Clear the error flag for a particular cartridge if it's set
+ * @parameter cartridge           Address of the target
  */ 
 void I2C__ClearError(uint8_t cartridge);
 
