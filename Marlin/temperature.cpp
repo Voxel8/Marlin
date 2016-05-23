@@ -689,7 +689,6 @@ void manage_heater() {
   if (!temp_meas_ready) return;
 
   updateTemperaturesFromRawValues();
-  Regulator__Update();
 
   #if ENABLED(HEATER_0_USES_MAX6675)
     float ct = current_temperature[0];
@@ -788,7 +787,8 @@ void manage_heater() {
   // ELECTRO-PNEUMATIC REGULATOR CONTROL
   #if (ENABLED(E_REGULATOR) && ENABLED(PNEUMATICS))
   if (millis() - previous_millis_regulator_value > REGULATOR_CHECK_INTERVAL) {
-    
+    // Updates the regulator protection timers
+    Regulator__Update();
     previous_millis_regulator_value = millis();
     //Is output pressure more than what is available?
     if((pressureRegulator() >= pressurePneumatic()) && (pressurePneumatic() >= REGULATOR_LOW_P) && (pressureRegulator() != REGULATOR_NOT_PRESENT_VALUE)) {
