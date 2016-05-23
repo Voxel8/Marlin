@@ -22,7 +22,6 @@
 //================================ GCode List ===============================
 //===========================================================================
 
-
 /**
  * Look here for descriptions of G-codes:
  *  - http://linuxcnc.org/handbook/gcode/g-code.html
@@ -48,13 +47,10 @@
 //============================= Public Functions ============================
 //===========================================================================
 
-
 /*
 * M251: I2C Query Syringe Status, currently only valid for Cart 1
 */
-inline void gcode_M251() { 
-  I2C__GetGpioSwitch(CART1_ADDR); 
-}
+inline void gcode_M251() { I2C__GetGpioSwitch(CART1_ADDR); }
 
 /*
 * M253: I2C Query Vsense, currently only valid for cartridges
@@ -62,24 +58,21 @@ inline void gcode_M251() {
 */
 inline void gcode_M253() {
   uint8_t i2c_address = 0xFF;
-  // Used to see if we've been given arguments, and to warn you through the
-  // serial port if they're not seen.
-  bool hasC;
 
   // Desired address for peripheral device
-  if (hasC = code_seen('C')) {
-    switch (int(code_value())) {
+  if (code_seen('C')) {
+    switch (uint8_t(code_value())) {
       case 0:
         i2c_address = CART0_ADDR;
         break;
       case 1:
         i2c_address = CART1_ADDR;
         break;
-        break;
+      default:
+        SERIAL_ECHOLNPGM("Invalid Cartridge Address");
+        return;
     }
-  }
-
-  if (!hasC) {
+  } else {
     SERIAL_ECHOLNPGM("No cartridge address given");
     return;
   }
@@ -97,20 +90,22 @@ inline void gcode_M272(void) {
     if (code_seen(axis_codes[i])) {
       if (i == E_AXIS) {
         /* conversion from ball-bar units to um */
-        float value = (213.3333333 / (1 + (code_value() / MM_TO_UM)));
-        if (value < 20.0) {
-          float factor =
-              axis_steps_per_unit[i] /
-              value;  // increase e constants if M92 E14 is given for netfab.
+        float converted_code_value =
+            (213.3333333 / (1 + (code_value() / MM_TO_UM)));
+        if (converted_code_value < 20.0) {
+          float factor = axis_steps_per_unit[i] /
+                         converted_code_value;  // increase e constants if M92
+                                                // E14 is given for netfab.
           max_e_jerk *= factor;
           max_feedrate[i] *= factor;
           axis_steps_per_sqr_second[i] *= factor;
         }
-        axis_steps_per_unit[i] = value;
+        axis_steps_per_unit[i] = converted_code_value;
       } else {
         /* conversion from ball-bar units to um */
-        float value = (213.3333333 / (1 + (code_value() / MM_TO_UM)));
-        axis_steps_per_unit[i] = value;
+        float converted_code_value =
+            (213.3333333 / (1 + (code_value() / MM_TO_UM)));
+        axis_steps_per_unit[i] = converted_code_value;
       }
     }
   }
