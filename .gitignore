@@ -31,3 +31,4 @@ src
 *.pyc
 .build_log
 *.hex
+tests/console.log
