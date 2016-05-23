@@ -22,8 +22,11 @@
 // Returns if a specific identifier letter was used in an MCode.
 bool  code_seen(char code);
 
-// Returns the value of the last item identified by code_seen.
+// Returns the value of the last item identified by code_seen, as a float.
 float code_value(void);
+
+// Returns the value of the last item identified by code_seen, as a uint16_t.
+int16_t code_value_short(void);
 
 //===========================================================================
 //============================= Public Variables ============================
