@@ -36,8 +36,10 @@
  *
  * "M" Codes
  *
- * M251 - Queries small pneumatics cartridge to retrieve solenoid status
- * M253 - Queries cartridge to see if 24 volts are present or not
+ * M251 - Queries small pneumatics cartridge to retrieve Syringe status
+ * M253 - Queries cartridge to see if 24 volts are present or not.
+          FFF: Returns whether hot end is active
+          Pneumatics: Returns whether solenoid is active
  * M272 - Set axis steps-per-unit for one or more axes, X, Y, Z, and E using
  *        the default ball-bar units
 */
@@ -48,8 +50,7 @@
 
 
 /*
-* M251: I2C Query Solenoid Status, currently only valid for Cart 1
-*   C - 0 - 1   Cartridge Address (0 or 1)
+* M251: I2C Query Syringe Status, currently only valid for Cart 1
 */
 inline void gcode_M251() { 
   I2C__GetGpioSwitch(CART1_ADDR); 
