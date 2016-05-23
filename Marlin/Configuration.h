@@ -394,7 +394,7 @@ Here are some standard links for getting your machine calibrated:
  // 1 - Built-in Pressure Transducer (ITV0050-2UL)
  // 2 - Built-in Pressure Transducer (Regtronics M5)
 
-  #define E_REGULATOR_SENSOR 1
+  #define E_REGULATOR_SENSOR 2
   #define DAC_I2C
  // 130 psi is max settable pressure for e-regulator
   #define OUTPUT_PSI_MAX     130.0 

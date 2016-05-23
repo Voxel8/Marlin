@@ -290,14 +290,21 @@ void I2C__GetFirmwareVersion(uint8_t cartridge) {
 }
 
 /**
- * Read the voltage sense pin on a cartridge and print it on the serial port
+ * Read the voltage sense pin on a cartridge and print it on the serial port.
+ * On the pneumatics cartridge, this should correspond to the solenoid being 
+ * active. For FFF, this represents if the hot end is active.
  * @parameter cartridge           Address of the target (cartridge)
  */
 void I2C__GetVoltageSense(uint8_t cartridge) {
   // Send message
   writeThreeBytePacket(cartridge, GET_GPIO_V_SENSE, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
-  SERIAL_PROTOCOLPGM("V Sense = ");
+  if (cartridge == CART0_ADDR) {
+    SERIAL_PROTOCOLPGM("Extruder Status = ");
+  }
+  else if (cartridge == CART1_ADDR) {
+    SERIAL_PROTOCOLPGM("Solenoid Status = ");
+  }
   // Read from cartridge and report
   requestAndPrintPacket(cartridge, 1);
   SERIAL_EOL;
@@ -305,14 +312,15 @@ void I2C__GetVoltageSense(uint8_t cartridge) {
 
 /**
  * Read the SYRINGE_ACTIVE pin on a pneumatics cartridge and print it on the
- * serial port
+ * serial port. This should be a 1 when the syringe is deployed, and a 0 when
+ * it's retracted. 
  * @parameter cartridge           Address of the target (pneumatic cartridge)
  */
 void I2C__GetGpioSwitch(uint8_t cartridge) {
   // Send message
   writeThreeBytePacket(cartridge, GET_GPIO_SWITCH, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
-  SERIAL_PROTOCOLPGM("Solenoid Sense = ");
+  SERIAL_PROTOCOLPGM("Syringe Status = ");
   // Read from cartridge and report
   requestAndPrintPacket(cartridge, 1);
   SERIAL_EOL;

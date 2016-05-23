@@ -6628,7 +6628,7 @@ void process_next_command() {
         gcode_M249();
         break;
 
-      case 251: // I2C Query Solenoid Status:
+      case 251: // I2C Query Syringe Status:
         gcode_M251();
         break;
       case 253: // I2C Query Voltage Sense:
