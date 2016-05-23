@@ -5087,37 +5087,6 @@ inline void gcode_M249() {
   }
 }
 
-
-
-inline void gcode_M252() {
-  uint8_t i2c_address = 0xFF;
-  // Used to see if we've been given arguments, and to warn you through the
-  // serial port if they're not seen.
-  bool hasC;
-
-  // Desired address for peripheral device
-  if (hasC = code_seen('C')) {
-    switch(int(code_value())) {
-      case 0:
-        i2c_address = CART0_ADDR;
-        break;
-      case 1:
-        i2c_address = CART1_ADDR;
-        break;
-      case 2:
-        i2c_address = CART_HOLDER_ADDR;
-        break;
-    }
-  }
-  
-  if (!hasC){
-    SERIAL_ECHOLNPGM("No cartridge address given");
-    return;
-  }
-
-  I2C__ClearError(i2c_address);
-}
-
 #if HAS_SERVOS
 
   /**
