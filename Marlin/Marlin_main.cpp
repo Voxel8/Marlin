@@ -5087,6 +5087,8 @@ inline void gcode_M249() {
   }
 }
 
+
+
 inline void gcode_M252() {
   uint8_t i2c_address = 0xFF;
   // Used to see if we've been given arguments, and to warn you through the
@@ -6626,6 +6628,13 @@ void process_next_command() {
         gcode_M249();
         break;
 
+      case 251: // I2C Query Solenoid Status:
+        gcode_M251();
+        break;
+      case 253: // I2C Query Voltage Sense:
+        gcode_M253();
+        break;
+        
       case 272:
         gcode_M272();
         break;

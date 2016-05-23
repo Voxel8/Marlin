@@ -16,20 +16,20 @@
 //===========================================================================
 
 // General Defines
-#define BYTE_SIZE                           (8)
+#define BYTE_SIZE (8)
 
 // Defines for specific commands
 
 // 127 (50%) is maxy duty cycle for 12V fans wired in parallel. 255 should be
 // fine for those wired in series (Gen 3D, and beyond).
-#define MAX_FAN_DUTY                        (255)
+#define MAX_FAN_DUTY (255)
 
 // Defines for use with requesting serial number from Cartridges
-#define CARTRIDGE_SERIAL_LENGTH             (4)
+#define CARTRIDGE_SERIAL_LENGTH (4)
 #define CARTRIDGE_SERIAL_PROGRAMMER_STATION (0)
-#define CARTRIDGE_SERIAL_TYPE               (1)
-#define CARTRIDGE_SERIAL_NUMBER_0           (2)
-#define CARTRIDGE_SERIAL_NUMBER_1           (3)
+#define CARTRIDGE_SERIAL_TYPE (1)
+#define CARTRIDGE_SERIAL_NUMBER_0 (2)
+#define CARTRIDGE_SERIAL_NUMBER_1 (3)
 //===========================================================================
 //============================ Private Variables ============================
 //===========================================================================
@@ -37,10 +37,8 @@
 //===========================================================================
 //====================== Private Functions Prototypes =======================
 //===========================================================================
-void writeThreeBytePacket(uint8_t I2C_target_address,
-                          uint8_t command,
-                          uint8_t address,
-                          uint8_t data);
+void writeThreeBytePacket(uint8_t I2C_target_address, uint8_t command,
+                          uint8_t address, uint8_t data);
 
 void requestAndPrintPacket(uint8_t I2C_target_address, uint8_t bytes);
 
@@ -286,6 +284,35 @@ void I2C__GetFirmwareVersion(uint8_t cartridge) {
   writeThreeBytePacket(cartridge, EEPROM_READ_FRMWRE, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
   SERIAL_PROTOCOLPGM("Cartridge Firmware Version = ");
+  // Read from cartridge and report
+  requestAndPrintPacket(cartridge, 1);
+  SERIAL_EOL;
+}
+
+/**
+ * Read the voltage sense pin on a cartridge and print it on the serial port
+ * @parameter cartridge           Address of the target (cartridge)
+ */
+void I2C__GetVoltageSense(uint8_t cartridge) {
+  // Send message
+  writeThreeBytePacket(cartridge, GET_GPIO_V_SENSE, I2C_EMPTY_ADDRESS,
+                       I2C_EMPTY_DATA);
+  SERIAL_PROTOCOLPGM("V Sense = ");
+  // Read from cartridge and report
+  requestAndPrintPacket(cartridge, 1);
+  SERIAL_EOL;
+}
+
+/**
+ * Read the SYRINGE_ACTIVE pin on a pneumatics cartridge and print it on the
+ * serial port
+ * @parameter cartridge           Address of the target (pneumatic cartridge)
+ */
+void I2C__GetGpioSwitch(uint8_t cartridge) {
+  // Send message
+  writeThreeBytePacket(cartridge, GET_GPIO_SWITCH, I2C_EMPTY_ADDRESS,
+                       I2C_EMPTY_DATA);
+  SERIAL_PROTOCOLPGM("Solenoid Sense = ");
   // Read from cartridge and report
   requestAndPrintPacket(cartridge, 1);
   SERIAL_EOL;
