@@ -790,18 +790,6 @@ void manage_heater() {
     // Updates the regulator protection timers
     Regulator__Update();
     previous_millis_regulator_value = millis();
-    //Is output pressure more than what is available?
-    if((pressureRegulator() >= pressurePneumatic()) && (pressurePneumatic() >= REGULATOR_LOW_P) && (pressureRegulator() != REGULATOR_NOT_PRESENT_VALUE)) {
-      // Shut down
-      if(IsRunning()) {
-        SERIAL_ERROR_START;
-        SERIAL_ERRORLNPGM(MSG_ERR_REGULATOR);
-        // Set output pressure to 0
-        DAC_write(MCP4725_I2C_ADDRESS, 0);
-        // Disable heaters
-        Stop();
-      }
-    }
   }
   // Turn off E-reg if error flag
   if(pneumatic_error_flag == 1) {

@@ -132,10 +132,10 @@ class Test:
 test = Test()
 
 I2C = I2C_Test(test,logging)
-# I2C.run_all_tests()
+I2C.run_all_tests()
 
 Pneumatics = Pneumatics_Test(test,logging)
-Pneumatics.test_solenoid()
+Pneumatics.run_all_tests()
 
 
 test.FinalDisplay()

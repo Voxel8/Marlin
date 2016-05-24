@@ -216,6 +216,10 @@
 #define MSG_T_CARTRIDGE_REMOVED             "Cartridge Removed. Print cancelled, heating disabled"
 #define MSG_T_CARTRIDGE_REMOVED_HEATING     "An FFF Cartridge has been removed, will not heat"
 #define MSG_PNEUMATIC_PUMP_OFF              ": Pressure pump turned off, MAX/MIN value exceeded!!"
+#define MSG_T_PNEUMATICS_EREG_ABOVE_PUMP    "E-regulator pressure above available pressure, please check pneumatics system"
+#define MSG_T_PNEUMATICS_REMOVED            "Pneumatics appear to be removed, check the pneumatics system. Canceling print."
+#define MSG_T_PNEUMATICS_RUNAWAY            "Pneumatics system runaway, canceling print. Check pneumatics system."
+#define MSG_T_PNEUMATICS_LEAK               "Pneumatics leak, canceling print. Check pneumatics system."
 
 // Debug
 #define MSG_DEBUG_ECHO                      "DEBUG ECHO ENABLED"

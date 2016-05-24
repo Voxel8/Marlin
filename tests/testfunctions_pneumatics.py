@@ -112,7 +112,7 @@ class Pneumatics_Test:
             
         """
         solenoidStatus = self.g.write('M381 V', resp_needed=True).split()
-        logging.debug(solenoidStatus[3])
+        logging.debug(repr(solenoidStatus[3]))
         return int(solenoidStatus[3])
 
 
@@ -240,8 +240,8 @@ class Pneumatics_Test:
         """
 
         logging.debug("Activating Solenoid")
-        if self.activateAndReadSolenoid(1) != '1':
+        if self.activateAndReadSolenoid(1) != 1:
             self.test.logFailure("Solenoid not activated")
         sleep(.25)
-        if self.disableAndReadSolenoid(1) != '0':
+        if self.disableAndReadSolenoid(1) != 0:
             self.test.logFailure("Solenoid not activated")

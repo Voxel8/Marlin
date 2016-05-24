@@ -8,12 +8,6 @@
 /* Definitions  */
 /*================================================================================*/
 
-// Relevant Pins
-// Voxel8 C2
-// #define PNEUMATIC_PUMP_PIN    7   // Pump driver
-// #define PNEUMATIC_PIN         5   // A5 Input analog tank pressure reading
-// #define PNEUMATIC_CART1_PIN   4   // A4 Cartridge 2 analog pressure reading
-
 // Calculation for BITS_PER_PSI:
 // R1 = 499
 // n = 12
@@ -43,7 +37,7 @@
 #define REGULATOR_PROTECTION_TIME_S (5)
 #define REGULATOR_PROTECTION_BAND   (4)
 
-#define REGULATOR_NOT_PRESENT_VALUE (130.5)
+#define REGULATOR_NOT_PRESENT_VALUE (110)
 
 /*================================================================================*/
 /* Function Prototypes */
