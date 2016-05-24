@@ -4896,6 +4896,9 @@ inline void gcode_M243() {
       case 2:
         i2c_address = CART_HOLDER_ADDR;
         break;
+      default:
+        SERIAL_ECHOLNPGM("Invalid Address");
+        return;
     }
   }
   // Desired EEPROM address
@@ -4951,6 +4954,9 @@ inline void gcode_M244() {
       case 2:
         i2c_address = CART_HOLDER_ADDR;
         break;
+      default:
+        SERIAL_ECHOLNPGM("Invalid Address");
+        return;
     }
   }
   // Desired EEPROM address
@@ -4994,6 +5000,9 @@ inline void gcode_M245() {
       case 2:
         i2c_address = CART_HOLDER_ADDR;
         break;
+      default:
+        SERIAL_ECHOLNPGM("Invalid Address");
+        return;
     }
   }
   
@@ -5051,6 +5060,9 @@ inline void gcode_M248() {
       case 1:
         Cartridge__SetPresentCheck(true);
         break;
+      default:
+        SERIAL_ECHOLNPGM("(E1) or (E0) not given");
+        return;
     }
   }
 

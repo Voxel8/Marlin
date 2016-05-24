@@ -30,6 +30,7 @@
 #define CARTRIDGE_SERIAL_TYPE (1)
 #define CARTRIDGE_SERIAL_NUMBER_0 (2)
 #define CARTRIDGE_SERIAL_NUMBER_1 (3)
+
 //===========================================================================
 //============================ Private Variables ============================
 //===========================================================================
@@ -296,6 +297,9 @@ void I2C__GetFirmwareVersion(uint8_t cartridge) {
  * @parameter cartridge           Address of the target (cartridge)
  */
 void I2C__GetVoltageSense(uint8_t cartridge) {
+    if ((cartridge != CART0_ADDR) && (cartridge != CART1_ADDR)) {
+    return;
+  }
   // Send message
   writeThreeBytePacket(cartridge, GET_GPIO_V_SENSE, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
@@ -317,6 +321,9 @@ void I2C__GetVoltageSense(uint8_t cartridge) {
  * @parameter cartridge           Address of the target (pneumatic cartridge)
  */
 void I2C__GetGpioSwitch(uint8_t cartridge) {
+  if (cartridge != CART1_ADDR){
+    return;
+  }
   // Send message
   writeThreeBytePacket(cartridge, GET_GPIO_SWITCH, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);

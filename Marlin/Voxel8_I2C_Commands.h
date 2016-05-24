@@ -42,12 +42,12 @@
 #define EEPROM_READ_ERR         0x13
 #define EEPROM_READ_FRMWRE      0x14
 
-#define GET_GPIO_V_SENSE        0x20
-#define GET_GPIO_SWITCH         0x21
-
 #define CLEAR_ERROR             0x15
 
 #define EEPROM_READ_TEMP        0x16
+
+#define GET_GPIO_V_SENSE        0x20
+#define GET_GPIO_SWITCH         0x21
 
 //===========================================================================
 //============================= Public Functions ============================
