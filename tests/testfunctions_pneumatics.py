@@ -31,6 +31,38 @@ class Pneumatics_Test:
 # Utility Functions
 ##########################################################################
 
+    def commandparser(self, command, p1='', p2='', p3=''):
+        """ Checks for errors on sent commands, returns response.
+
+        Args:
+            command (string): The M or G code being sent
+            p1 (string): first argument for the M Code
+            p2 (string): second argument for the M Code
+            p3 (string): third argument for the M Code
+
+        Returns:
+            int: The response sent from the printer. Returns 0 if the packet was
+            dropped or if the request timed out.
+
+        """
+        resp = self.g.write(
+            command + ' ' + p1 + ' ' + p2 + ' ' + p3, resp_needed=True)
+        logging.debug(
+            str(command + ' ' + p1 + ' ' + p2 + ' ' + p3 + '  Response: ' + resp))
+        PacketSplit = re.findall('Packet', resp)
+        TimeoutSplit = re.findall('Timeout', resp)
+        if len(PacketSplit):
+            self.test.logFailure("Dropped " + str(len(PacketSplit)) + " Packets from address " + str(
+                p1) + ". " + str(p1) + " is either not present or not communicating.")
+            resp = "0"
+            self.testFailed = True
+        if len(TimeoutSplit):
+            self.test.logFailure(
+                str(len(TimeoutSplit)) + " Timeouts from " + str(p1))
+            resp = "0"
+            self.testFailed = True
+        return resp
+
     def setPumpPressure(self, pressure):
         """ Sets the pressure of the pump
 
@@ -96,8 +128,13 @@ class Pneumatics_Test:
 
         """
         solenoidStatus = self.g.write('M380 T1 V', resp_needed=True).split()
-        logging.debug(repr(solenoidStatus[3]))
-        return int(solenoidStatus[3])
+        solenoidI2CStatus = self.commandparser('M253', 'C1').split()
+        if self.testFailed is False:
+            logging.debug(repr(solenoidStatus[3]))
+            logging.debug(repr(solenoidI2CStatus[3]))
+            return int(solenoidI2CStatus[3])
+        else:
+            return False
 
     def disableAndReadSolenoid(self, solenoid):
         """ Activates the solenoid and reads the status
@@ -111,9 +148,55 @@ class Pneumatics_Test:
             int: Solenoid Status
             
         """
-        solenoidStatus = self.g.write('M381 V', resp_needed=True).split()
-        logging.debug(repr(solenoidStatus[3]))
-        return int(solenoidStatus[3])
+        solenoidStatus = self.g.write('M381', resp_needed=True).split()
+        solenoidI2CStatus = self.commandparser('M253', 'C1').split()
+        if self.testFailed is False:
+            logging.debug(repr(solenoidI2CStatus[3]))
+            return int(solenoidI2CStatus[3])
+        else:
+            return False
+
+    def activateAndReadSyringe(self):
+        """ Activates the syringe and reads the status
+
+        Activates the given syringe using M380, and reads back
+        the status.
+
+        Args:
+            syringe (int): Desired Syringe
+        Returns:
+            int: Syringe Status
+
+        """
+        self.g.write('M42 P75 S255')
+        sleep(1)
+        syringeStatus = self.commandparser("M251").split()
+        logging.debug(syringeStatus)
+        if self.testFailed is False:
+            return int(syringeStatus[3])
+        else: 
+            return False
+
+    def disableAndReadSyringe(self):
+        """ Activates the syringe and reads the status
+
+        Deactivates the given syringe using M381, and reads back
+        the status.
+
+        Args:
+            syringe (int): Desired Syringe
+        Returns:
+            int: Syringe Status
+            
+        """
+        self.g.write('M42 P75 S0')
+        sleep(2)
+        syringeStatus = self.commandparser("M251").split()
+        logging.debug(syringeStatus)
+        if self.testFailed is False:
+            return int(syringeStatus[3])
+        else: 
+            return False
 
 
 ##########################################################################
@@ -180,6 +263,7 @@ class Pneumatics_Test:
             sleep(1)
             if i is pressureMeasurementTime_s-1:
                 self.test.logSuccess("Tank is mantaining pressure correctly")
+            self.testFailed = False
 
     def test_set_pressure(self):
         """ Sets tank pressure, then tests the E-Reg at various 
@@ -192,7 +276,6 @@ class Pneumatics_Test:
                 for any of the above.
 
         """
-
         PASSING_CRITERIA = .5
 
         logging.info(
@@ -228,6 +311,8 @@ class Pneumatics_Test:
         else:
             if self.testFailed is False:
                 self.test.logSuccess("Pressure is appropriate")
+            else:
+                self.testFailed = False
 
     def test_solenoid(self):
         """ Opens and closes the solenoid, checking the status over I2C for both
@@ -238,10 +323,42 @@ class Pneumatics_Test:
             Fail: I2C command incorrectly reads solenoid condition
 
         """
-
         logging.debug("Activating Solenoid")
-        if self.activateAndReadSolenoid(1) != 1:
-            self.test.logFailure("Solenoid not activated")
+
+        if self.activateAndReadSolenoid(1) is not 1 and self.testFailed is False:
+                self.test.logFailure("Solenoid not activated")
+                self.testFailed = True
         sleep(.25)
-        if self.disableAndReadSolenoid(1) != 0:
-            self.test.logFailure("Solenoid not activated")
+        if self.testFailed is False:
+            logging.debug("Deactivating Solenoid")
+            if self.disableAndReadSolenoid(1) is not 0 and self.testFailed is False:
+                    self.test.logFailure("Solenoid not activated")
+                    self.testFailed = True
+        if self.testFailed is False:
+            self.test.logSuccess("Solenoid operating correctly")
+        else:
+            self.testFailed = False
+
+    def test_syringe(self):
+        """ Drops the syringe and retracts it, checking the status over I2C for both
+            states.
+
+        Conditions:
+            Pass: I2C command reads correct syringe condition
+            Fail: I2C command incorrectly reads syringe condition
+
+        """
+        logging.debug("Activating Syringe")
+        if (self.activateAndReadSyringe()) is not 1 and self.testFailed is False:
+            self.test.logFailure("Syringe not activated")
+            self.testFailed = True
+        if self.testFailed is False:
+            logging.debug("Retracting Syringe")
+            if (self.disableAndReadSyringe()) is not 0 and self.testFailed is False:
+               self.test.logFailure("Syringe retraction not functioning")
+               self.testFailed = True
+        if self.testFailed is False:
+            self.test.logSuccess("Syringe operating correctly")
+        else:
+            self.testFailed = False
+
