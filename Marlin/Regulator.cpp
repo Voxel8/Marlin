@@ -19,7 +19,7 @@
 //===========================================================================
 
 static float current_target_pressure = 0;
-static bool  pneumatics_running = false;
+static bool  regulator_active = false;
 
 //===========================================================================
 //====================== Private Functions Prototypes =======================
@@ -40,7 +40,7 @@ static void pressure_protection(float pressure, float target_pressure);
  */
 void Regulator__SetOutputPressure(float desired_pressure) {
     uint16_t digital_val = 0;
-    pneumatics_running = true;
+    regulator_active = true;
     // Set current pressure for Regulator__Update()
     current_target_pressure = desired_pressure;
     // Set to zero
@@ -93,7 +93,7 @@ static void _regulator_error_handler(const char *serial_msg, float pressure) {
     }
     SERIAL_EOL;
     SERIAL_PROTOCOLLNPGM("// action:cancel");
-    pneumatics_running = false;
+    regulator_active = false;
 }
 
 /** 
@@ -111,7 +111,7 @@ static void pressure_protection(float target_pressure, float pressure) {
   if (regulatorTimer == 0) regulatorTimer = millis();
 
   // Only run protections if the pneumatics system is running
-  if (pneumatics_running) {
+  if (regulator_active) {
 
     // Is output pressure more than what is available? If so, we throw an error.
     if ((pressureRegulator() >= pressurePneumatic()) &&
