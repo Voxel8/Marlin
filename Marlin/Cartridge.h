@@ -44,13 +44,6 @@
  */
   void Cartridge__Update(void);
 
-/**
- * This is the error handler for when we see the cartridge removed error. It 
- * reports to octoprint that we should pause the print, as well as disabling
- * all heaters and stopping the currently queued commands. This will only get
- * called once if it's been called multiple times in quick succession.
- */
-
  /** 
   * Allows all cartridge checks to be disabled by making the printer think
   * cartridges are always present.

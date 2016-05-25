@@ -53,11 +53,11 @@ void printPrecedingZero(int number, uint8_t precision);
 
 /**
  * Sends a general I2C Command.
- * @parameter I2C_target_address  Address of the target (cartridge or
+ * @param I2C_target_address  Address of the target (cartridge or
  *                                cartridge holder)
- * @parameter command             The command being sent
- * @parameter address             The EEPROM address, if applicable
- * @parameter data                The data used for the command
+ * @param command             The command being sent
+ * @param address             The EEPROM address, if applicable
+ * @param data                The data used for the command
  */
 void I2C__GeneralCommand(uint8_t I2C_target_address, uint8_t command,
                          uint8_t address, uint8_t data) {
@@ -82,7 +82,7 @@ void I2C__GeneralCommand(uint8_t I2C_target_address, uint8_t command,
 
 /**
  * Sets the speed of the fan on the cartridge holder.
- * @parameter fanspeed            Speed the fan is set to
+ * @param fanspeed            Speed the fan is set to
  */
 void I2C__SetFanDrive0PWM(uint8_t fanSpeed) {
   // Check fanspeed, cap at MAX_FAN_DUTY
@@ -122,7 +122,7 @@ void I2C__SetFanOff(void) {
 
 /**
  * Toggles the UV LED
- * @parameter data                0 to disable, enabled on call otherwise
+ * @param data                0 to disable, enabled on call otherwise
  */
 void I2C__ToggleUV(uint8_t data) {
   // Send message
@@ -140,9 +140,9 @@ void I2C__ToggleUV(uint8_t data) {
 
 /**
  * Writes data to a specific EEPROM address on a cartridge
- * @parameter cartridge           Address of the target (cartridge)
- * @parameter address             The EEPROM address being written to
- * @parameter data                The data being written
+ * @param cartridge           Address of the target (cartridge)
+ * @param address             The EEPROM address being written to
+ * @param data                The data being written
  */
 void I2C__EEPROMWrite(uint8_t cartridge, uint8_t eeprom_address, uint8_t data) {
   // Send message
@@ -162,8 +162,8 @@ void I2C__EEPROMWrite(uint8_t cartridge, uint8_t eeprom_address, uint8_t data) {
 
 /**
  * Reads data from a specific EEPROM address on a cartridge
- * @parameter cartridge           Address of the target (cartridge)
- * @parameter address             The EEPROM address being written to
+ * @param cartridge           Address of the target (cartridge)
+ * @param address             The EEPROM address being written to
  */
 void I2C__EEPROMRead(uint8_t cartridge, uint8_t address) {
   // Send message
@@ -180,7 +180,7 @@ void I2C__EEPROMRead(uint8_t cartridge, uint8_t address) {
 
 /**
  * Read the serial number from a cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @param cartridge           Address of the target (cartridge)
  */
 void I2C__GetSerial(uint8_t cartridge) {
   // Send message
@@ -198,7 +198,7 @@ void I2C__GetSerial(uint8_t cartridge) {
 /**
  * Read the number of the programmer used on a cartridge and print it on
  * the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @param cartridge           Address of the target (cartridge)
  */
 void I2C__GetProgrammerStation(uint8_t cartridge) {
   // Send message
@@ -215,7 +215,7 @@ void I2C__GetProgrammerStation(uint8_t cartridge) {
 
 /**
  * Read the variety of cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @param cartridge           Address of the target (cartridge)
  */
 void I2C__GetCartridgeType(uint8_t cartridge) {
   // Send message
@@ -232,7 +232,7 @@ void I2C__GetCartridgeType(uint8_t cartridge) {
 
 /**
  * Read the size of the nozzle from cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @param cartridge           Address of the target (cartridge)
  */
 void I2C__GetSize(uint8_t cartridge) {
   // Send message
@@ -249,7 +249,7 @@ void I2C__GetSize(uint8_t cartridge) {
 
 /**
  * Read the material contained by a cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @param cartridge           Address of the target (cartridge)
  */
 void I2C__GetMaterial(uint8_t cartridge) {
   // Send message
@@ -266,7 +266,7 @@ void I2C__GetMaterial(uint8_t cartridge) {
 
 /**
  * Read the material contained by a cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @param cartridge           Address of the target (cartridge)
  */
 void I2C__GetErrorCode(uint8_t cartridge) {
   // Send message
@@ -279,7 +279,7 @@ void I2C__GetErrorCode(uint8_t cartridge) {
 
 /**
  * Read the firmware version by a cartridge and print it on the serial port
- * @parameter cartridge           Address of the target (cartridge)
+ * @param cartridge           Address of the target (cartridge)
  */
 void I2C__GetFirmwareVersion(uint8_t cartridge) {
   // Send message
@@ -293,7 +293,7 @@ void I2C__GetFirmwareVersion(uint8_t cartridge) {
 
 /**
  * Clear the error flag for a particular cartridge if it's set
- * @parameter cartridge           Address of the target (cartridge)
+ * @param cartridge           Address of the target (cartridge)
  */
 void I2C__ClearError(uint8_t cartridge) {
   // Send message

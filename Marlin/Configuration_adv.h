@@ -131,11 +131,11 @@
   // Set pneumatics hysteresis to 20 (2 PSI * 10 = 20)
   #define PNEUMATIC_HYSTERESIS 20
   #define PNEUMATIC_HYSTERESIS_PSI PNEUMATIC_HYSTERESIS/10
-  #define PNEUMATIC_CHECK_INTERVAL 2500 // in ms
+  #define PNEUMATIC_CHECK_INTERVAL 1100 // in ms
 #endif
 
 #if ENABLED(E_REGULATOR)
-  #define REGULATOR_CHECK_INTERVAL 2500 // in ms
+  #define REGULATOR_CHECK_INTERVAL 1000 // in ms
 
   // If tank pressure is greater than this number, house air is assumed.
   // In this case, a tank setpoint is no longer required and if a setpoint

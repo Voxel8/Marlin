@@ -4711,13 +4711,13 @@ inline void gcode_M226() {
       // Desired pressure is available
       else if(psi <= available_output_pressure) {
         regulator_setpoint = psi;
-        setOutputPressure(regulator_setpoint);
+        Regulator__SetOutputPressure(regulator_setpoint);
       }
       // Tank pressure is near zero, can set output to near zero
       else if( (psi == 0) && !(house_air) ) {
         if( (current_tank <= REGULATOR_LOW_P) || (current_tank_target <= REGULATOR_LOW_P) ) {
           regulator_setpoint = psi;
-          setOutputPressure(regulator_setpoint);
+          Regulator__SetOutputPressure(regulator_setpoint);
         }
       }
       // Desired pressure NOT available
@@ -5130,9 +5130,9 @@ inline void gcode_M252() {
         servo[servo_index].move(servo_position);
       else {
         SERIAL_ECHO_START;
-        SERIAL_ECHO("Servo ");
+        SERIAL_PROTOCOLPGM("Servo ");
         SERIAL_ECHO(servo_index);
-        SERIAL_ECHOLN(" out of range");
+        SERIAL_PROTOCOLLNPGM(" out of range");
       }
     }
     else if (servo_index >= 0) {

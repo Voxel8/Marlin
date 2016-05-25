@@ -210,6 +210,10 @@
 #define MSG_T_MAXTEMP                       "MAXTEMP triggered"
 #define MSG_T_MINTEMP                       "MINTEMP triggered"
 #define MSG_T_CARTRIDGE_REMOVED             "Cartridge Removed. Print will not continue, and heating is disabled"
+#define MSG_T_PNEUMATICS_EREG_ABOVE_PUMP    "E-regulator pressure above available pressure, please check pneumatics system"
+#define MSG_T_PNEUMATICS_REMOVED            "Pneumatics appear to be removed, check the pneumatics system. Canceling print."
+#define MSG_T_PNEUMATICS_RUNAWAY            "Pneumatics system runaway, canceling print. Check pneumatics system."
+#define MSG_T_PNEUMATICS_LEAK               "Pneumatics leak, canceling print. Check pneumatics system."
 
 // Debug
 #define MSG_DEBUG_ECHO                      "DEBUG ECHO ENABLED"

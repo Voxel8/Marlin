@@ -9,7 +9,7 @@ import logging
 import argparse
 
 from testfunctions_i2c import I2C_Test
-from testfunctions_ereg import Ereg_Test
+from testfunctions_pneumatics import Pneumatics_Test
 
 ###################################################################################################
 """Set up for the test framework, defining parser arguments and color logging"""
@@ -106,7 +106,11 @@ class Test:
         self.testSuccessCount = self.testSuccessCount + 1
 
     def FinalDisplay(self):
-        '''Display the final counts for passed, failed, and warnings, with test fail or pass'''
+        """Display final test data
+
+        Display the final counts for passed, failed, and warnings, with test fail or pass
+
+        """
         logging.info("")
         logging.info("----------------------------------------------")
         logging.info("Final Test Results")
@@ -130,7 +134,9 @@ test = Test()
 I2C = I2C_Test(test,logging)
 I2C.run_all_tests()
 
-Ereg = Ereg_Test(test,logging)
+Pneumatics = Pneumatics_Test(test,logging)
+Pneumatics.run_all_tests()
+
 
 test.FinalDisplay()
 test.TearDown()

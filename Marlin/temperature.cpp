@@ -659,16 +659,16 @@ float get_pid_output(int e) {
 
     #if ENABLED(PID_BED_DEBUG)
       SERIAL_ECHO_START;
-      SERIAL_ECHO(" PID_BED_DEBUG ");
-      SERIAL_ECHO(": Input ");
+      SERIAL_PROTOCOLPGM(" PID_BED_DEBUG ");
+      SERIAL_PROTOCOLPGM(": Input ");
       SERIAL_ECHO(current_temperature_bed);
-      SERIAL_ECHO(" Output ");
+      SERIAL_PROTOCOLPGM(" Output ");
       SERIAL_ECHO(pid_output);
-      SERIAL_ECHO(" pTerm ");
+      SERIAL_PROTOCOLPGM(" pTerm ");
       SERIAL_ECHO(pTerm_bed);
-      SERIAL_ECHO(" iTerm ");
+      SERIAL_PROTOCOLPGM(" iTerm ");
       SERIAL_ECHO(iTerm_bed);
-      SERIAL_ECHO(" dTerm ");
+      SERIAL_PROTOCOLPGM(" dTerm ");
       SERIAL_ECHOLN(dTerm_bed);
     #endif //PID_BED_DEBUG
 
@@ -706,7 +706,7 @@ void manage_heater() {
     #if ENABLED(THERMAL_PROTECTION_HOTENDS)
       thermal_runaway_protection(&thermal_runaway_state_machine[e], &thermal_runaway_timer[e], current_temperature[e], target_temperature[e], e, THERMAL_PROTECTION_PERIOD, THERMAL_PROTECTION_HYSTERESIS);
     #endif
-
+    
     float pid_output = get_pid_output(e);
 
     // Check if temperature is within the correct range
@@ -787,20 +787,9 @@ void manage_heater() {
   // ELECTRO-PNEUMATIC REGULATOR CONTROL
   #if (ENABLED(E_REGULATOR) && ENABLED(PNEUMATICS))
   if (millis() - previous_millis_regulator_value > REGULATOR_CHECK_INTERVAL) {
-    
+    // Updates the regulator protection timers
+    Regulator__Update();
     previous_millis_regulator_value = millis();
-    //Is output pressure more than what is available?
-    if((pressureRegulator() >= pressurePneumatic()) && (pressurePneumatic() >= 1)) {
-      // Shut down
-      if(IsRunning()) {
-        SERIAL_ERROR_START;
-        SERIAL_ERRORLNPGM(MSG_ERR_REGULATOR);
-        // Set output pressure to 0
-        DAC_write(MCP4725_I2C_ADDRESS, 0);
-        // Disable heaters
-        Stop();
-      }
-    }
   }
   // Turn off E-reg if error flag
   if(pneumatic_error_flag == 1) {

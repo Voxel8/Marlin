@@ -7,6 +7,7 @@
 /*================================================================================*/
 /* Definitions  */
 /*================================================================================*/
+
 // Calculation for BITS_PER_PSI:
 // R1 = 499
 // n = 12
@@ -33,9 +34,25 @@
 #endif // E_REGULATOR_SENSOR
 #define REGULATOR_LOW_P 2
 
+#define REGULATOR_PROTECTION_TIME_S (5)
+#define REGULATOR_PROTECTION_BAND   (4)
+
+#define REGULATOR_NOT_PRESENT_VALUE (110)
+
 /*================================================================================*/
 /* Function Prototypes */
 /*================================================================================*/
-void setOutputPressure(float pressure);
+
+/**
+ * Set the output pressure (in psi) of the regulator.
+ * @input desired_pressure  The pressure that the function is attempting to 
+ *                          reach.
+ */
+void Regulator__SetOutputPressure(float pressure);
+
+/**
+ * Updates the protection function, called regularly in the main loop.
+ */
+void Regulator__Update();
 
 #endif
