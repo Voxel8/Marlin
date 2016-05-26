@@ -8,6 +8,9 @@ from colorlog import ColoredFormatter
 import logging
 import argparse
 
+import sys
+sys.path.append("./Diagnostics_Suite")
+from TestUtilities import TestRunner, UtilityData, TestData
 from testfunctions_i2c import I2C_Test
 from testfunctions_pneumatics import Pneumatics_Test
 
@@ -129,14 +132,15 @@ class Test:
 ## Test Main
 ############################################################################################
 
-test = Test()
+test = TestRunner(logging,args.comport)
 
-I2C = I2C_Test(test,logging)
-I2C.run_all_tests()
+test.runTest(test.test_test)
+# I2C = I2C_Test(test,logging)
+# I2C.run_all_tests()
 
-Pneumatics = Pneumatics_Test(test,logging)
-Pneumatics.run_all_tests()
+# Pneumatics = Pneumatics_Test(test,logging)
+# Pneumatics.run_all_tests()
 
 
-test.FinalDisplay()
-test.TearDown()
+# test.FinalDisplay()
+# test.TearDown()

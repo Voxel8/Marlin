@@ -1,6 +1,13 @@
+#! /usr/bin/env python
+
+import numpy as np
+from mecode import G
+from time import sleep
+import re
+
 class TestRunner:
 
-    def __init__(self,logger):
+    def __init__(self,logger,comport):
         '''Initialize the printer serial communication, and test variables'''
         self.g = G(
             print_lines=False,
@@ -8,7 +15,7 @@ class TestRunner:
             direct_write=True,
             direct_write_mode='serial',
             # printer_port="/dev/tty.usbmodem1421",
-            printer_port=args.comport,
+            printer_port=comport,
         )
         self.logging = logger
         self.testFailed = False
@@ -62,3 +69,24 @@ class TestRunner:
         else:
             self.logging.info("Test Passed")
         self.logging.info("")
+
+    def runTest(self, f):
+        self.logging.info("Executing Test: {}".format(f.__name__))
+        returnvalue = f()
+        self.logging.info("Return Value: {}".format(returnvalue))
+
+    def test_test(self):
+        self.logging.info("test test")
+        return 1
+
+class UtilityData:
+    def __init__(self):
+        '''Initialize the utility variables'''
+        self.successful = True;
+        self.data = None;
+
+class TestData:
+    def __init__(self):
+        '''Initialize the test variables'''
+        self.failed = False;
+        self.failuremessage = None
