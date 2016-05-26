@@ -10,7 +10,7 @@ import argparse
 
 import sys
 sys.path.append("./Diagnostics_Suite")
-from TestUtilities import TestRunner, UtilityData, TestData
+from TestUtilities import TestRunner, ResponseData
 from testfunctions_i2c import I2C_Test
 from testfunctions_pneumatics import Pneumatics_Test
 
@@ -61,7 +61,8 @@ logging.getLogger('').addHandler(console)
 
 logging.debug("Logging and Parser Complete")
 
-############################################################################################
+###############################################################################
+
 
 class Test:
 
@@ -132,15 +133,15 @@ class Test:
 ## Test Main
 ############################################################################################
 
-test = TestRunner(logging,args.comport)
+test = TestRunner(logging, args.comport)
 
-test.runTest(test.test_test)
-# I2C = I2C_Test(test,logging)
-# I2C.run_all_tests()
+I2C = I2C_Test(test, logging)
+# test.runTest(I2C.test_i2c_alltargets)
+I2C.run_all_tests()
 
 # Pneumatics = Pneumatics_Test(test,logging)
 # Pneumatics.run_all_tests()
 
 
-# test.FinalDisplay()
-# test.TearDown()
+test.FinalDisplay()
+test.TearDown()

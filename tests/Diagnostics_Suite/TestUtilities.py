@@ -5,9 +5,10 @@ from mecode import G
 from time import sleep
 import re
 
+
 class TestRunner:
 
-    def __init__(self,logger,comport):
+    def __init__(self, logger, comport):
         '''Initialize the printer serial communication, and test variables'''
         self.g = G(
             print_lines=False,
@@ -22,6 +23,7 @@ class TestRunner:
         self.testFailCount = 0
         self.testSuccessCount = 0
         self.warningCount = 0
+        self.errorList = []
 
         self.logging.debug("Test initialized")
 
@@ -33,19 +35,20 @@ class TestRunner:
 
         self.logging.debug("Test Teardown Complete")
 
-    def logFailure(self,message):
-        '''Display the correct error message, increase the failure count, set the 
-            test to failed'''
+    def logFailure(self, message):
+        '''Display the correct error message, increase the failure count,
+            set the test to failed'''
         self.logging.error(message)
         self.testFailCount = self.testFailCount + 1
         self.testFailed = True
+        self.errorList.append(message)
 
-    def logWarning(self,message):
+    def logWarning(self, message):
         '''Display the warning message, increase the warning count'''
         self.logging.warning(message)
         self.testFailCount = self.warningCount + 1
 
-    def logSuccess(self,message):
+    def logSuccess(self, message):
         '''Display the success message, increase the success count'''
         self.logging.info(message)
         self.testSuccessCount = self.testSuccessCount + 1
@@ -53,7 +56,8 @@ class TestRunner:
     def FinalDisplay(self):
         """Display final test data
 
-        Display the final counts for passed, failed, and warnings, with test fail or pass
+        Display the final counts for passed, failed, and warnings, with
+        test fail or pass
 
         """
         self.logging.info("")
@@ -69,24 +73,32 @@ class TestRunner:
         else:
             self.logging.info("Test Passed")
         self.logging.info("")
+        self.logging.info("Error List")
+        self.logging.info("----------------------------------------------")
+        for i in range(len(self.errorList)):
+            self.logging.error("{}".format(self.errorList[i]))
 
     def runTest(self, f):
         self.logging.info("Executing Test: {}".format(f.__name__))
         returnvalue = f()
-        self.logging.info("Return Value: {}".format(returnvalue))
+        self.logging.debug("Return Value: {}".format(returnvalue.failed))
+        if returnvalue.failed is False:
+            self.logSuccess("Passed!\n")
+        else:
+            self.logFailure(returnvalue.data)
+        self.logging.debug("Return Value: {}\n".format(returnvalue.data))
 
-    def test_test(self):
-        self.logging.info("test test")
-        return 1
 
-class UtilityData:
+class ResponseData:
     def __init__(self):
-        '''Initialize the utility variables'''
-        self.successful = True;
-        self.data = None;
+        '''Pass through success or failure, and variables'''
+        self.failed = False
+        self.data = None
 
-class TestData:
-    def __init__(self):
-        '''Initialize the test variables'''
-        self.failed = False;
-        self.failuremessage = None
+    def fail(self, message):
+        self.failed = True
+        self.data = message
+
+    def success(self, message):
+        self.failed = False
+        self.data = message
