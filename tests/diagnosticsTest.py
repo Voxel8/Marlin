@@ -13,7 +13,7 @@ sys.path.append("./Diagnostics_Suite")
 from TestUtilities import TestRunner, ResponseData
 from testfunctions_i2c import I2C_Test
 from testfunctions_pneumatics import Pneumatics_Test
-
+from testfunctions_NIDAQ import Pneumatics_Test_NIDAQ
 ###################################################################################################
 """Set up for the test framework, defining parser arguments and color logging"""
 
@@ -72,9 +72,11 @@ I2C = I2C_Test(test, logging)
 # test.runTest(I2C.test_i2c_alltargets)
 # I2C.run_all_tests()
 
-Pneumatics = Pneumatics_Test(test,logging)
-Pneumatics.run_all_tests()
+# Pneumatics = Pneumatics_Test(test,logging)
+# Pneumatics.run_all_tests()
 
+NIDAQ = Pneumatics_Test_NIDAQ(test,logging)
+NIDAQ.test_Diagnostics_trial()
 
 test.FinalDisplay()
 test.TearDown()

@@ -5,7 +5,7 @@ import re
 from time import sleep
 import sys
 sys.path.append("./Diagnostics_Suite")
-from TestUtilities import TestRunner, ResponseData
+from TestUtilities import TestRunner, ResponseData, cd
 
 import os
 import time
@@ -18,9 +18,10 @@ from nidaqmx import AnalogInputTask
 from threading import Thread
 from testfunctions_pneumatics import Pneumatics_Test
 
-
-
-class Pneumatics_Test_NIDAQ:
+# Path where data folder is located
+path = r"\\V8NETDRIVE\home\Regulator Testing Data"
+current_ramp_cycle = None
+class Pneumatics_Test_NIDAQ(object):
 
     """ Test module for the pneumatics system, e-regulator, and solenoid.
 
@@ -40,90 +41,109 @@ class Pneumatics_Test_NIDAQ:
         self.g = test.g
         self.test = test
         logging.debug("Initialized NIDAQ Extend Pneumatics Test")
-        self.pneumatics = Pneumatics_Test(test,logging)
+        self.pneumatics = Pneumatics_Test(test, logging)
 
+        # Basic defines for running the test, used further on
         self.pressure_start = 0                  # Pressure to toggle regulator
         self.pressure_end = 40
         self.pressure_interval = 5
-        self.pressure_ramp_cycles = 1            # Total number of solenoid_toggle_cycles
+        # Total number of solenoid_toggle_cycles
+        self.pressure_ramp_cycles = 1
         self.sample_rate = 1000                  # Sampling rate (Hz)
-        
+
+        # The percentage of the set value that, when reached, will be marked as reaching
+        # the value.
         self.tolerance = 0.95                    # Response-time tolerance
         # Number of solenoid_toggle_cycles to toggle solenoid
         self.solenoid_toggle_cycles = 1
         #   at each pressure
-        self.wait_time_s = 1                     # Wait for regulator to reach pressure
-        # Save full data every _ solenoid solenoid_toggle_cycles, if 0 don't save
+        # Wait for regulator to reach pressure
+        self.wait_time_s = 1
+        # Save full data every _ solenoid solenoid_toggle_cycles, if 0 don't
+        # save
         self.checkpoint = 5
         self.ID = 'Default'
-        
-        self.outputdirectory = None
-        self.current_ramp_cycle = None
 
+        self.outputdirectory = None
 
         self.task = AnalogInputTask()
-        task.create_voltage_channel('Dev1/ai0', terminal='diff',
-                            min_val=-5.0, max_val=5.0)
-        task.configure_timing_sample_clock(rate=sample_rate)
-        self.daq  = DAQ(self.task)
+        self.task.create_voltage_channel('Dev1/ai0', terminal='diff',
+                                    min_val=-5.0, max_val=5.0)
+        self.task.configure_timing_sample_clock(rate=self.sample_rate)
+        with cd(path):
+            self.daq = DAQ(self)
 
-
-    def test_solenoid_pressure(pressure):
-        self.setRegulatorPressure(pressure)       # Set regulator pressure
+    def test_solenoid_pressure(self, pressure):
+        # Set regulator pressure
+        self.pneumatics.setRegulatorPressure(pressure)
         time.sleep(3)
-        for cycle in range(0, solenoid_toggle_cycles):
-            self.daq.record(int(sample_rate*wait_time_s),
-                       cycle, p)                # Open recording thread
-    
-            self.pneumatics.activateAndReadSolenoid()         # Open solenoid
-            time.sleep(wait_time_s)
-            self.pneumatics.disableAndReadSolenoid()          # close Solenoid
+        for cycle in range(0, self.solenoid_toggle_cycles):
+            self.daq.record(int(self.sample_rate*self.wait_time_s),
+                       cycle, pressure)                # Open recording thread
+
+            self.open_solenoid()
+            time.sleep(self.wait_time_s)
+            self.close_solenoid()
             time.sleep(1)
 
-
-    def test_Diagnostics_trial:
+    def test_Diagnostics_trial(self):
         path = r"\\V8NETDRIVE\home\Regulator Testing Data"
-    
+
         with cd(path):
-            g = G(print_lines=False,
-                aerotech_include=False,
-                direct_write=True,
-                direct_write_mode='serial',
-                printer_port='COM18')
-            
+            g = self.g
             task = AnalogInputTask()
 
-        
-        
-            for i in range(0, pressure_ramp_cycles):
+            self.open_house_air()
+
+            for i in range(0, self.pressure_ramp_cycles):
                 # Ensure solenoid is closed at start
-                g.write('M42 P8 S0')
-                g.write('M125 S40')                     # Set tank pressure to 40psi
-        
+                # Ensure Solenoid is closed
+                self.close_solenoid()
+                # Set tank pressure to 40psi
+                self.pneumatics.setPumpPressure(40)
+
                 current_ramp_cycle = i
-                # Interval added / subtracted to help make range function more intuitive
+                # Interval added / subtracted to help make range function more
+                # intuitive
                 for p in range(self.pressure_start, self.pressure_end + self.pressure_interval, self.pressure_interval):
                     print(p)
-                    self.solenoid_pressure_test(p)
-            
+                    self.test_solenoid_pressure(p)
+
                 for p in range(self.pressure_end, self.pressure_start - self.pressure_interval, -self.pressure_interval):
                     print(p)
-                    self.solenoid_pressure_test(p)
-            
-            self.g.teardown()
-            
+                    self.test_solenoid_pressure(p)
+
+            self.close_house_air()
             self.daq.display_test_results()
-    
-###########################################################################################
+
+    def open_solenoid(self):
+        self.g.write('M42 P8 S255')          # Open solenoid (Fan 0)
+
+    def close_solenoid(self):
+       self.g.write('M42 P8 S0')            # Close solenoid (Fan 0)
+
+    def open_house_air(self):
+        self.g.write('M42 P6 S255')          # Open solenoid (Fan 1)
+
+    def close_house_air(self):
+        self.g.write('M42 P6 S0')            # Close solenoid (Fan 1)
+##########################################################################
+
+
 class DAQ(object):
 
     """Interface for the NI DAQ"""
 
-    def __init__(self, task1):
+    def __init__(self, test):
         """Initializes the DAQ with a task, and a logger"""
-        self.task1 = task1
+        self.task1 = test.task
         self.data = {}
-        self.log = Logger()
+        self.log = Logger(test)
+        self.g = test.g
+        self.tolerance = test.tolerance
+        self.wait_time_s = test.wait_time_s
+        self.sample_rate = test.sample_rate
+        self.checkpoint = test.checkpoint
 
     def record(self, samples, cycle, pressure):
         """Starts a thread that launches a record_worker"""
@@ -138,13 +158,13 @@ class DAQ(object):
         self.data[cycle] = self.task1.read(samples)
         self.task1.stop()
 
-        resp = (g.write('M236', resp_needed=True))
+        resp = (self.g.write('M236', resp_needed=True))
         pressure_reported = (resp.split()[0])
-        print ("pressure reported {} ".format(pressure_reported))
+        print("pressure reported {} ".format(pressure_reported))
         # Save times required to reach tolerance point
-        target = tolerance * (pressure / 20.0)
-        timestamp = wait_time_s
-        last_timestamp = wait_time_s
+        target = self.tolerance * (pressure / 20.0)
+        timestamp = self.wait_time_s
+        last_timestamp = self.wait_time_s
         final_value = float(self.data[cycle][-10])
         error_actual = float(final_value*20) - float(pressure)
         error_reported = float(pressure_reported) - float(final_value*20)
@@ -154,42 +174,44 @@ class DAQ(object):
                     final_value)*20.0, error_actual, pressure_reported, error_reported, last_timestamp)
                 break
             last_timestamp = timestamp
-            timestamp -= (1.0 / sample_rate)
-            if timestamp is (1.0 / sample_rate):
+            timestamp -= (1.0 / self.sample_rate)
+            if timestamp is (1.0 / self.sample_rate):
                 self.log.log_and_print(cycle, pressure, float(
-                    final_value)*20.0, error_actual, pressure_reported, error_reported, wait_time_s)
+                    final_value)*20.0, error_actual, pressure_reported, error_reported, self.wait_time_s)
 
         # Periodically save full data for a cycle
-        if cycle % checkpoint == 0:
+        if cycle % self.checkpoint == 0:
             self.log.log_checkpoint(
                 self.data, cycle, current_ramp_cycle, pressure)
 
     def display_test_results(self):
         """Shows the final display from the stat tracker in the logger"""
         self.log.display_test_results()
-
-
 ###############################################################################
+
 
 class Logger(object):
 
-    def __init__(self):
+    def __init__(self, test):
+
+        self.sample_rate = test.sample_rate
+        self.ID = test.ID
         """Creates the output directory, Response_Data.csv, populates the header, and makes a statTrackerCollection"""
         i = 1
         today = '{0}{1:02}{2:02}'.format(date.today().year-2000,
                                          date.today().month,
                                          date.today().day)
-        self.outdir = 'data/ereg_{0}_{1:02}_{2}'.format(today, i, ID)
+        self.outdir = 'data/ereg_{0}_{1:02}_{2}'.format(today, i, self.ID)
         for _ in os.listdir('data'):
             if '_'.join(self.outdir[5:].split('_')[0:3]) in _:
                 i += 1
-                self.outdir = 'data/ereg_{0}_{1:02}_{2}'.format(today, i, ID)
-        self.outdir = 'data/ereg_{0}_{1:02}_{2}'.format(today, i, ID)
+                self.outdir = 'data/ereg_{0}_{1:02}_{2}'.format(today, i, self.ID)
+        self.outdir = 'data/ereg_{0}_{1:02}_{2}'.format(today, i, self.ID)
         os.makedirs(self.outdir)
 
         self.response_time = os.path.join(self.outdir, 'Response_Data.csv')
         with open(self.response_time, 'a') as f:
-            f.write(ID + '\n\n')
+            f.write(self.ID + '\n\n')
             f.write(
                 'Ramp Cycle, Cycle, Set Pressure, Actual Pressure, Actual Error, Reported Pressure, Reported Error, Response Time ,Value less than Target\n')
         ##  f.write('{7}, {0},   {1},          {2:.2f},         {3:.2f},      {4},               {5:.2f},        {6:.2f} ')
@@ -197,7 +219,7 @@ class Logger(object):
         self.statTracker = PSI_StatTracker_Collection(self.outdir)
 
     def log_and_print(self, cycle, pressure, pressure_actual, error_actual, pressure_reported, error_reported, last_timestamp):
-        """"Logs and prints the test data in the correct format"""       
+        """"Logs and prints the test data in the correct format"""
         with open(self.response_time, 'a') as f:
             f.write('{7}, {0}, {1}, {2:.2f}, {3:.2f}, {4}, {5:.2f}, {6:.2f},\n'.format(
                 cycle, pressure, pressure_actual, error_actual, pressure_reported, error_reported, last_timestamp, current_ramp_cycle))
@@ -216,14 +238,13 @@ class Logger(object):
         with open(outfile, 'w') as f:
             timestamp = 0.0
             for value in data[cycle]:
-                timestamp += (1.0 / sample_rate)
+                timestamp += (1.0 / self.sample_rate)
                 f.write(
                     '{0:.3f}, {1:.3f}\n'.format(float(timestamp), float(value)*20.0))
 
     def display_test_results(self):
         """Displays the test data kept by the statTracker"""
         self.statTracker.finalDisplay()
-
 ###############################################################################
 
 
@@ -299,8 +320,8 @@ class PSI_StatTracker(object):
             self.pressure_err_last))
         print("Average Pressure Error: {0:.2f} PSI".format(
             self.pressure_err_avg))
-
 ###############################################################################
+
 
 class PSI_StatTracker_Collection(object):
 
@@ -351,48 +372,3 @@ class PSI_StatTracker_Collection(object):
                     l[i].set_pressure, l[i].pressure_err_avg, l[i].response_time_avg, l[i].pressure_err_last, l[i].response_time_last))
                 f.write("Pressure: {0} psi. Avg Error: {1:.2f} psi. Avg Response Time: {2} seconds. Last Error: {3:.2f} psi. Last Response Time {4} seconds\n".format(
                     l[i].set_pressure, l[i].pressure_err_avg, l[i].response_time_avg, l[i].pressure_err_last, l[i].response_time_last))
-
-###############################################################################
-
-
-# # Parse all active COM ports
-# comports = serial_ports()
-# #print('Avalable COM ports: ' + str(comports) + '. Using ' + comports[0] + '...')
-
-def test_Diagnostics_trial:
-    path = r"\\V8NETDRIVE\home\Regulator Testing Data"
-
-    with cd(path):
-        g = G(print_lines=False,
-            aerotech_include=False,
-            direct_write=True,
-            direct_write_mode='serial',
-            printer_port='COM18')
-        
-        task1 = AnalogInputTask()
-        task1.create_voltage_channel('Dev1/ai0', terminal='diff',
-                                    min_val=-5.0, max_val=5.0)
-        task1.configure_timing_sample_clock(rate=sample_rate)
-        
-        self.daq = DAQ(task1)
-    
-    
-        for i in range(0, pressure_ramp_cycles):
-            # Ensure solenoid is closed at start
-            g.write('M42 P8 S0')
-            g.write('M125 S40')                     # Set tank pressure to 40psi
-    
-            current_ramp_cycle = i
-            # Interval added / subtracted to help make range function more intuitive
-            for p in range(self.pressure_start, self.pressure_end + self.pressure_interval, self.pressure_interval):
-                print(p)
-                self.solenoid_pressure_test(p)
-        
-            for p in range(self.pressure_end, self.pressure_start - self.pressure_interval, -self.pressure_interval):
-                print(p)
-                self.solenoid_pressure_test(p)
-        
-        self.g.teardown()
-        
-        self.daq.display_test_results()
-    
