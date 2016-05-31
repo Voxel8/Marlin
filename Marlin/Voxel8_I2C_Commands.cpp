@@ -80,7 +80,7 @@ void I2C__GeneralCommand(uint8_t I2C_target_address, uint8_t command,
 }
 
 /**
- * Sets the speed of the fan on the cartridge holder.
+ * Sets the speed of the fan on the cartrdge holder.
  * @param fanspeed            Speed the fan is set to
  */
 void I2C__SetFanDrive0PWM(uint8_t fanSpeed) {
@@ -138,14 +138,14 @@ void I2C__ToggleUV(uint8_t data) {
 }
 
 /**
- * Writes data to a specific EEPROM address on a cartridge
- * @param cartridge           Address of the target (cartridge)
+ * Writes data to a specific EEPROM address on a I2C_target_address
+ * @param I2C_target_address  Address of the target (cartridge or holder)
  * @param address             The EEPROM address being written to
  * @param data                The data being written
  */
-void I2C__EEPROMWrite(uint8_t cartridge, uint8_t eeprom_address, uint8_t data) {
+void I2C__EEPROMWrite(uint8_t I2C_target_address, uint8_t eeprom_address, uint8_t data) {
   // Send message
-  writeThreeBytePacket(cartridge, EEPROM_WRITE, eeprom_address, data);
+  writeThreeBytePacket(I2C_target_address, EEPROM_WRITE, eeprom_address, data);
 
   // Send information to Octoprint
   SERIAL_PROTOCOLLNPGM("Command: 'EEPROM Write' Sent");
@@ -154,139 +154,139 @@ void I2C__EEPROMWrite(uint8_t cartridge, uint8_t eeprom_address, uint8_t data) {
   SERIAL_PROTOCOLPGM("Address = ");
   SERIAL_PROTOCOL(eeprom_address);
 
-  // Read from cartridge and report
-  requestAndPrintPacket(cartridge, 1);
+  // Read from I2C_target_address and report
+  requestAndPrintPacket(I2C_target_address, 1);
   SERIAL_EOL;
 }
 
 /**
- * Reads data from a specific EEPROM address on a cartridge
- * @param cartridge           Address of the target (cartridge)
+ * Reads data from a specific EEPROM address on a I2C_target_address
+ * @param I2C_target_address  Address of the target (cartridge or holder)
  * @param address             The EEPROM address being written to
  */
-void I2C__EEPROMRead(uint8_t cartridge, uint8_t address) {
+void I2C__EEPROMRead(uint8_t I2C_target_address, uint8_t address) {
   // Send message
-  writeThreeBytePacket(cartridge, EEPROM_READ, address, I2C_EMPTY_DATA);
+  writeThreeBytePacket(I2C_target_address, EEPROM_READ, address, I2C_EMPTY_DATA);
 
   // Send information to Octoprint
   SERIAL_PROTOCOLLNPGM("Command: 'EEPROM READ' Sent");
   SERIAL_PROTOCOLPGM("Value = ");
 
-  // Read from cartridge and report
-  requestAndPrintPacket(cartridge, 1);
+  // Read from I2C_target_address and report
+  requestAndPrintPacket(I2C_target_address, 1);
   SERIAL_EOL;
 }
 
 /**
- * Read the serial number from a cartridge and print it on the serial port
- * @param cartridge           Address of the target (cartridge)
+ * Read the serial number from a I2C_target_address and print it on the serial port
+ * @param I2C_target_address           Address of the target (cartridge or holder)
  */
-void I2C__GetSerial(uint8_t cartridge) {
+void I2C__GetSerial(uint8_t I2C_target_address) {
   // Send message
-  writeThreeBytePacket(cartridge, EEPROM_READ_SERIAL, I2C_EMPTY_ADDRESS,
+  writeThreeBytePacket(I2C_target_address, EEPROM_READ_SERIAL, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
 
   // Send information to Octoprint
   SERIAL_PROTOCOLPGM("Serial Number = ");
 
-  // Read from cartridge and report
-  requestAndPrintSerial(cartridge);
+  // Read from I2C_target_address and report
+  requestAndPrintSerial(I2C_target_address);
   SERIAL_EOL;
 }
 
 /**
  * Read the number of the programmer used on a cartridge and print it on
  * the serial port
- * @param cartridge           Address of the target (cartridge)
+ * @param I2C_target_address           Address of the target (cartridge)
  */
-void I2C__GetProgrammerStation(uint8_t cartridge) {
+void I2C__GetProgrammerStation(uint8_t I2C_target_address) {
   // Send message
-  writeThreeBytePacket(cartridge, EEPROM_READ_PRGMR, I2C_EMPTY_ADDRESS,
+  writeThreeBytePacket(I2C_target_address, EEPROM_READ_PRGMR, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
 
   // Send information to Octoprint
   SERIAL_PROTOCOLPGM("Programmer Station = ");
 
-  // Read from cartridge and report
-  requestAndPrintPacket(cartridge, 1);
+  // Read from I2C_target_address and report
+  requestAndPrintPacket(I2C_target_address, 1);
   SERIAL_EOL;
 }
 
 /**
- * Read the variety of cartridge and print it on the serial port
- * @param cartridge           Address of the target (cartridge)
+ * Read the variety of peripheral and print it on the serial port
+ * @param I2C_target_address           Address of the target (cartridge or holder)
  */
-void I2C__GetCartridgeType(uint8_t cartridge) {
+void I2C__GetPeripheralType(uint8_t I2C_target_address) {
   // Send message
-  writeThreeBytePacket(cartridge, EEPROM_READ_TYPE, I2C_EMPTY_ADDRESS,
+  writeThreeBytePacket(I2C_target_address, EEPROM_READ_TYPE, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
 
   // Send information to Octoprint
-  SERIAL_PROTOCOLPGM("Cartridge Type = ");
+  SERIAL_PROTOCOLPGM("I2C_target_address Type = ");
 
-  // Read from cartridge and report
-  requestAndPrintPacket(cartridge, 1);
+  // Read from I2C_target_address and report
+  requestAndPrintPacket(I2C_target_address, 1);
   SERIAL_EOL;
 }
 
 /**
  * Read the size of the nozzle from cartridge and print it on the serial port
- * @param cartridge           Address of the target (cartridge)
+ * @param I2C_target_address           Address of the target (cartridge)
  */
-void I2C__GetSize(uint8_t cartridge) {
+void I2C__GetSize(uint8_t I2C_target_address) {
   // Send message
-  writeThreeBytePacket(cartridge, EEPROM_READ_SIZE, I2C_EMPTY_ADDRESS,
+  writeThreeBytePacket(I2C_target_address, EEPROM_READ_SIZE, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
 
   // Send information to Octoprint
   SERIAL_PROTOCOLPGM("Cartridge Size = ");
 
-  // Read from cartridge and report
-  requestAndPrintPacket(cartridge, 1);
+  // Read from I2C_target_address and report
+  requestAndPrintPacket(I2C_target_address, 1);
   SERIAL_EOL;
 }
 
 /**
  * Read the material contained by a cartridge and print it on the serial port
- * @param cartridge           Address of the target (cartridge)
+ * @param I2C_target_address           Address of the target (cartridge)
  */
-void I2C__GetMaterial(uint8_t cartridge) {
+void I2C__GetMaterial(uint8_t I2C_target_address) {
   // Send message
-  writeThreeBytePacket(cartridge, EEPROM_READ_MTRL, I2C_EMPTY_ADDRESS,
+  writeThreeBytePacket(I2C_target_address, EEPROM_READ_MTRL, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
 
   // Send information to Octoprint
   SERIAL_PROTOCOLPGM("Cartridge Material = ");
 
-  // Read from cartridge and report
-  requestAndPrintPacket(cartridge, 1);
+  // Read from I2C_target_address and report
+  requestAndPrintPacket(I2C_target_address, 1);
   SERIAL_EOL;
 }
 
 /**
- * Read the material contained by a cartridge and print it on the serial port
- * @param cartridge           Address of the target (cartridge)
+ * Read the error code of an I2C_target_address and print it on the serial port
+ * @param I2C_target_address     Address of the target (cartridge or holder)
  */
-void I2C__GetErrorCode(uint8_t cartridge) {
+void I2C__GetErrorCode(uint8_t I2C_target_address) {
   // Send message
-  writeThreeBytePacket(cartridge, EEPROM_READ_ERR, I2C_EMPTY_ADDRESS,
+  writeThreeBytePacket(I2C_target_address, EEPROM_READ_ERR, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
 
-  // Read from cartridge and report
-  requestAndPrintPacket(cartridge, 1);
+  // Read from I2C_target_address and report
+  requestAndPrintPacket(I2C_target_address, 1);
 }
 
 /**
- * Read the firmware version by a cartridge and print it on the serial port
- * @param cartridge           Address of the target (cartridge)
+ * Read the firmware version by a I2C_target_address and print it on the serial port
+ * @param I2C_target_address     Address of the target (cartridge or holder)
  */
-void I2C__GetFirmwareVersion(uint8_t cartridge) {
+void I2C__GetFirmwareVersion(uint8_t I2C_target_address) {
   // Send message
-  writeThreeBytePacket(cartridge, EEPROM_READ_FRMWRE, I2C_EMPTY_ADDRESS,
+  writeThreeBytePacket(I2C_target_address, EEPROM_READ_FRMWRE, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
   SERIAL_PROTOCOLPGM("Cartridge Firmware Version = ");
-  // Read from cartridge and report
-  requestAndPrintPacket(cartridge, 1);
+  // Read from I2C_target_address and report
+  requestAndPrintPacket(I2C_target_address, 1);
   SERIAL_EOL;
 }
 
@@ -294,23 +294,23 @@ void I2C__GetFirmwareVersion(uint8_t cartridge) {
  * Read the voltage sense pin on a cartridge and print it on the serial port.
  * On the pneumatics cartridge, this should correspond to the solenoid being 
  * active. For FFF, this represents if the hot end is active.
- * @parameter cartridge           Address of the target (cartridge)
+ * @parameter I2C_target_address           Address of the target (cartridge)
  */
-void I2C__GetVoltageSense(uint8_t cartridge) {
-    if ((cartridge != CART0_ADDR) && (cartridge != CART1_ADDR)) {
+void I2C__GetVoltageSense(uint8_t I2C_target_address) {
+    if ((I2C_target_address != CART0_ADDR) && (I2C_target_address != CART1_ADDR)) {
     return;
   }
   // Send message
-  writeThreeBytePacket(cartridge, GET_GPIO_V_SENSE, I2C_EMPTY_ADDRESS,
+  writeThreeBytePacket(I2C_target_address, GET_GPIO_V_SENSE, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
-  if (cartridge == CART0_ADDR) {
+  if (I2C_target_address == CART0_ADDR) {
     SERIAL_PROTOCOLPGM("Extruder Status = ");
   }
-  else if (cartridge == CART1_ADDR) {
+  else if (I2C_target_address == CART1_ADDR) {
     SERIAL_PROTOCOLPGM("Solenoid Status = ");
   }
-  // Read from cartridge and report
-  requestAndPrintPacket(cartridge, 1);
+  // Read from I2C_target_address and report
+  requestAndPrintPacket(I2C_target_address, 1);
   SERIAL_EOL;
 }
 
@@ -318,28 +318,28 @@ void I2C__GetVoltageSense(uint8_t cartridge) {
  * Read the SYRINGE_ACTIVE pin on a pneumatics cartridge and print it on the
  * serial port. This should be a 1 when the syringe is deployed, and a 0 when
  * it's retracted. 
- * @parameter cartridge           Address of the target (pneumatic cartridge)
+ * @parameter I2C_target_address           Address of the target (pneumatic cartridge)
  */
-void I2C__GetGpioSwitch(uint8_t cartridge) {
-  if (cartridge != CART1_ADDR){
+void I2C__GetGpioSwitch(uint8_t I2C_target_address) {
+  if (I2C_target_address != CART1_ADDR){
     return;
   }
   // Send message
-  writeThreeBytePacket(cartridge, GET_GPIO_SWITCH, I2C_EMPTY_ADDRESS,
+  writeThreeBytePacket(I2C_target_address, GET_GPIO_SWITCH, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
   SERIAL_PROTOCOLPGM("Syringe Status = ");
-  // Read from cartridge and report
-  requestAndPrintPacket(cartridge, 1);
+  // Read from I2C_target_address and report
+  requestAndPrintPacket(I2C_target_address, 1);
   SERIAL_EOL;
 }
 
 /**
- * Clear the error flag for a particular cartridge if it's set
- * @param cartridge           Address of the target (cartridge)
+ * Clear the error flag for a particular I2C_target_address if it's set
+ * @param I2C_target_address           Address of the target (I2C_target_address)
  */
-void I2C__ClearError(uint8_t cartridge) {
+void I2C__ClearError(uint8_t I2C_target_address) {
   // Send message
-  writeThreeBytePacket(cartridge, CLEAR_ERROR, I2C_EMPTY_ADDRESS,
+  writeThreeBytePacket(I2C_target_address, CLEAR_ERROR, I2C_EMPTY_ADDRESS,
                        I2C_EMPTY_DATA);
   SERIAL_PROTOCOLPGM("Cleared Error State");
   SERIAL_EOL;
@@ -367,7 +367,7 @@ void writeThreeBytePacket(uint8_t I2C_target_address, uint8_t command,
 }
 
 void requestAndPrintPacket(uint8_t I2C_target_address, uint8_t bytes) {
-  // Read from cartridge and report
+  // Read from I2C_target_address and report
   Wire.requestFrom(I2C_target_address, bytes);
   if (!Wire.available()) {
     SERIAL_PROTOCOLPGM(" No Packet Available ");
