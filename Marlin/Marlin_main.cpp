@@ -4896,6 +4896,9 @@ inline void gcode_M243() {
       case 2:
         i2c_address = CART_HOLDER_ADDR;
         break;
+      default:
+        SERIAL_ECHOLNPGM("Invalid Address");
+        return;
     }
   }
   // Desired EEPROM address
@@ -4951,6 +4954,9 @@ inline void gcode_M244() {
       case 2:
         i2c_address = CART_HOLDER_ADDR;
         break;
+      default:
+        SERIAL_ECHOLNPGM("Invalid Address");
+        return;
     }
   }
   // Desired EEPROM address
@@ -4994,6 +5000,9 @@ inline void gcode_M245() {
       case 2:
         i2c_address = CART_HOLDER_ADDR;
         break;
+      default:
+        SERIAL_ECHOLNPGM("Invalid Address");
+        return;
     }
   }
   
@@ -5004,7 +5013,7 @@ inline void gcode_M245() {
 
   I2C__GetSerial(i2c_address);
   I2C__GetProgrammerStation(i2c_address);
-  I2C__GetCartridgeType(i2c_address);
+  I2C__GetPeripheralType(i2c_address);
   I2C__GetSize(i2c_address);
   I2C__GetMaterial(i2c_address);
   I2C__GetFirmwareVersion(i2c_address);
@@ -5051,6 +5060,9 @@ inline void gcode_M248() {
       case 1:
         Cartridge__SetPresentCheck(true);
         break;
+      default:
+        SERIAL_ECHOLNPGM("(E1) or (E0) not given");
+        return;
     }
   }
 
@@ -5085,35 +5097,6 @@ inline void gcode_M249() {
     SERIAL_ECHOLNPGM("Enable (E1) or Disable (E0) not given");
     return;
   }
-}
-
-inline void gcode_M252() {
-  uint8_t i2c_address = 0xFF;
-  // Used to see if we've been given arguments, and to warn you through the
-  // serial port if they're not seen.
-  bool hasC;
-
-  // Desired address for peripheral device
-  if (hasC = code_seen('C')) {
-    switch(int(code_value())) {
-      case 0:
-        i2c_address = CART0_ADDR;
-        break;
-      case 1:
-        i2c_address = CART1_ADDR;
-        break;
-      case 2:
-        i2c_address = CART_HOLDER_ADDR;
-        break;
-    }
-  }
-  
-  if (!hasC){
-    SERIAL_ECHOLNPGM("No cartridge address given");
-    return;
-  }
-
-  I2C__ClearError(i2c_address);
 }
 
 #if HAS_SERVOS
@@ -6626,6 +6609,13 @@ void process_next_command() {
         gcode_M249();
         break;
 
+      case 251: // I2C Query Syringe Status:
+        gcode_M251();
+        break;
+      case 253: // I2C Query Voltage Sense:
+        gcode_M253();
+        break;
+        
       case 272:
         gcode_M272();
         break;
