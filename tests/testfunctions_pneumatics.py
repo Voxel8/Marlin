@@ -247,10 +247,12 @@ class Pneumatics_Test:
 
         """
         setPressure = 40
-        getToPressureTime_s = 30
-        pressureMeasurementTime_s = 40
-        passingPressureRange = 1
+        getToPressureTime_s = 60
+        pressureMeasurementTime_s = 540
+        passingPressureRange_psi = 1
         t = ResponseData()
+        measurement_delay_time_s = 60
+        allowed_leak_amount_psi = .1
 
         logging.info(
             "Testing for leaking Pressure Tank\n")
@@ -258,7 +260,7 @@ class Pneumatics_Test:
         for i in range(getToPressureTime_s):
             pumpPressure = self.readPumpPressure()
             logging.debug("Pump Pressure: {} PSI".format(pumpPressure))
-            if pumpPressure > setPressure - passingPressureRange:
+            if pumpPressure > setPressure - passingPressureRange_psi:
                 break
             sleep(1)
             if i is getToPressureTime_s - 1:
@@ -267,12 +269,15 @@ class Pneumatics_Test:
                 return t
 
         self.setPumpPressure(0)
+        logging.info("Waiting for {} seconds to allow time to stabilize".format(measurement_delay_time_s))
+        sleep(measurement_delay_time_s)
+        logging.info("Starting to analyze pressure")
         startingPumpPressure = self.readPumpPressure()
         for i in range(pressureMeasurementTime_s):
 
             pumpPressure = self.readPumpPressure()
             logging.debug("Pump Pressure: {} PSI".format(pumpPressure))
-            if pumpPressure < startingPumpPressure - 1:
+            if pumpPressure < startingPumpPressure - allowed_leak_amount_psi:
                 t.fail("Tank Pressure too low, likely a leak")
                 return t
             sleep(1)

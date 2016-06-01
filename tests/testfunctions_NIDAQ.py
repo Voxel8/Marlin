@@ -21,6 +21,8 @@ from testfunctions_pneumatics import Pneumatics_Test
 # Path where data folder is located
 path = r"\\V8NETDRIVE\home\Regulator Testing Data"
 current_ramp_cycle = None
+
+
 class Pneumatics_Test_NIDAQ(object):
 
     """ Test module for the pneumatics system, e-regulator, and solenoid.
@@ -28,7 +30,7 @@ class Pneumatics_Test_NIDAQ(object):
     This class is used to run tests on the pneumatics sled, and cartridge. 
     """
 
-    def __init__(self, test, logging):
+    def __init__(self, test, logging, regulator):
         """Initialize the NIDAQ extended Pneumatics test, with the supplied overall test and logger.
 
         Args:
@@ -44,8 +46,10 @@ class Pneumatics_Test_NIDAQ(object):
         self.pneumatics = Pneumatics_Test(test, logging)
 
         # Basic defines for running the test, used further on
-        self.pressure_start = 0                  # Pressure to toggle regulator
-        self.pressure_end = 40
+        self.pressure_tank_start = 0                  # Pressure to toggle regulator
+        self.pressure_tank_end = 30
+        self.pressure_house_start = 30
+        self.pressure_house_end = 80
         self.pressure_interval = 5
         # Total number of solenoid_toggle_cycles
         self.pressure_ramp_cycles = 1
@@ -62,7 +66,7 @@ class Pneumatics_Test_NIDAQ(object):
         # Save full data every _ solenoid solenoid_toggle_cycles, if 0 don't
         # save
         self.checkpoint = 5
-        self.ID = 'Default'
+        self.ID = str(regulator)
 
         self.outputdirectory = None
 
@@ -87,11 +91,46 @@ class Pneumatics_Test_NIDAQ(object):
             time.sleep(1)
 
     def test_Diagnostics_trial(self):
-        path = r"\\V8NETDRIVE\home\Regulator Testing Data"
-
+        t = ResponseData()
+        global current_ramp_cycle
         with cd(path):
             g = self.g
             task = AnalogInputTask()
+
+            self.close_house_air()
+
+            for i in range(0, self.pressure_ramp_cycles):
+                # Ensure solenoid is closed at start
+                # Ensure Solenoid is closed
+                self.close_solenoid()
+                # Set tank pressure to 40psi
+                self.pneumatics.setPumpPressure(40)
+
+                logging.info("Testing Output Pressure (Source: Tank)")
+                current_ramp_cycle = i
+                # Interval added / subtracted to help make range function more
+                # intuitive
+                for p in range(self.pressure_tank_start, self.pressure_tank_end + self.pressure_interval, self.pressure_interval):
+                    logging.debug(p)
+                    self.test_solenoid_pressure(p)
+                    if self.daq.u.failed:
+                        self.close_house_air()
+                        self.pneumatics.setRegulatorPressure(0)
+                        self.pneumatics.setPumpPressure(0)
+                        t = self.daq.u
+                        return t
+
+                for p in range(self.pressure_tank_end, self.pressure_tank_start - self.pressure_interval, -self.pressure_interval):
+                    logging.debug(p)
+                    self.test_solenoid_pressure(p)
+                    if self.daq.u.failed:
+                        self.close_house_air()
+                        self.pneumatics.setRegulatorPressure(0)
+                        self.pneumatics.setPumpPressure(0)
+                        t = self.daq.u
+                        return t
+
+            logging.info("Testing Output Pressure (Source: House Air)")
 
             self.open_house_air()
 
@@ -105,16 +144,31 @@ class Pneumatics_Test_NIDAQ(object):
                 current_ramp_cycle = i
                 # Interval added / subtracted to help make range function more
                 # intuitive
-                for p in range(self.pressure_start, self.pressure_end + self.pressure_interval, self.pressure_interval):
-                    print(p)
+                for p in range(self.pressure_house_start, self.pressure_house_end + self.pressure_interval, self.pressure_interval):
+                    logging.debug(p)
                     self.test_solenoid_pressure(p)
+                    if self.daq.u.failed:
+                        self.close_house_air()
+                        self.pneumatics.setRegulatorPressure(0)
+                        self.pneumatics.setPumpPressure(0)
+                        t = self.daq.u
+                        return t
 
-                for p in range(self.pressure_end, self.pressure_start - self.pressure_interval, -self.pressure_interval):
-                    print(p)
+                for p in range(self.pressure_house_end, self.pressure_house_start - self.pressure_interval, -self.pressure_interval):
+                    logging.debug(p)
                     self.test_solenoid_pressure(p)
-
+                    if self.daq.u.failed:
+                        self.close_house_air()
+                        self.pneumatics.setRegulatorPressure(0)
+                        self.pneumatics.setPumpPressure(0)
+                        t = self.daq.u
+                        return t
+            
             self.close_house_air()
+            
             self.daq.display_test_results()
+            t.success("Pressure test run successfully")
+            return t
 
     def open_solenoid(self):
         self.g.write('M42 P8 S255')          # Open solenoid (Fan 0)
@@ -144,6 +198,7 @@ class DAQ(object):
         self.wait_time_s = test.wait_time_s
         self.sample_rate = test.sample_rate
         self.checkpoint = test.checkpoint
+        self.u = ResponseData()
 
     def record(self, samples, cycle, pressure):
         """Starts a thread that launches a record_worker"""
@@ -152,6 +207,8 @@ class DAQ(object):
         self._rec_thread.start()
 
     def record_worker(self, samples, cycle, pressure):
+        u = ResponseData()
+        global current_ramp_cycle
         """Records the number of samples losted, logs the data"""
         # Record data
         self.task1.start()
@@ -160,25 +217,30 @@ class DAQ(object):
 
         resp = (self.g.write('M236', resp_needed=True))
         pressure_reported = (resp.split()[0])
-        print("pressure reported {} ".format(pressure_reported))
+        logging.debug("pressure reported {} ".format(pressure_reported))
         # Save times required to reach tolerance point
-        target = self.tolerance * (pressure / 20.0)
         timestamp = self.wait_time_s
         last_timestamp = self.wait_time_s
-        final_value = float(self.data[cycle][-10])
+        final_value = float(np.average(self.data[cycle][-10:-5]))
+        target = self.tolerance * final_value 
         error_actual = float(final_value*20) - float(pressure)
         error_reported = float(pressure_reported) - float(final_value*20)
         for value in reversed(self.data[cycle]):
             if value < target:
                 self.log.log_and_print(cycle, pressure, float(
                     final_value)*20.0, error_actual, pressure_reported, error_reported, last_timestamp)
+                if abs(error_actual) > 2 or  abs(error_reported) > 3:
+                    self.u.fail("Error too high, test failed")
+                elif last_timestamp > .35 and pressure > 0:
+                    self.u.fail("Time too high, test failed")
                 break
             last_timestamp = timestamp
             timestamp -= (1.0 / self.sample_rate)
             if timestamp is (1.0 / self.sample_rate):
                 self.log.log_and_print(cycle, pressure, float(
                     final_value)*20.0, error_actual, pressure_reported, error_reported, self.wait_time_s)
-
+                if pressure is not 0:
+                    u.fail("Response time too long, test failed")
         # Periodically save full data for a cycle
         if cycle % self.checkpoint == 0:
             self.log.log_checkpoint(
@@ -224,7 +286,7 @@ class Logger(object):
             f.write('{7}, {0}, {1}, {2:.2f}, {3:.2f}, {4}, {5:.2f}, {6:.2f},\n'.format(
                 cycle, pressure, pressure_actual, error_actual, pressure_reported, error_reported, last_timestamp, current_ramp_cycle))
 
-        print('Ramp Cycle: {7}, Cycle: {0}, Set Pressure {1}, Actual PSI {2:.2f}, Actual Err {3:.2f}, Reported PSI {4}, Reported Err {5:.2f}, Response Time {6:.2f},\n'.format(
+        logging.debug('Ramp Cycle: {7}, Cycle: {0}, Set Pressure {1}, Actual PSI {2:.2f}, Actual Err {3:.2f}, Reported PSI {4}, Reported Err {5:.2f}, Response Time {6:.2f},\n'.format(
             cycle, pressure, pressure_actual, error_actual, pressure_reported, error_reported, last_timestamp, current_ramp_cycle))
 
         tracker = self.statTracker.getStatTracker(pressure)
@@ -280,7 +342,7 @@ class PSI_StatTracker(object):
 
         self.reported_pressure_err_max = 0
         self.reported_pressure_err_last = 0
-        print("Stat Tracker {0}".format(self.set_pressure))
+        logging.debug("Stat Tracker {0}".format(self.set_pressure))
 
     def pressure_err_update(self, new_pressure):
         """Updates the pressure average, last pressure, and decides if it's the highest seen pressure"""
@@ -306,19 +368,19 @@ class PSI_StatTracker(object):
 
     def display_data(self):
         """Prints the data kept in this stat tracker"""
-        print("Set PSI: {0:.2f} PSI".format(self.set_pressure))
-        print("-----Response Time-----")
-        print("Max Response Time: {0:.2f} seconds".format(
+        logging.debug("Set PSI: {0:.2f} PSI".format(self.set_pressure))
+        logging.debug("-----Response Time-----")
+        logging.debug("Max Response Time: {0:.2f} seconds".format(
             self.response_time_max))
-        print("Last Response Time: {0:.2f} seconds".format(
+        logging.debug("Last Response Time: {0:.2f} seconds".format(
             self.response_time_last))
-        print("Average Response Time: {0:.2f} seconds".format(
+        logging.debug("Average Response Time: {0:.2f} seconds".format(
             self.response_time_avg))
-        print("--------Pressure-------")
-        print("Max Pressure Error: {0:.2f} PSI".format(self.pressure_err_max))
-        print("Last Pressure Error: {0:.2f} PSI".format(
+        logging.debug("--------Pressure-------")
+        logging.debug("Max Pressure Error: {0:.2f} PSI".format(self.pressure_err_max))
+        logging.debug("Last Pressure Error: {0:.2f} PSI".format(
             self.pressure_err_last))
-        print("Average Pressure Error: {0:.2f} PSI".format(
+        logging.debug("Average Pressure Error: {0:.2f} PSI".format(
             self.pressure_err_avg))
 ###############################################################################
 
@@ -344,18 +406,17 @@ class PSI_StatTracker_Collection(object):
         return self.statTrackerList[len(self.statTrackerList)-1]
 
     def finalDisplay(self):
-
         outfile = os.path.join(self.directory, 'final_display.txt')
         """Gathers the data for the final display, and prints it"""
         with open(outfile, 'w') as f:
-            print("\nTest Results")
-            print("-------------------")
+            logging.debug("\nTest Results")
+            logging.debug("-------------------")
             l = self.statTrackerList
             for i in range(0, len(l)):
                 if l[i].response_time_max > self.response_time_max:
                     self.response_time_max = l[i].response_time_max
                     self.response_time_max_set_pressure = l[i].set_pressure
-            print("Max response time: {0} seconds at {1} PSI".format(
+            logging.debug("Max response time: {0} seconds at {1} PSI".format(
                 self.response_time_max, self.response_time_max_set_pressure))
             f.write("Max response time: {0} seconds at {1} PSI\n".format(
                 self.response_time_max, self.response_time_max_set_pressure))
@@ -363,12 +424,12 @@ class PSI_StatTracker_Collection(object):
                 if abs(l[i].pressure_err_max) > abs(self.pressure_err_max):
                     self.pressure_err_max = abs(l[i].pressure_err_max)
                     self.pressure_err_max_set_pressure = l[i].set_pressure
-            print("Max pressure error: {0:.2f} PSI at {1} PSI".format(
+            logging.debug("Max pressure error: {0:.2f} PSI at {1} PSI".format(
                 self.pressure_err_max, self.pressure_err_max_set_pressure))
             f.write("Max pressure error: {0:.2f} PSI at {1} PSI\n".format(
                 self.pressure_err_max, self.pressure_err_max_set_pressure))
             for i in range(0, len(l)):
-                print("Pressure: {0} psi. Avg Error: {1:.2f} psi. Avg Response Time: {2} seconds. Last Error: {3:.2f} psi. Last Response Time {4} seconds".format(
+                logging.debug("Pressure: {0} psi. Avg Error: {1:.2f} psi. Avg Response Time: {2} seconds. Last Error: {3:.2f} psi. Last Response Time {4} seconds".format(
                     l[i].set_pressure, l[i].pressure_err_avg, l[i].response_time_avg, l[i].pressure_err_last, l[i].response_time_last))
                 f.write("Pressure: {0} psi. Avg Error: {1:.2f} psi. Avg Response Time: {2} seconds. Last Error: {3:.2f} psi. Last Response Time {4} seconds\n".format(
                     l[i].set_pressure, l[i].pressure_err_avg, l[i].response_time_avg, l[i].pressure_err_last, l[i].response_time_last))

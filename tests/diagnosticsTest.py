@@ -25,12 +25,18 @@ parser.add_argument(dest = 'comport',
                     metavar='N',
                     help='Target com port')
 
+parser.add_argument(dest = 'regulator', 
+                    metavar='N',
+                    help='Regulator name for logging')
+
 parser.add_argument(
     '-v', '--verbose',
     help="Increase verbosity",
     action="store_const", dest="loglevel", const=logging.DEBUG,
     default=logging.INFO,
 )
+
+
 args = parser.parse_args()   
 
 logging.basicConfig(level=logging.DEBUG,  # DEBUG, INFO, WARNING
@@ -68,15 +74,15 @@ logging.debug("Logging and Parser Complete")
 
 test = TestRunner(logging, args.comport)
 
-I2C = I2C_Test(test, logging)
+# I2C = I2C_Test(test, logging)
 # test.runTest(I2C.test_i2c_alltargets)
 # I2C.run_all_tests()
 
-# Pneumatics = Pneumatics_Test(test,logging)
-# Pneumatics.run_all_tests()
+NIDAQ = Pneumatics_Test_NIDAQ(test, logging, args.regulator)
+test.runTest(NIDAQ.test_Diagnostics_trial)
 
-NIDAQ = Pneumatics_Test_NIDAQ(test,logging)
-NIDAQ.test_Diagnostics_trial()
+Pneumatics = Pneumatics_Test(test, logging)
+test.runTest(Pneumatics.test_for_leaks)
 
 test.FinalDisplay()
 test.TearDown()
