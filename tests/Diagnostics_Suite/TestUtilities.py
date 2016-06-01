@@ -78,9 +78,12 @@ class TestRunner:
         for i in range(len(self.errorList)):
             self.logging.error("{}".format(self.errorList[i]))
 
-    def runTest(self, f):
+    def runTest(self, f, speed = "slow"):
         self.logging.info("Executing Test: {}".format(f.__name__))
-        returnvalue = f()
+        if speed is 'fast':
+            returnvalue = f('fast')
+        else:
+            returnvalue = f()
         self.logging.debug("Return Value: {}".format(returnvalue.failed))
         if returnvalue.failed is False:
             self.logSuccess("Passed!\n")

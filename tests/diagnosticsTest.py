@@ -73,7 +73,7 @@ I2C = I2C_Test(test, logging)
 I2C.run_all_tests()
 
 Pneumatics = Pneumatics_Test(test, logging)
-Pneumatics.run_all_tests()
+Pneumatics.run_all_tests('fast')
 
 
 test.FinalDisplay()

@@ -217,7 +217,7 @@ class Pneumatics_Test:
 # Test Functions
 ##########################################################################
 
-    def run_all_tests(self):
+    def run_all_tests(self,speed):
         """ Runs all of the enumerated tests, catch all for the file.
 
         Adding a test to this function is the equivalent of "installing" it
@@ -226,10 +226,13 @@ class Pneumatics_Test:
         isn't a particular feature being tested.
 
         """
-        self.test.runTest(self.test_for_leaks)
+        if (speed is 'fast'):
+            self.test.runTest(self.test_for_leaks,'fast')
+        else:
+            self.test.runTest(self.test_for_leaks)
         self.test.runTest(self.test_set_pressure)
 
-    def test_for_leaks(self):
+    def test_for_leaks(self, speed = 'slow'):
         """ Tests tank pressure for stability
 
         Sets the tank pressure, and makes sure it reaches an acceptably close 
@@ -248,10 +251,15 @@ class Pneumatics_Test:
         """
         setPressure = 40
         getToPressureTime_s = 60
-        pressureMeasurementTime_s = 540
-        passingPressureRange_psi = 1
+        
+        pressureMeasurementTime_slow_s = 540
+        pressureMeasurementTime_fast_s = 20
+        
+        measurement_delay_time_slow_s  = 60
+        measurement_delay_time_fast_s  = 10
+        
         t = ResponseData()
-        measurement_delay_time_s = 60
+        passingPressureRange_psi = 1
         allowed_leak_amount_psi = .2
 
         logging.info(
@@ -269,23 +277,41 @@ class Pneumatics_Test:
                 return t
 
         self.setPumpPressure(0)
-        logging.info("Waiting for {} seconds to allow time to stabilize".format(measurement_delay_time_s))
-        sleep(measurement_delay_time_s)
+        
+        if speed is not 'fast':
+            logging.info("Waiting for {} seconds to allow time to stabilize".format(measurement_delay_time_slow_s))
+            sleep(measurement_delay_time_slow_s)
+        else:
+            logging.info("Waiting for {} seconds to allow time to stabilize".format(measurement_delay_time_fast_s))
+            sleep(measurement_delay_time_fast_s)
         logging.info("Starting to analyze pressure")
         startingPumpPressure = self.readPumpPressure()
-        for i in range(pressureMeasurementTime_s):
-
-            pumpPressure = self.readPumpPressure()
-            logging.debug("Pump Pressure: {} PSI".format(pumpPressure))
-            if pumpPressure < startingPumpPressure - allowed_leak_amount_psi:
-                t.fail("Tank Pressure too low, likely a leak")
-                return t
-            sleep(1)
-            if i is pressureMeasurementTime_s-1:
-                t.success("Tank is mantaining pressure correctly")
-                return t
-        t.success("Tank is mantaining pressure correctly")
-        return t
+        if speed is not 'fast':
+            for i in range(pressureMeasurementTime_slow_s):
+                pumpPressure = self.readPumpPressure()
+                logging.debug("Pump Pressure: {} PSI".format(pumpPressure))
+                if pumpPressure < startingPumpPressure - allowed_leak_amount_psi:
+                    t.fail("Tank Pressure too low, likely a leak")
+                    return t
+                sleep(1)
+                if i is pressureMeasurementTime_slow_s-1:
+                    t.success("Tank is mantaining pressure correctly")
+                    return t
+            t.success("Tank is mantaining pressure correctly")
+            return t
+        else:
+            for i in range(pressureMeasurementTime_fast_s):
+                pumpPressure = self.readPumpPressure()
+                logging.debug("Pump Pressure: {} PSI".format(pumpPressure))
+                if pumpPressure < startingPumpPressure - allowed_leak_amount_psi:
+                    t.fail("Tank Pressure too low, likely a leak")
+                    return t
+                sleep(1)
+                if i is pressureMeasurementTime_fast_s-1:
+                    t.success("Tank is mantaining pressure correctly")
+                    return t
+            t.success("Tank is mantaining pressure correctly")
+            return t
 
     def test_set_pressure(self):
         """ Sets tank pressure, then tests the E-Reg at various 
