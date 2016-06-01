@@ -252,7 +252,7 @@ class Pneumatics_Test:
         passingPressureRange_psi = 1
         t = ResponseData()
         measurement_delay_time_s = 60
-        allowed_leak_amount_psi = .1
+        allowed_leak_amount_psi = .2
 
         logging.info(
             "Testing for leaking Pressure Tank\n")
@@ -284,6 +284,8 @@ class Pneumatics_Test:
             if i is pressureMeasurementTime_s-1:
                 t.success("Tank is mantaining pressure correctly")
                 return t
+        t.success("Tank is mantaining pressure correctly")
+        return t
 
     def test_set_pressure(self):
         """ Sets tank pressure, then tests the E-Reg at various 

@@ -90,7 +90,7 @@ class Pneumatics_Test_NIDAQ(object):
             self.close_solenoid()
             time.sleep(1)
 
-    def test_Diagnostics_trial(self):
+    def test_Diagnostics_trial_pump(self):
         t = ResponseData()
         global current_ramp_cycle
         with cd(path):
@@ -105,6 +105,16 @@ class Pneumatics_Test_NIDAQ(object):
                 self.close_solenoid()
                 # Set tank pressure to 40psi
                 self.pneumatics.setPumpPressure(40)
+                for i in range(60):
+                    p = self.pneumatics.readPumpPressure()
+                    if p > 38:
+                        break
+                    if i is 59:
+                        t.fail("Didn't reach pump pressure")
+                        return t
+                    sleep(1)
+                    logging.debug("Pump Pressure: {}".format(p))
+
 
                 logging.info("Testing Output Pressure (Source: Tank)")
                 current_ramp_cycle = i
@@ -117,8 +127,9 @@ class Pneumatics_Test_NIDAQ(object):
                         self.close_house_air()
                         self.pneumatics.setRegulatorPressure(0)
                         self.pneumatics.setPumpPressure(0)
-                        t = self.daq.u
-                        return t
+                        if (p >= 10 or p <= 25):
+                            t = self.daq.u
+                            return t
 
                 for p in range(self.pressure_tank_end, self.pressure_tank_start - self.pressure_interval, -self.pressure_interval):
                     logging.debug(p)
@@ -127,8 +138,31 @@ class Pneumatics_Test_NIDAQ(object):
                         self.close_house_air()
                         self.pneumatics.setRegulatorPressure(0)
                         self.pneumatics.setPumpPressure(0)
-                        t = self.daq.u
-                        return t
+                        if (p >= 10 or p <= 25):
+                            t = self.daq.u
+                            return t                        
+
+            self.close_house_air()
+            
+            self.daq.display_test_results()
+            t.success("Pressure test run successfully")
+            return t
+
+    def test_Diagnostics_trial_house(self):
+        t = ResponseData()
+        global current_ramp_cycle
+        with cd(path):
+            g = self.g
+            task = AnalogInputTask()
+
+            self.close_house_air()
+
+            for i in range(0, self.pressure_ramp_cycles):
+                # Ensure solenoid is closed at start
+                # Ensure Solenoid is closed
+                self.close_solenoid()
+                # Set tank pressure to 40psi
+                self.pneumatics.setPumpPressure(40)
 
             logging.info("Testing Output Pressure (Source: House Air)")
 
@@ -151,8 +185,6 @@ class Pneumatics_Test_NIDAQ(object):
                         self.close_house_air()
                         self.pneumatics.setRegulatorPressure(0)
                         self.pneumatics.setPumpPressure(0)
-                        t = self.daq.u
-                        return t
 
                 for p in range(self.pressure_house_end, self.pressure_house_start - self.pressure_interval, -self.pressure_interval):
                     logging.debug(p)
@@ -161,14 +193,13 @@ class Pneumatics_Test_NIDAQ(object):
                         self.close_house_air()
                         self.pneumatics.setRegulatorPressure(0)
                         self.pneumatics.setPumpPressure(0)
-                        t = self.daq.u
-                        return t
             
             self.close_house_air()
             
             self.daq.display_test_results()
             t.success("Pressure test run successfully")
             return t
+
 
     def open_solenoid(self):
         self.g.write('M42 P8 S255')          # Open solenoid (Fan 0)

@@ -79,10 +79,12 @@ test = TestRunner(logging, args.comport)
 # I2C.run_all_tests()
 
 NIDAQ = Pneumatics_Test_NIDAQ(test, logging, args.regulator)
-test.runTest(NIDAQ.test_Diagnostics_trial)
+test.runTest(NIDAQ.test_Diagnostics_trial_pump)
 
 Pneumatics = Pneumatics_Test(test, logging)
 test.runTest(Pneumatics.test_for_leaks)
+
+test.runTest(NIDAQ.test_Diagnostics_trial_house)
 
 test.FinalDisplay()
 test.TearDown()
