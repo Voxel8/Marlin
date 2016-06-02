@@ -46,7 +46,7 @@ class TestRunner:
     def logWarning(self, message):
         '''Display the warning message, increase the warning count'''
         self.logging.warning(message)
-        self.testFailCount = self.warningCount + 1
+        self.warningCount = self.warningCount + 1
 
     def logSuccess(self, message):
         '''Display the success message, increase the success count'''

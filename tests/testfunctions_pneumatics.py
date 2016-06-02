@@ -281,10 +281,11 @@ class Pneumatics_Test:
         if speed is not 'fast':
             logging.info("Waiting for {} seconds to allow time to stabilize".format(measurement_delay_time_slow_s))
             sleep(measurement_delay_time_slow_s)
+            logging.info("Starting to analyse pressure. This will take {} Seconds".format(pressureMeasurementTime_slow_s))
         else:
             logging.info("Waiting for {} seconds to allow time to stabilize".format(measurement_delay_time_fast_s))
             sleep(measurement_delay_time_fast_s)
-        logging.info("Starting to analyze pressure")
+            logging.info("Starting to analyse pressure. This will take {} Seconds".format(pressureMeasurementTime_fast_s))
         startingPumpPressure = self.readPumpPressure()
         if speed is not 'fast':
             for i in range(pressureMeasurementTime_slow_s):

@@ -18,9 +18,9 @@ from nidaqmx import AnalogInputTask
 from threading import Thread
 from testfunctions_pneumatics import Pneumatics_Test
 
-# Path where data folder is located
-path = r"\\V8NETDRIVE\home\Regulator Testing Data"
-current_ramp_cycle = None
+
+path = r"\\V8NETDRIVE\home\Regulator Testing Data" # Path where data folder is located
+current_ramp_cycle = None                          # Current pressure ramp cycle, used for logging purposes
 
 
 class Pneumatics_Test_NIDAQ(object):
@@ -46,52 +46,45 @@ class Pneumatics_Test_NIDAQ(object):
         self.pneumatics = Pneumatics_Test(test, logging)
 
         # Basic defines for running the test, used further on
-        self.pressure_tank_start = 0                  # Pressure to toggle regulator
-        self.pressure_tank_end = 30
-        self.pressure_house_start = 30
-        self.pressure_house_end = 80
-        self.pressure_interval = 5
-        # Total number of solenoid_toggle_cycles
-        self.pressure_ramp_cycles = 1
+        self.pressure_ramp_cycles = 1            # Total number cycles the test is run
         self.sample_rate = 1000                  # Sampling rate (Hz)
-
-        # The percentage of the set value that, when reached, will be marked as reaching
-        # the value.
-        self.tolerance = 0.95                    # Response-time tolerance
-        # Number of solenoid_toggle_cycles to toggle solenoid
-        self.solenoid_toggle_cycles = 1
-        #   at each pressure
-        # Wait for regulator to reach pressure
-        self.wait_time_s = 1
-        # Save full data every _ solenoid solenoid_toggle_cycles, if 0 don't
-        # save
-        self.checkpoint = 5
-        self.ID = str(regulator)
-
-        self.outputdirectory = None
-
-        self.task = AnalogInputTask()
+        self.solenoid_toggle_cycles = 1          # Number of solenoid_toggle_cycles to toggle solenoid at each pressure
+        self.wait_time_s = 1                     # Wait for regulator to reach pressure in between solenoid toggles
+        self.checkpoint = 5                      # Save full data every _ solenoid solenoid_toggle_cycles, if 0 don't save
+        self.ID = str(regulator)                 # Name of the file saved in the directory by the logger
+        
+        # Miscellanous setup
+        self.outputdirectory = None              # Allows us ot set the output directory later with the logger
+        self.task = AnalogInputTask()            # Used to read from the DAQ
         self.task.create_voltage_channel('Dev1/ai0', terminal='diff',
                                     min_val=-5.0, max_val=5.0)
         self.task.configure_timing_sample_clock(rate=self.sample_rate)
         with cd(path):
-            self.daq = DAQ(self)
+            self.daq = DAQ(self)                 # Sets the directory that the logger logs in
 
-    def test_solenoid_pressure(self, pressure):
+    def record_solenoid_pressure(self, pressure):
         # Set regulator pressure
         self.pneumatics.setRegulatorPressure(pressure)
         time.sleep(3)
         for cycle in range(0, self.solenoid_toggle_cycles):
             self.daq.record(int(self.sample_rate*self.wait_time_s),
                        cycle, pressure)                # Open recording thread
-
-            self.open_solenoid()
+            self.open_solenoid()   
             time.sleep(self.wait_time_s)
             self.close_solenoid()
             time.sleep(1)
 
     def test_Diagnostics_trial_pump(self):
         t = ResponseData()
+
+        # Test Failure Criteria
+        pump_to_pressure_time = 60
+        pump_pressure = 40
+        pump_pressure_acceptable_bound = 2
+        pressure_tank_start = 0             # Beginning pressure while testing for tank pressure
+        pressure_tank_end = 30              # Highest pressure reached while testing on tank pressure
+        pressure_interval = 5               # Interval in which the pressure increases between bounds
+
         global current_ramp_cycle
         with cd(path):
             g = self.g
@@ -100,16 +93,19 @@ class Pneumatics_Test_NIDAQ(object):
             self.close_house_air()
 
             for i in range(0, self.pressure_ramp_cycles):
+
                 # Ensure solenoid is closed at start
-                # Ensure Solenoid is closed
                 self.close_solenoid()
-                # Set tank pressure to 40psi
-                self.pneumatics.setPumpPressure(40)
-                for i in range(60):
+                
+                # Set tank pressure to pump pressure
+                self.pneumatics.setPumpPressure(pump_pressure)
+                
+                # Wait for pump to reach pressure
+                for i in range(pump_to_pressure_time):
                     p = self.pneumatics.readPumpPressure()
-                    if p > 38:
+                    if p > pump_pressure - pump_pressure_acceptable_bound:
                         break
-                    if i is 59:
+                    if i is pump_to_pressure_time - 1:
                         t.fail("Didn't reach pump pressure")
                         return t
                     sleep(1)
@@ -120,9 +116,9 @@ class Pneumatics_Test_NIDAQ(object):
                 current_ramp_cycle = i
                 # Interval added / subtracted to help make range function more
                 # intuitive
-                for p in range(self.pressure_tank_start, self.pressure_tank_end + self.pressure_interval, self.pressure_interval):
+                for p in range(pressure_tank_start, pressure_tank_end + pressure_interval, pressure_interval):
                     logging.debug(p)
-                    self.test_solenoid_pressure(p)
+                    self.record_solenoid_pressure(p)
                     if self.daq.u.failed:
                         self.close_house_air()
                         self.pneumatics.setRegulatorPressure(0)
@@ -131,9 +127,9 @@ class Pneumatics_Test_NIDAQ(object):
                             t = self.daq.u
                             return t
 
-                for p in range(self.pressure_tank_end, self.pressure_tank_start - self.pressure_interval, -self.pressure_interval):
+                for p in range(pressure_tank_end, pressure_tank_start - pressure_interval, -pressure_interval):
                     logging.debug(p)
-                    self.test_solenoid_pressure(p)
+                    self.record_solenoid_pressure(p)
                     if self.daq.u.failed:
                         self.close_house_air()
                         self.pneumatics.setRegulatorPressure(0)
@@ -150,6 +146,12 @@ class Pneumatics_Test_NIDAQ(object):
 
     def test_Diagnostics_trial_house(self):
         t = ResponseData()
+
+        # Test Failure Criteria
+        pressure_house_start = 30           # Beginning of house air pressure test
+        pressure_house_end = 80             # Highest pressure reached while testing house air
+        pressure_interval = 5               # Interval in which the pressure increases between bounds
+
         global current_ramp_cycle
         with cd(path):
             g = self.g
@@ -178,17 +180,17 @@ class Pneumatics_Test_NIDAQ(object):
                 current_ramp_cycle = i
                 # Interval added / subtracted to help make range function more
                 # intuitive
-                for p in range(self.pressure_house_start, self.pressure_house_end + self.pressure_interval, self.pressure_interval):
+                for p in range(pressure_house_start, pressure_house_end + pressure_interval, pressure_interval):
                     logging.debug(p)
-                    self.test_solenoid_pressure(p)
+                    self.record_solenoid_pressure(p)
                     if self.daq.u.failed:
                         self.close_house_air()
                         self.pneumatics.setRegulatorPressure(0)
                         self.pneumatics.setPumpPressure(0)
 
-                for p in range(self.pressure_house_end, self.pressure_house_start - self.pressure_interval, -self.pressure_interval):
+                for p in range(pressure_house_end, pressure_house_start - pressure_interval, -pressure_interval):
                     logging.debug(p)
-                    self.test_solenoid_pressure(p)
+                    self.record_solenoid_pressure(p)
                     if self.daq.u.failed:
                         self.close_house_air()
                         self.pneumatics.setRegulatorPressure(0)
@@ -225,12 +227,12 @@ class DAQ(object):
         self.data = {}
         self.log = Logger(test)
         self.g = test.g
-        self.tolerance = test.tolerance
         self.wait_time_s = test.wait_time_s
         self.sample_rate = test.sample_rate
         self.checkpoint = test.checkpoint
         self.u = ResponseData()
-
+        self.test = test
+        
     def record(self, samples, cycle, pressure):
         """Starts a thread that launches a record_worker"""
         self._rec_thread = Thread(target=self.record_worker,
@@ -238,7 +240,20 @@ class DAQ(object):
         self._rec_thread.start()
 
     def record_worker(self, samples, cycle, pressure):
-        u = ResponseData()
+
+        # Test Warning Criteria
+        error_actual_warning_bound = .5
+        error_reported_warning_bound = 1
+        response_time_warning_bound = .25
+
+        # Test Failing Criteria
+        error_actual_bound = 1
+        error_reported_bound = 2
+        response_time_bound = .35 
+
+        response_time_tolerance = 0.95                    # The percentage of the set value that, when reached, will be marked as reaching the value.     
+
+
         global current_ramp_cycle
         """Records the number of samples losted, logs the data"""
         # Record data
@@ -253,17 +268,21 @@ class DAQ(object):
         timestamp = self.wait_time_s
         last_timestamp = self.wait_time_s
         final_value = float(np.average(self.data[cycle][-10:-5]))
-        target = self.tolerance * final_value 
+        target = response_time_tolerance * final_value 
         error_actual = float(final_value*20) - float(pressure)
         error_reported = float(pressure_reported) - float(final_value*20)
         for value in reversed(self.data[cycle]):
             if value < target:
                 self.log.log_and_print(cycle, pressure, float(
                     final_value)*20.0, error_actual, pressure_reported, error_reported, last_timestamp)
-                if abs(error_actual) > 2 or  abs(error_reported) > 3:
-                    self.u.fail("Error too high, test failed")
-                elif last_timestamp > .35 and pressure > 0:
-                    self.u.fail("Time too high, test failed")
+                if abs(error_actual) > error_actual_bound  or  abs(error_reported) > error_reported_bound:
+                    self.u.fail("Error too high, test failed: Actual: {:2f}, Reported {:2f}".format(error_actual, error_reported))
+                elif abs(error_actual) > error_actual_warning_bound  or  abs(error_reported) > error_reported_warning_bound:
+                    self.test.test.logWarning("Error may be outside of acceptable range: Actual: {:2f} PSI Reported: {:2f} PSI".format(error_actual, error_reported))
+                elif last_timestamp > response_time_bound and pressure > 0:
+                    self.u.fail("Time too high, test failed: Time: {}".format(last_timestamp))
+                elif last_timestamp > response_time_warning_bound and pressure > 0:
+                    self.test.test.logWarning("Response time might be outside of acceptable range: Time {:2f} PSI".format(last_timestamp))
                 break
             last_timestamp = timestamp
             timestamp -= (1.0 / self.sample_rate)
