@@ -260,7 +260,7 @@ class Pneumatics_Test:
         
         t = ResponseData()
         passingPressureRange_psi = 1
-        allowed_leak_amount_psi = .2
+        allowed_leak_amount_psi = .1
 
         logging.info(
             "Testing for leaking Pressure Tank\n")
@@ -273,7 +273,7 @@ class Pneumatics_Test:
             sleep(1)
             if i is getToPressureTime_s - 1:
                 t.fail(
-                    "Tank Pressure did not reach accpetable pressure range")
+                    "Tank Pressure did not reach acceptable pressure range")
                 return t
 
         self.setPumpPressure(0)
@@ -281,11 +281,11 @@ class Pneumatics_Test:
         if speed is not 'fast':
             logging.info("Waiting for {} seconds to allow time to stabilize".format(measurement_delay_time_slow_s))
             sleep(measurement_delay_time_slow_s)
-            logging.info("Starting to analyse pressure. This will take {} Seconds".format(pressureMeasurementTime_slow_s))
+            logging.info("Starting to analyse pressure. This will take {} Seconds ({} Minutes)".format(pressureMeasurementTime_slow_s, pressureMeasurementTime_slow_s / 60.0))
         else:
             logging.info("Waiting for {} seconds to allow time to stabilize".format(measurement_delay_time_fast_s))
             sleep(measurement_delay_time_fast_s)
-            logging.info("Starting to analyse pressure. This will take {} Seconds".format(pressureMeasurementTime_fast_s))
+            logging.info("Starting to analyse pressure. This will take {} Seconds ({} Minutes)".format(pressureMeasurementTime_fast_s, pressureMeasurementTime_fast_s / 60.0))
         startingPumpPressure = self.readPumpPressure()
         if speed is not 'fast':
             for i in range(pressureMeasurementTime_slow_s):

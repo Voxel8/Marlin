@@ -134,9 +134,9 @@ class Pneumatics_Test_NIDAQ(object):
                         self.close_house_air()
                         self.pneumatics.setRegulatorPressure(0)
                         self.pneumatics.setPumpPressure(0)
-                        if (p >= 10 or p <= 25):
-                            t = self.daq.u
-                            return t                        
+                        print(self.daq.u.data.split())
+                        t = self.daq.u
+                        return t                        
 
             self.close_house_air()
             
@@ -250,7 +250,8 @@ class DAQ(object):
         error_actual_bound = 1
         error_reported_bound = 2
         response_time_bound = .35 
-
+        pressure_failing_low = 5
+        pressure_failing_high = 25
         response_time_tolerance = 0.95                    # The percentage of the set value that, when reached, will be marked as reaching the value.     
 
 
@@ -276,13 +277,14 @@ class DAQ(object):
                 self.log.log_and_print(cycle, pressure, float(
                     final_value)*20.0, error_actual, pressure_reported, error_reported, last_timestamp)
                 if abs(error_actual) > error_actual_bound  or  abs(error_reported) > error_reported_bound:
-                    self.u.fail("Error too high, test failed: Actual: {:2f}, Reported {:2f}".format(error_actual, error_reported))
-                elif abs(error_actual) > error_actual_warning_bound  or  abs(error_reported) > error_reported_warning_bound:
-                    self.test.test.logWarning("Error may be outside of acceptable range: Actual: {:2f} PSI Reported: {:2f} PSI".format(error_actual, error_reported))
+                    if pressure >= pressure_failing_low and pressure <= pressure_failing_high:
+                        self.u.fail("Error too high, test failed: Actual: {:2f}, Reported {:2f}, Pressure {}".format(error_actual, error_reported, pressure))
+                    elif abs(error_actual) > error_actual_warning_bound  or  abs(error_reported) > error_reported_warning_bound:
+                        self.test.test.logWarning("Error may be outside of acceptable range: Actual: {:2f} PSI Reported: {:2f} PSI, Pressure {}".format(error_actual, error_reported, pressure))
                 elif last_timestamp > response_time_bound and pressure > 0:
-                    self.u.fail("Time too high, test failed: Time: {}".format(last_timestamp))
+                    self.u.fail("Response time too high, test failed: Time: {}, Pressure: {}".format(last_timestamp, pressure))
                 elif last_timestamp > response_time_warning_bound and pressure > 0:
-                    self.test.test.logWarning("Response time might be outside of acceptable range: Time {:2f} PSI".format(last_timestamp))
+                    self.test.test.logWarning("Response time might be outside of acceptable range: Time {:2f}, Pressure: {}".format(last_timestamp, pressure))
                 break
             last_timestamp = timestamp
             timestamp -= (1.0 / self.sample_rate)
