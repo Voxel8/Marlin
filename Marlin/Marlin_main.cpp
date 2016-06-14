@@ -5472,66 +5472,38 @@ inline void gcode_M303() {
   }
 
   /**
-   * M380: Enable solenoid on the active extruder
+   * M380:  Enable solenoid on the active extruder, or specify a tool number
    */
-  inline void gcode_M380() { 
-    int8_t current_solenoid_pin = -1;
+  inline void gcode_M380() {
     uint8_t tool = active_extruder;
     // Tool number provided
     if (code_seen('T')) {
       tool = code_value();
     }
-    switch(tool) {
-      #if HAS_SOLENOID_0
-        case 0:
-          OUT_WRITE(SOL0_PIN, HIGH);
-          current_solenoid_pin = SOL0_PIN;
-          break;
-      #endif
-      #if HAS_SOLENOID_1
-        case 1:
-          OUT_WRITE(SOL1_PIN, HIGH);
-          current_solenoid_pin = SOL1_PIN;
-          break;
-      #endif
-      // Invalid Tool Number
-      default:
-        SERIAL_ECHO_START;
-        SERIAL_CHAR('T');
-        SERIAL_PROTOCOL_F(tool, DEC);
-        SERIAL_PROTOCOLPGM(" ");
-        SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
-        break;
-    }
+    enable_solenoid(tool);
     // Verbosity Handling
     if (code_seen('V')) {
-      if (current_solenoid_pin != -1) {
-        bool pin_status = digitalRead(current_solenoid_pin);
-        SERIAL_PROTOCOLPGM("Solenoid ");
-        SERIAL_PROTOCOL_F(tool, DEC);
-        SERIAL_PROTOCOLPGM(" Status: ");
-        SERIAL_PROTOCOLLN(pin_status);
-      }
+      report_solenoid_status(tool);
     }
   }
 
   /**
-   * M381: Disable all solenoids
+   * M381: Disable all solenoids, or specify a tool number
    */
   inline void gcode_M381() {
-    disable_all_solenoids();
+    if (code_seen('T')) {
+      disable_solenoid(code_value());
+    }
+    else {
+      disable_all_solenoids();
+    }
+    // Verbosity Handling
     if (code_seen('V')) {
-      bool pin_status;
-      #if HAS_SOLENOID_0
-        pin_status = digitalRead(SOL0_PIN);
-        SERIAL_PROTOCOLPGM("Solenoid 0 Status: ");
-        SERIAL_PROTOCOLLN(pin_status);
-      #endif
-      #if HAS_SOLENOID_1
-        pin_status = digitalRead(SOL1_PIN);
-        SERIAL_PROTOCOLPGM("Solenoid 1 Status: ");
-        SERIAL_PROTOCOLLN(pin_status);
-      #endif
+      // Report tool status of T0 and T1
+      uint8_t tool_num;
+      for (tool_num = 0; tool_num < EXTRUDERS; tool_num++) {
+        report_solenoid_status(tool_num);
+      }
     }
   }
 
