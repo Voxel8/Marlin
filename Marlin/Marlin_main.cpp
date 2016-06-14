@@ -5444,6 +5444,33 @@ inline void gcode_M303() {
     #endif
   } // end disabe_all_solenoids
 
+  static void report_solenoid_status(uint8_t tool) {
+    bool pin_status;
+    switch (tool) {
+      #if HAS_SOLENOID_0
+        case 0:
+          pin_status = digitalRead(SOL0_PIN);
+          SERIAL_PROTOCOLPGM("Solenoid 0 Status: ");
+          SERIAL_PROTOCOLLN(pin_status);
+          break;
+      #endif
+      #if HAS_SOLENOID_1
+        case 1:
+          pin_status = digitalRead(SOL1_PIN);
+          SERIAL_PROTOCOLPGM("Solenoid 1 Status: ");
+          SERIAL_PROTOCOLLN(pin_status);
+          break;
+      #endif
+      // Invalid Tool Number
+      default:
+        SERIAL_ECHO_START;
+        SERIAL_CHAR('T');
+        SERIAL_PROTOCOL_F(tool, DEC);
+        SERIAL_PROTOCOLPGM(" ");
+        SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
+        break;
+  }
+
   /**
    * M380: Enable solenoid on the active extruder
    */
