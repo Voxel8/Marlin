@@ -3690,7 +3690,7 @@ inline void gcode_M105() {
       serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
       SERIAL_EOL;
       SERIAL_ECHOLN("// action:cancel");
-    } 
+    }
     else {
       if (setTargetedHotend(109)) return;
       if (marlin_debug_flags & DEBUG_DRYRUN) return;
@@ -3700,6 +3700,7 @@ inline void gcode_M105() {
       no_wait_for_cooling = code_seen('S');
       if (no_wait_for_cooling || code_seen('R')) {
         float temp = code_value();
+        if (temp == 0) return; // Skip 10-second wait if set to 0
         setTargetHotend(temp, target_extruder);
 #if ENABLED(DUAL_X_CARRIAGE)
         if (dual_x_carriage_mode == DXC_DUPLICATION_MODE &&
