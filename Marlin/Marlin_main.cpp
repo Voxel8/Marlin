@@ -5375,14 +5375,74 @@ inline void gcode_M303() {
 
 #if ENABLED(PNEUMATICS)
 
-  void disable_all_solenoids() {
+  /*
+   * Ensures the existence of a particular solenoid.
+   * @param   tool  Tool number of solenoid being checked.
+   * @returns solenoid_pin  Pin number of solenoid,
+   *                        or -1 if it does not exist.
+   */
+  static int8_t ensure_solenoid(uint8_t tool) {
+    int8_t solenoid_pin = -1;
+    switch(tool) {
+      #if HAS_SOLENOID_0
+        case 0:
+          solenoid_pin = SOL0_PIN;
+          break;
+      #endif
+      #if HAS_SOLENOID_1
+        case 1:
+          solenoid_pin = SOL1_PIN;
+          break;
+      #endif
+      // Invalid Tool Number
+      default:
+        SERIAL_ECHO_START;
+        SERIAL_CHAR('T');
+        SERIAL_PROTOCOL_F(tool, DEC);
+        SERIAL_PROTOCOLPGM(" ");
+        SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
+        break;
+    }
+    return solenoid_pin;
+  } // end ensure_solenoid
+
+  /*
+   * Enables the specified solenoid if it exists.
+   * @param   tool  Tool number of the solenoid to enable.
+   */
+  static void enable_solenoid(uint8_t tool) {
+    // Check that solenoid exists (assumed that uC pin count < 128)
+    int8_t solenoid_pin = ensure_solenoid(tool);
+    // If solenoid exists, enable it
+    if (solenoid_pin >= 0) {
+      OUT_WRITE(solenoid_pin, HIGH);
+    }
+  } // end enable_solenoid
+
+  /*
+   * Disables the specified solenoid if it exists.
+   * @param   tool  Tool number of the solenoid to disable.
+   */
+  static void disable_solenoid(uint8_t tool) {
+    // Check that solenoid exists
+    int8_t solenoid_pin = ensure_solenoid(tool);
+    // If solenoid exists, disable it
+    if (solenoid_pin >= 0) {
+      OUT_WRITE(pin, LOW);
+    }
+  } // end disable solenoid
+
+  /*
+   * Disables all solenoids that exist
+   */
+  static void disable_all_solenoids() {
     #if HAS_SOLENOID_0
       OUT_WRITE(SOL0_PIN, LOW);
     #endif
     #if HAS_SOLENOID_1
       OUT_WRITE(SOL1_PIN, LOW);
     #endif
-  }
+  } // end disabe_all_solenoids
 
   /**
    * M380: Enable solenoid on the active extruder
