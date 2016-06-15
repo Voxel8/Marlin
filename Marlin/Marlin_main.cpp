@@ -5415,7 +5415,8 @@ inline void gcode_M303() {
     int8_t solenoid_pin = ensure_solenoid(tool);
     // If solenoid exists, enable it
     if (solenoid_pin >= 0) {
-      OUT_WRITE(solenoid_pin, HIGH);
+      pinMode(solenoid_pin, OUTPUT);
+      digitalWrite(solenoid_pin, HIGH);
     }
   } // end enable_solenoid
 
@@ -5428,14 +5429,15 @@ inline void gcode_M303() {
     int8_t solenoid_pin = ensure_solenoid(tool);
     // If solenoid exists, disable it
     if (solenoid_pin >= 0) {
-      OUT_WRITE(pin, LOW);
+      pinMode(solenoid_pin, OUTPUT);
+      digitalWrite(solenoid_pin, LOW);
     }
   } // end disable solenoid
 
   /*
    * Disables all solenoids that exist
    */
-  static void disable_all_solenoids() {
+  void disable_all_solenoids() {
     #if HAS_SOLENOID_0
       OUT_WRITE(SOL0_PIN, LOW);
     #endif
@@ -5469,6 +5471,7 @@ inline void gcode_M303() {
         SERIAL_PROTOCOLPGM(" ");
         SERIAL_ECHOLNPGM(MSG_INVALID_SOLENOID);
         break;
+    }
   }
 
   /**
