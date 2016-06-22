@@ -18,6 +18,8 @@ ExternalProject_Add(gtest
 )
 ExternalProject_Get_Property(gtest source_dir binary_dir)
 
+add_definitions(-DUNIT_TEST)
+
 ################
 # Define a test
 add_executable(cartridge_test cartridge_test.cc)

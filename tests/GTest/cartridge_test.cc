@@ -1,4 +1,4 @@
-#include "Cartridge.cpp"
+#include "../../Marlin/Cartridge.cpp"
 #include "gtest/gtest.h"
 
 TEST(cartridge_test, cartridge_present__test)

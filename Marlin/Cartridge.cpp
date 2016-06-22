@@ -6,6 +6,16 @@
  * in decision making in other parts of the program
  * Copyright (C) 2016 Voxel8
  */
+#ifdef UNIT_TEST
+
+#include "../tests/GTest/mocks/Marlin.h"
+#include "Cartridge.h"
+
+#include "../tests/GTest/mocks/temperature.h"  // for disable_all_heaters()
+#include "../tests/GTest/mocks/stepper.h"      // for quickStop()
+#include "../tests/GTest/mocks/language.h"     // for MSG_T_CARTRIDGE_REMOVED
+
+#else
 
 #include "Marlin.h"
 #include "Cartridge.h"
@@ -14,12 +24,11 @@
 #include "./stepper.h"      // for quickStop()
 #include "./language.h"     // for MSG_T_CARTRIDGE_REMOVED
 
+#endif
 //===========================================================================
 //=============================== Definitions ===============================
 //===========================================================================
-
 typedef enum _CartridgeStatus { ABSENT = 0, PRESENT, REMOVED } CARTRIDGE_STATUS;
-
 //===========================================================================
 //============================ Private Variables ============================
 //===========================================================================
