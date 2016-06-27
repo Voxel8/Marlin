@@ -5512,6 +5512,66 @@ inline void gcode_M303() {
 
 #endif // PNEUMATICS
 
+  /**
+   * M382: Drop syringe on active or specified tool
+   */
+  inline void gcode_M382() {
+    int8_t current_syringe_pin = -1;
+    uint8_t tool = active_extruder;
+    // Tool number provided
+    if (code_seen('T')) {
+      tool = code_value();
+    }
+    switch(tool) {
+        case 0:
+          OUT_WRITE(SYRINGE0_PIN, HIGH);
+          current_solenoid_pin = SYRINGE0_PIN;
+          break;
+        case 1:
+          OUT_WRITE(SYRINGE1_PIN, HIGH);
+          current_solenoid_pin = SYRINGE1_PIN;
+          break;
+      // Invalid Tool Number
+      default:
+        SERIAL_ECHO_START;
+        SERIAL_CHAR('T');
+        SERIAL_PROTOCOL_F(tool, DEC);
+        SERIAL_PROTOCOLPGM(" ");
+        SERIAL_ECHOLNPGM(MSG_INVALID_TOOL);
+        break;
+    }
+  }
+
+  /**
+   * M383: Retract syringe on active or specified tool
+   */
+  inline void gcode_M383() {
+    int8_t current_syringe_pin = -1;
+    uint8_t tool = active_extruder;
+    // Tool number provided
+    if (code_seen('T')) {
+      tool = code_value();
+    }
+    switch(tool) {
+        case 0:
+          OUT_WRITE(SYRINGE0_PIN, LOW);
+          current_solenoid_pin = SYRINGE0_PIN;
+          break;
+        case 1:
+          OUT_WRITE(SYRINGE1_PIN, LOW);
+          current_solenoid_pin = SYRINGE1_PIN;
+          break;
+      // Invalid Tool Number
+      default:
+        SERIAL_ECHO_START;
+        SERIAL_CHAR('T');
+        SERIAL_PROTOCOL_F(tool, DEC);
+        SERIAL_PROTOCOLPGM(" ");
+        SERIAL_ECHOLNPGM(MSG_INVALID_TOOL);
+        break;
+    }
+  }
+
 /**
   M399: Pause command
 **/
@@ -6751,6 +6811,14 @@ void process_next_command() {
           gcode_M381();
           break;
       #endif
+
+      case 382: // M382 Drop syringe on active or specified tool
+        gcode_M382();
+        break;
+
+      case 383: // M383 Retract syringe on active or specified tool
+        gcode_M383();
+        break;
 
       case 399: // M399 Pause command
         gcode_M399();
