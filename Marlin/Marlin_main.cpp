@@ -5540,13 +5540,22 @@ inline void gcode_M303() {
         SERIAL_ECHOLNPGM(MSG_INVALID_TOOL);
         break;
     }
+    // Verbosity Handling
+    if (code_seen('V')) {
+      if (current_syringe_pin != -1) {
+        bool pin_status = digitalRead(current_syringe_pin);
+        SERIAL_PROTOCOLPGM("Syringe ");
+        SERIAL_PROTOCOL_F(tool, DEC);
+        SERIAL_PROTOCOLPGM(" Status: ");
+        SERIAL_PROTOCOLLN(pin_status);
+      }
+    }
   }
 
   /**
    * M383: Retract syringe on active or specified tool
    */
   inline void gcode_M383() {
-    int8_t current_syringe_pin = -1;
     uint8_t tool = active_extruder;
     // Tool number provided
     if (code_seen('T')) {
@@ -5555,11 +5564,9 @@ inline void gcode_M303() {
     switch(tool) {
         case 0:
           OUT_WRITE(SYRINGE0_PIN, LOW);
-          current_syringe_pin = SYRINGE0_PIN;
           break;
         case 1:
           OUT_WRITE(SYRINGE1_PIN, LOW);
-          current_syringe_pin = SYRINGE1_PIN;
           break;
       // Invalid Tool Number
       default:
@@ -5569,6 +5576,16 @@ inline void gcode_M303() {
         SERIAL_PROTOCOLPGM(" ");
         SERIAL_ECHOLNPGM(MSG_INVALID_TOOL);
         break;
+    }
+    // Verbosity Handling
+    if (code_seen('V')) {
+      bool pin_status;
+      pin_status = digitalRead(SYRINGE0_PIN);
+      SERIAL_PROTOCOLPGM("Syringe 0 Status: ");
+      SERIAL_PROTOCOLLN(pin_status);
+      pin_status = digitalRead(SYRINGE1_PIN);
+      SERIAL_PROTOCOLPGM("Syringe 1 Status: ");
+      SERIAL_PROTOCOLLN(pin_status);
     }
   }
 
