@@ -5525,11 +5525,11 @@ inline void gcode_M303() {
     switch(tool) {
         case 0:
           OUT_WRITE(SYRINGE0_PIN, HIGH);
-          current_solenoid_pin = SYRINGE0_PIN;
+          current_syringe_pin = SYRINGE0_PIN;
           break;
         case 1:
           OUT_WRITE(SYRINGE1_PIN, HIGH);
-          current_solenoid_pin = SYRINGE1_PIN;
+          current_syringe_pin = SYRINGE1_PIN;
           break;
       // Invalid Tool Number
       default:
@@ -5555,11 +5555,11 @@ inline void gcode_M303() {
     switch(tool) {
         case 0:
           OUT_WRITE(SYRINGE0_PIN, LOW);
-          current_solenoid_pin = SYRINGE0_PIN;
+          current_syringe_pin = SYRINGE0_PIN;
           break;
         case 1:
           OUT_WRITE(SYRINGE1_PIN, LOW);
-          current_solenoid_pin = SYRINGE1_PIN;
+          current_syringe_pin = SYRINGE1_PIN;
           break;
       // Invalid Tool Number
       default:
