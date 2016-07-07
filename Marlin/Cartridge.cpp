@@ -61,6 +61,20 @@ bool Cartridge__Present(uint8_t cartridgeNumber) {
 }
 
 /**
+ * Checks to see if a cartridge is removed, using the defined cartridge
+ * addresses.
+ * @inputs     0 for Cartridge 0, 1 for Cartridge 1
+ * @returns    Returns true if the specified cartridge is removed
+ */
+bool Cartridge__Removed(uint8_t cartridgeNumber) {
+  uint8_t returnValue = false;
+  if (cartridgeNumber <= NUMBER_OF_CARTRIDGES) {
+    if (cartridgeStatus[cartridgeNumber] == REMOVED) returnValue = true;
+  }
+  return returnValue;
+}
+
+/**
 * Check to see if cartridges are present or absent. Flags internally if
 * one has been removed, or clears the removed flag if it's present.
 * The status of cartridge removal can be found with
