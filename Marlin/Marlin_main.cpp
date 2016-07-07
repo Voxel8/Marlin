@@ -3734,12 +3734,12 @@ inline void gcode_M105() {
                (residency_start_ms >= 0 &&
                 (((unsigned int)(millis() - residency_start_ms)) <
                  (TEMP_RESIDENCY_TIME * 1000UL))))) &&
-             !Cartridge__FFFNotPresent())
+             !Cartridge__FFFNotPresent() && !Cartridge__Removed(SILVER_INDEX))
 #else
       while ((target_direction ? (isHeatingHotend(target_extruder))
                                : (isCoolingHotend(target_extruder) &&
                                   (no_wait_for_cooling == false))) &&
-             !Cartridge__FFFNotPresent())
+             !Cartridge__FFFNotPresent() && !Cartridge__Removed(SILVER_INDEX))
 #endif  // TEMP_RESIDENCY_TIME
 
       {  // while loop
