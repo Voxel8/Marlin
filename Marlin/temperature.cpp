@@ -58,6 +58,7 @@ float current_pneumatic = 0.0;
 float current_regulator = 0.0;
 millis_t time_since_last_err[4] = { 0 };
 millis_t time_since_last_err_bed = 0;
+extern bool cancel_heatup;
 
 #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
   int redundant_temperature_raw = 0;
@@ -1304,6 +1305,7 @@ void tp_init() {
 #endif // THERMAL_PROTECTION_HOTENDS || THERMAL_PROTECTION_BED
 
 void disable_all_heaters() {
+  cancel_heatup = true;
   for (int i=0; i<EXTRUDERS; i++) setTargetHotend(0, i);
   setTargetBed(0);
 
