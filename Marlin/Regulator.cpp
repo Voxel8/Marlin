@@ -106,7 +106,8 @@ static void _regulator_error_handler(const char *serial_msg, float pressure) {
 static void pressure_protection(float target_pressure, float pressure) {
   static float prev_target_pressure = 0;
   static millis_t regulatorTimer = 0;
-  
+  bool regulatorUnder = false;
+  bool regulatorOver = false;
   // This is set the first time the function is called to initialize it.
   if (regulatorTimer == 0) regulatorTimer = millis();
 
@@ -120,12 +121,19 @@ static void pressure_protection(float target_pressure, float pressure) {
       _regulator_error_handler(PSTR(MSG_T_PNEUMATICS_EREG_ABOVE_PUMP), pressure);
     }
   
-    // Calculate the conditions where we may enter an error.
-    bool regulatorUnder =
-        (pressure <= (target_pressure - REGULATOR_PROTECTION_BAND));
-    bool regulatorOver =
-        (pressure >= (target_pressure + REGULATOR_PROTECTION_BAND));
-  
+    // Calculate the conditions where we may enter an error. This is split into
+    // two bands, to accomodate larger variable in higher pressures.
+    if (pressure <= REGULATOR_BAND_CROSSOVER_PSI) {
+      regulatorUnder =
+          (pressure <= (target_pressure - REGULATOR_PROTECTION_BAND_LOW));
+      regulatorOver =
+          (pressure >= (target_pressure + REGULATOR_PROTECTION_BAND_LOW));
+    } else {
+      regulatorUnder =
+          (pressure <= (target_pressure - REGULATOR_PROTECTION_BAND_HIGH));
+      regulatorOver =
+          (pressure >= (target_pressure + REGULATOR_PROTECTION_BAND_HIGH));
+    }
     // Check to see if we're outside the bands
     if ((regulatorOver || regulatorUnder)) {
       //  If the conditions have been met for 5 seconds without going within

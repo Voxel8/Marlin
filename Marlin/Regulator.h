@@ -32,12 +32,22 @@
     #define REG_OFFSET      0.0   // psi
     #define REG_HYSTERESIS  0.0   // psi
 #endif // E_REGULATOR_SENSOR
-#define REGULATOR_LOW_P 2
 
-#define REGULATOR_PROTECTION_TIME_S (5)
-#define REGULATOR_PROTECTION_BAND   (4)
+// The amount of time the pressure must be outside the pressure bounds to activate
+// the protection
+#define REGULATOR_PROTECTION_TIME_S    (5)
 
-#define REGULATOR_NOT_PRESENT_VALUE (110)
+// The regulator protection is divided into two bands, with lower PSI having a 
+// tighter tolerance on the acceptable pressure values. The crossover is set below,
+// and the plus / minus values acceptable are set with REGULATOR_PROTECTION_BAND_LOW
+// and REGULATOR_PROTECTION_BAND_HIGH. REGULATOR_NOT_PRESENT_VALUE attempts to 
+// identify when the system is running without a pneumatics sled present, and
+// REGULATOR_LOW_P allows the pressure to have greater resolution near 0 PSI.
+#define REGULATOR_BAND_CROSSOVER_PSI   (HOUSE_AIR_THRESH)
+#define REGULATOR_PROTECTION_BAND_LOW  (5)
+#define REGULATOR_PROTECTION_BAND_HIGH (10)
+#define REGULATOR_NOT_PRESENT_VALUE    (110)
+#define REGULATOR_LOW_P                (2)
 
 /*================================================================================*/
 /* Function Prototypes */
