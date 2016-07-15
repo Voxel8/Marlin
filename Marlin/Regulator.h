@@ -58,11 +58,17 @@
  * @input desired_pressure  The pressure that the function is attempting to 
  *                          reach.
  */
-void Regulator__SetOutputPressure(float pressure);
+  void Regulator__SetOutputPressure(float pressure);
 
 /**
  * Updates the protection function, called regularly in the main loop.
  */
-void Regulator__Update();
+  void Regulator__Update();
+
+ /** 
+  * Enables or disables pressure protections
+  * @value     true = enable, false = no check.
+  */
+  void Regulator__SetPressureProtections(bool value);
 
 #endif

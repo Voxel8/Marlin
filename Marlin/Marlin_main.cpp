@@ -55,8 +55,7 @@
 #include "Cartridge.h"
 #include "Voxel8_I2C_Commands.h"
 #include "HeatedBed.h"
-#include "GCodes.h"
-#include "GCodeUtility.h"
+
 
 #if ENABLED(EXT_ADC)
   #include "ADC.h"
@@ -82,6 +81,9 @@
   #include <SPI.h>
 #endif
 
+#include "GCodes.h"
+#include "GCodeUtility.h"
+ 
 /**
  * Look here for descriptions of G-codes:
  *  - http://linuxcnc.org/handbook/gcode/g-code.html
@@ -5043,63 +5045,6 @@ inline void gcode_M247() {
   I2C__ToggleUV(i2c_data);
 }
 
-/*
-* M248 - Enable / Disable Cartridge Present Check
-*   E - 0 - 1   1 = Enable, 0 = Disable
-*/
-inline void gcode_M248() {
-  // Used to see if we've been given arguments, and to warn you through the
-  // serial port if they're not seen.
-  bool hasE;
-
-  // Desired address for peripheral device
-  if (hasE = code_seen('E')) {
-    switch(int(code_value())) {
-      case 0:
-        Cartridge__SetPresentCheck(false);
-        break;
-      case 1:
-        Cartridge__SetPresentCheck(true);
-        break;
-      default:
-        SERIAL_ECHOLNPGM("(E1) or (E0) not given");
-        return;
-    }
-  }
-
-  if (!hasE){
-    SERIAL_ECHOLNPGM("(E1) or (E0) not given");
-    return;
-  }
-}
-
-/*
-* M249 - Enable / Disable Heated Bed Check
-*   E - 0 - 1   1 = Enable, 0 = Disable
-*/
-inline void gcode_M249() {
-  // Used to see if we've been given arguments, and to warn you through the
-  // serial port if they're not seen.
-  bool hasE;
-
-  // Desired address for peripheral device
-  if (hasE = code_seen('E')) {
-    switch(int(code_value())) {
-      case 0:
-        HeatedBed__SetPresentCheck(false);
-        break;
-      case 1:
-        HeatedBed__SetPresentCheck(true);
-        break;
-    }
-  }
-  
-  if (!hasE){
-    SERIAL_ECHOLNPGM("Enable (E1) or Disable (E0) not given");
-    return;
-  }
-}
-
 #if HAS_SERVOS
 
   /**
@@ -6602,12 +6547,8 @@ void process_next_command() {
         gcode_M245();
         break;
 
-      case 248: // M248 - Enable / Disable Cartridge Check
+      case 248: // M248 - Enable / Disable Protections  
         gcode_M248();
-        break;
-
-      case 249: // M249 - Enable / Disable Heated Bed Check
-        gcode_M249();
         break;
 
       case 251: // I2C Query Syringe Status:

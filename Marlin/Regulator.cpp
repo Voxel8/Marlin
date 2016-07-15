@@ -20,7 +20,7 @@
 
 static float current_target_pressure = 0;
 static bool  regulator_active = false;
-
+static bool  protectionsActive = true;
 //===========================================================================
 //====================== Private Functions Prototypes =======================
 //===========================================================================
@@ -69,8 +69,18 @@ void Regulator__SetOutputPressure(float desired_pressure) {
  * Updates the protection function, called regularly in the main loop.
  */
 void Regulator__Update() {
-  pressure_protection(current_target_pressure, pressureRegulator());
+  if (protectionsActive) {
+    pressure_protection(current_target_pressure, pressureRegulator());
+  }
 }
+
+ /** 
+  * Enables or disables pressure protections
+  * @value     true = enable, false = no check.
+  */
+  void Regulator__SetPressureProtections(bool value) {
+    protectionsActive = value;
+  }
 
 //===========================================================================
 //============================ Private Functions ============================

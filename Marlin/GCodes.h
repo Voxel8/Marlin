@@ -143,4 +143,82 @@ inline void gcode_M272(void) {
   }
 }
 
+
+/*
+* M248 - Enable / Disable Protections
+*   S - 0 - 2   0 = Cartridge Check, 1 = Heated Bed Check, 2 = Pressure 
+*               Protections Check
+*   E - 0 - 1   1 = Enable, 0 = Disable
+*/
+inline void gcode_M248() {
+  // Used to see if we've been given arguments, and to warn you through the
+  // serial port if they're not seen.
+  bool hasS;
+  bool hasE;
+
+  if (hasS = code_seen('S')) {
+    switch(int(code_value())) {
+      case 0:
+        if (hasE = code_seen('E')) {
+          switch(int(code_value())) {
+            case 0:
+              Cartridge__SetPresentCheck(false);
+              break;
+            case 1:
+              Cartridge__SetPresentCheck(true);
+              break;
+            default:
+              SERIAL_PROTOCOLLNPGM("(E1) or (E0) not given");
+              return;
+          }
+        }
+        break;
+      case 1:
+        if (hasE = code_seen('E')) {
+          switch(int(code_value())) {
+            case 0:
+              HeatedBed__SetPresentCheck(false);
+              break;
+            case 1:
+              HeatedBed__SetPresentCheck(true);
+              break;
+            default:
+              SERIAL_PROTOCOLLNPGM("(E1) or (E0) not given");
+              return;
+          }
+        }
+        break;
+      case 2:
+        if (hasE = code_seen('E')) {
+          switch(int(code_value())) {
+            case 0:
+              Regulator__SetPressureProtections(false);
+              break;
+            case 1:
+              Regulator__SetPressureProtections(true);
+              break;
+            default:
+              SERIAL_PROTOCOLLNPGM("(E1) or (E0) not given");
+              return;
+          }
+        }
+        break;
+      default:
+        SERIAL_PROTOCOLLNPGM(
+            "Invalid S argument: S0 = Cartridge, S1 = HeatedBed, S2 = "
+            "Pneumatics");
+        return;
+    }
+  }
+
+  if (!hasS) {
+    SERIAL_PROTOCOLLNPGM(
+        "No S argument given: S0 = Cartridge, S1 = HeatedBed, S2 = "
+        "Pneumatics");
+    }
+    if (!hasE) {
+      SERIAL_PROTOCOLLNPGM("(E1) or (E0) not given");
+    }
+}
+
 #endif  // G_CODES_H_
