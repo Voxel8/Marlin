@@ -82,7 +82,7 @@ void _heated_bed_removed_error(void) {
         disable_all_heaters();
         disable_all_steppers();
         SERIAL_PROTOCOLPGM("// action:message ");
-        SERIAL_PROTOCOLPGM("Heated Bed Removed!");
+        SERIAL_PROTOCOLPGM("Heated Bed Removed! Homing Disabled");
         SERIAL_EOL;
         SERIAL_PROTOCOLLNPGM("// action:cancel");
     }
