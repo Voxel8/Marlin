@@ -159,6 +159,7 @@ inline void gcode_M248() {
   if (hasS = code_seen('S')) {
     switch(int(code_value())) {
       case 0:
+      // Cartridge Check
         if (hasE = code_seen('E')) {
           switch(int(code_value())) {
             case 0:
@@ -174,6 +175,7 @@ inline void gcode_M248() {
         }
         break;
       case 1:
+      // Heated Bed Check
         if (hasE = code_seen('E')) {
           switch(int(code_value())) {
             case 0:
@@ -189,6 +191,7 @@ inline void gcode_M248() {
         }
         break;
       case 2:
+      // Regulator Protection
         if (hasE = code_seen('E')) {
           switch(int(code_value())) {
             case 0:

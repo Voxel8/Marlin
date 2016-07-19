@@ -133,7 +133,7 @@ static void pressure_protection(float target_pressure, float pressure) {
   
     // Calculate the conditions where we may enter an error. This is split into
     // two bands, to accomodate larger variable in higher pressures.
-    if (pressure <= REGULATOR_BAND_CROSSOVER_PSI) {
+    if (target_pressure <= REGULATOR_BAND_CROSSOVER_PSI) {
       regulatorUnder =
           (pressure <= (target_pressure - REGULATOR_PROTECTION_BAND_LOW));
       regulatorOver =
