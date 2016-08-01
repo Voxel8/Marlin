@@ -20,7 +20,7 @@
 
 static float current_target_pressure = 0;
 static bool  regulator_active = false;
-
+static bool  protectionsActive = true;
 //===========================================================================
 //====================== Private Functions Prototypes =======================
 //===========================================================================
@@ -69,8 +69,18 @@ void Regulator__SetOutputPressure(float desired_pressure) {
  * Updates the protection function, called regularly in the main loop.
  */
 void Regulator__Update() {
-  pressure_protection(current_target_pressure, pressureRegulator());
+  if (protectionsActive) {
+    pressure_protection(current_target_pressure, pressureRegulator());
+  }
 }
+
+ /** 
+  * Enables or disables pressure protections
+  * @value     true = enable, false = no check.
+  */
+  void Regulator__SetPressureProtections(bool value) {
+    protectionsActive = value;
+  }
 
 //===========================================================================
 //============================ Private Functions ============================
@@ -106,7 +116,8 @@ static void _regulator_error_handler(const char *serial_msg, float pressure) {
 static void pressure_protection(float target_pressure, float pressure) {
   static float prev_target_pressure = 0;
   static millis_t regulatorTimer = 0;
-  
+  bool regulatorUnder = false;
+  bool regulatorOver = false;
   // This is set the first time the function is called to initialize it.
   if (regulatorTimer == 0) regulatorTimer = millis();
 
@@ -120,12 +131,19 @@ static void pressure_protection(float target_pressure, float pressure) {
       _regulator_error_handler(PSTR(MSG_T_PNEUMATICS_EREG_ABOVE_PUMP), pressure);
     }
   
-    // Calculate the conditions where we may enter an error.
-    bool regulatorUnder =
-        (pressure <= (target_pressure - REGULATOR_PROTECTION_BAND));
-    bool regulatorOver =
-        (pressure >= (target_pressure + REGULATOR_PROTECTION_BAND));
-  
+    // Calculate the conditions where we may enter an error. This is split into
+    // two bands, to accomodate larger variable in higher pressures.
+    if (target_pressure <= REGULATOR_BAND_CROSSOVER_PSI) {
+      regulatorUnder =
+          (pressure <= (target_pressure - REGULATOR_PROTECTION_BAND_LOW));
+      regulatorOver =
+          (pressure >= (target_pressure + REGULATOR_PROTECTION_BAND_LOW));
+    } else {
+      regulatorUnder =
+          (pressure <= (target_pressure - REGULATOR_PROTECTION_BAND_HIGH));
+      regulatorOver =
+          (pressure >= (target_pressure + REGULATOR_PROTECTION_BAND_HIGH));
+    }
     // Check to see if we're outside the bands
     if ((regulatorOver || regulatorUnder)) {
       //  If the conditions have been met for 5 seconds without going within
