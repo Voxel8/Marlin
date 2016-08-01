@@ -26,7 +26,7 @@ static bool bedRemovalCheckEnabled = 1;
 //====================== Private Functions Prototypes =======================
 //===========================================================================
 
-void heatedBedRemovedError(void);
+void _heated_bed_removed_error(void);
 
 //===========================================================================
 //============================ Public Functions =============================
@@ -43,7 +43,7 @@ bool HeatedBed__PresentCheck(void) {
 			returnValue = true;
 		}
 		else {
-			heatedBedRemovedError();
+			_heated_bed_removed_error();
 		}
 		return returnValue;
 	}
@@ -75,13 +75,14 @@ void HeatedBed__SetPresentCheck(bool value) {
 //============================ Private Functions ============================
 //===========================================================================
 
-void heatedBedRemovedError(void) {
+void _heated_bed_removed_error(void) {
     static millis_t timeSinceLastRemoval = {0};
     if (millis() > timeSinceLastRemoval + 1000) {
         quickStop();
         disable_all_heaters();
         disable_all_steppers();
-        SERIAL_PROTOCOLPGM("Heated Bed Removed!");
+        SERIAL_PROTOCOLPGM("// action:message ");
+        SERIAL_PROTOCOLPGM("Heated Bed Removed! Homing Disabled");
         SERIAL_EOL;
         SERIAL_PROTOCOLLNPGM("// action:cancel");
     }

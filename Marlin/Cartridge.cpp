@@ -246,6 +246,7 @@ static void _cartridge_removed_error(const char *serial_msg) {
     quickStop();
     disable_all_heaters();
     disable_all_steppers();
+    SERIAL_PROTOCOLPGM("// action:message ");
     serialprintPGM(serial_msg);
     SERIAL_EOL;
     SERIAL_PROTOCOLLNPGM("// action:cancel");

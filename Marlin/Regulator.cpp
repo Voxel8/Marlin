@@ -97,8 +97,10 @@ static void _regulator_error_handler(const char *serial_msg, float pressure) {
     disable_all_heaters();
     disable_all_steppers();
     if (pressure >= REGULATOR_NOT_PRESENT_VALUE) {
+      SERIAL_PROTOCOLPGM("// action:message ");
       serialprintPGM(PSTR(MSG_T_PNEUMATICS_REMOVED));
     } else {
+      SERIAL_PROTOCOLPGM("// action:message ");
       serialprintPGM(serial_msg);
     }
     SERIAL_EOL;
