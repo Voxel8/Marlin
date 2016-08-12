@@ -11,6 +11,15 @@
 #define MARLIN_CARTRIDGE_H_
 
 //===========================================================================
+//=============================== Definitions ===============================
+//===========================================================================
+
+#define NUMBER_OF_CARTRIDGES (2)
+#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (250)
+#define FFF_INDEX (0)
+#define SILVER_INDEX (1)
+
+//===========================================================================
 //============================= Public Functions ============================
 //===========================================================================
 
@@ -19,7 +28,7 @@
  * addresses.
  * @returns    Returns true if the specified cartridge is present
  */
-  bool Cartridge__Present(uint8_t cartridgeAddress);
+  bool Cartridge__Present(uint8_t cartridgeNumber);
 
 /**
  * This function checks to see if the FFF cartridge is removed,
@@ -51,5 +60,9 @@
   */
   void Cartridge__SetPresentCheck(bool value);
 
+ /** 
+  * Checks to see if the cartridge present check is active
+  * @returns   Returns true if the check is active
+  */
   bool Cartridge__GetPresentCheck(void);
 #endif  // MARLIN_CARTRIDGE_H_

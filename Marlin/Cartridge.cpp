@@ -6,6 +6,16 @@
  * in decision making in other parts of the program
  * Copyright (C) 2016 Voxel8
  */
+#ifdef UNIT_TEST
+
+#include "../tests/GTest/mocks/Marlin.h"
+#include "Cartridge.h"
+
+#include "../tests/GTest/mocks/temperature.h"  // for disable_all_heaters()
+#include "../tests/GTest/mocks/stepper.h"      // for quickStop()
+#include "../tests/GTest/mocks/language.h"     // for MSG_T_CARTRIDGE_REMOVED
+
+#else
 
 #include "Marlin.h"
 #include "Cartridge.h"
@@ -14,23 +24,16 @@
 #include "./stepper.h"      // for quickStop()
 #include "./language.h"     // for MSG_T_CARTRIDGE_REMOVED
 
+#endif
 //===========================================================================
 //=============================== Definitions ===============================
 //===========================================================================
-
-#define NUMBER_OF_CARTRIDGES (2)
-#define CARTRIDGE_REMOVAL_HYSTERESIS_COUNT (250)
-#define FFF_INDEX (0)
-#define SILVER_INDEX (1)
-
-typedef enum _CartridgeStatus { PRESENT, ABSENT, REMOVED } CARTRIDGE_STATUS;
-
+typedef enum _CartridgeStatus { ABSENT = 0, PRESENT, REMOVED } CARTRIDGE_STATUS;
 //===========================================================================
 //============================ Private Variables ============================
 //===========================================================================
 
-static CARTRIDGE_STATUS cartridgeStatus[NUMBER_OF_CARTRIDGES] = {ABSENT,
-                                                                 ABSENT};
+static CARTRIDGE_STATUS cartridgeStatus[NUMBER_OF_CARTRIDGES];
 
 static bool cartridgeRemovalCheckEnabled = 1;
 
@@ -56,7 +59,9 @@ static void _cartridge_removed_error(const char *serial_msg);
  */
 bool Cartridge__Present(uint8_t cartridgeNumber) {
   uint8_t returnValue = false;
-  if (cartridgeStatus[cartridgeNumber] == PRESENT) returnValue = true;
+  if (cartridgeNumber <= NUMBER_OF_CARTRIDGES) {
+    if (cartridgeStatus[cartridgeNumber] == PRESENT) returnValue = true;
+  }
   return returnValue;
 }
 
@@ -143,6 +148,11 @@ void Cartridge__SetPresentCheck(bool value) {
   cartridgeRemovalCheckEnabled = value;
 }
 
+
+/** 
+ * Checks to see if the cartridge present check is active
+ * @returns   Returns true if the check is active
+ */
 bool Cartridge__GetPresentCheck(void) { return cartridgeRemovalCheckEnabled; }
 
 //===========================================================================
