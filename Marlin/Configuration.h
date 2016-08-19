@@ -361,7 +361,7 @@ Here are some standard links for getting your machine calibrated:
  * the firmware will halt as a safety precaution.
  */
 
-//#define THERMAL_PROTECTION_HOTENDS // Enable thermal protection for all extruders
+#define THERMAL_PROTECTION_HOTENDS // Enable thermal protection for all extruders
 //#define THERMAL_PROTECTION_BED     // Enable thermal protection for the heated bed
 
 //===========================================================================
@@ -382,7 +382,14 @@ Here are some standard links for getting your machine calibrated:
 //#define HOME_AT_BACK
 
 // Define this if you are using dual pneumatics
-#define DUAL_PNEUMATICS
+//#define DUAL_PNEUMATICS
+
+// Define this if you are using an auger tool
+//#define AUGER
+#if ENABLED(AUGER)
+  #define DUAL_PNEUMATICS
+  #undef THERMAL_PROTECTION_HOTENDS
+#endif
 
 // Define to prevent printing without heated bed.
 #define HEATED_BED_PRESENT_CHECK
