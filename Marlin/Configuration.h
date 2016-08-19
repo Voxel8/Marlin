@@ -85,7 +85,7 @@ Here are some standard links for getting your machine calibrated:
 
 // This defines the number of extruders
 // :[1,2,3,4]
-#define EXTRUDERS 2
+#define EXTRUDERS 3
 
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
 // The offset has to be X=0, Y=0 for the extruder 0 hotend (default extruder).
@@ -361,7 +361,7 @@ Here are some standard links for getting your machine calibrated:
  * the firmware will halt as a safety precaution.
  */
 
-#define THERMAL_PROTECTION_HOTENDS // Enable thermal protection for all extruders
+//#define THERMAL_PROTECTION_HOTENDS // Enable thermal protection for all extruders
 //#define THERMAL_PROTECTION_BED     // Enable thermal protection for the heated bed
 
 //===========================================================================
@@ -382,7 +382,7 @@ Here are some standard links for getting your machine calibrated:
 //#define HOME_AT_BACK
 
 // Define this if you are using dual pneumatics
-//#define DUAL_PNEUMATICS
+#define DUAL_PNEUMATICS
 
 // Define to prevent printing without heated bed.
 #define HEATED_BED_PRESENT_CHECK
