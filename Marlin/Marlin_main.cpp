@@ -187,6 +187,7 @@
  * M218 - Set hotend offset (in mm): T<extruder_number> X<offset_on_X> Y<offset_on_Y>
  * M220 - Set speed factor override percentage: S<factor in percent>
  * M221 - Set extrude factor override percentage: S<factor in percent>
+ * M222 - Enable/disable pressure multiplier for active tool
  * M226 - Wait until the specified pin reaches the state required: P<pin number> S<pin state>
  * M234 - Output raw external ADC value (or averaged value over S samples if an S parameter is given)
  * M235 - Output distance sensor data (or averaged value over S samples if an S parameter is given)
@@ -304,6 +305,7 @@ bool axis_relative_modes[] = AXIS_RELATIVE_MODES;
 int feedrate_multiplier = 100; //100->1 200->2
 int saved_feedrate_multiplier;
 int extruder_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(100);
+bool pressure_multiplier = true;
 bool volumetric_enabled = false;
 float filament_size[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(DEFAULT_NOMINAL_FILAMENT_DIA);
 float volumetric_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(1.0);
@@ -4578,6 +4580,30 @@ inline void gcode_M221() {
 }
 
 /**
+ * M222: Enable/disable pressure multiplier for active tool
+ */
+inline void gcode_M222() {
+  if (code_seen('S')) {
+    switch(int(code_value())) {
+      case 0:
+        pressure_multiplier = false;
+        SERIAL_PROTOCOLLNPGM("Pressure multiplier disabled");
+        break;
+      case 255:
+        pressure_multiplier = true;
+        SERIAL_PROTOCOLLNPGM("Pressure multiplier enabled");
+        break;
+      default:
+        SERIAL_PROTOCOLLNPGM("Invalid code given");
+        return;
+    }
+  } else {
+    pressure_multiplier = true;
+    SERIAL_PROTOCOLLNPGM("Pressure multiplier enabled");
+  }
+}
+
+/**
  * M226: Wait until the specified pin reaches the state required (M226 P<pin> S<state>)
  */
 inline void gcode_M226() {
@@ -4702,7 +4728,12 @@ inline void gcode_M226() {
     }
     // Desired pressure value given
     if(code_seen('S')) {
-      float psi = code_value() * (extruder_multiplier[active_extruder] / 100.0);
+      float psi = code_value();
+      // Multiply pressure by the active tool's extrusion multiplier
+      // Use `M222` and `M222 S0` to toggle this behavior
+      if (pressure_multiplier) {
+          psi *= (extruder_multiplier[active_extruder] / 100.0);
+      }
       // Desired pressure outside allowed range?
       if((psi > OUTPUT_PSI_MAX) || (psi < OUTPUT_PSI_MIN)) {
         SERIAL_PROTOCOLPGM("ERROR: Desired Pressure Outside Allowed Pressure Range (");
@@ -6492,6 +6523,10 @@ void process_next_command() {
 
       case 221: // M221 S<factor in percent>- set extrude factor override percentage
         gcode_M221();
+        break;
+
+      case 222: // M222 Enable/disable pressure multiplier for active tool
+        gcode_M222();
         break;
 
       case 226: // M226 P<pin number> S<pin state>- Wait until the specified pin reaches the state required
