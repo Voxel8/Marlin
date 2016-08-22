@@ -141,6 +141,11 @@ DIGITAL POTENTIOMETER PINS
 #define E1_MS1_PIN              63
 #define E1_MS2_PIN              64
 
+#define E2_STEP_PIN             0
+#define E2_DIR_PIN              0
+#define E2_ENABLE_PIN           0
+#define HEATER_2_PIN            0
+
 /**********************************************************
   Fan Pins
   Fan_0 8
@@ -177,4 +182,3 @@ DIGITAL POTENTIOMETER PINS
 #ifdef DEBUG
   #define TEST_POINT_83_PIN     83
 #endif  // DEBUG
-    
