@@ -384,13 +384,6 @@ Here are some standard links for getting your machine calibrated:
 // Define this if you are using dual pneumatics
 //#define DUAL_PNEUMATICS
 
-// Define this if you are using an auger tool
-//#define AUGER
-#if ENABLED(AUGER)
-  #define DUAL_PNEUMATICS
-  #undef THERMAL_PROTECTION_HOTENDS
-#endif
-
 // Define to prevent printing without heated bed.
 #define HEATED_BED_PRESENT_CHECK
  
