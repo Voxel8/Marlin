@@ -5300,11 +5300,11 @@ inline void gcode_M277() {
   Cartridge__SetPresentCheck(!(auger_enabled));
   if (auger_enabled) {
     set_extrude_min_temp(0);
-    digipot_current(3, AUGER_CURRENT);
+    digipot_current(E_AXIS, AUGER_CURRENT);
     SERIAL_PROTOCOLLNPGM("Auger extrusion enabled");
   } else {
     set_extrude_min_temp(EXTRUDE_MINTEMP);
-    digipot_current(3, DIGIPOT_MOTOR_CURRENT[3]);
+    digipot_current(E_AXIS, DIGIPOT_MOTOR_CURRENT[E_AXIS]);
     SERIAL_PROTOCOLLNPGM("Auger extrusion disabled");
   }
 }
