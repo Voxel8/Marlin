@@ -3262,7 +3262,7 @@ inline void gcode_M42() {
 
     for (uint8_t i = 0; i < COUNT(sensitive_pins); i++) {
       if (sensitive_pins[i] == pin_number) {
-        pin_number = -1;
+        if (!(auger_enabled && pin_number == SOL0_PIN)) pin_number = -1;
         break;
       }
     }
