@@ -381,9 +381,6 @@ Here are some standard links for getting your machine calibrated:
 // Define this if you don't want to home in  the center of the bed.
 //#define HOME_AT_BACK
 
-// Define this if you are using dual pneumatics
-//#define DUAL_PNEUMATICS
-
 // Define to prevent printing without heated bed.
 #define HEATED_BED_PRESENT_CHECK
  
