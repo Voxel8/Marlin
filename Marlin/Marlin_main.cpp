@@ -5276,11 +5276,24 @@ void gcode_M241(long num_milliseconds) {
 
 #endif // HAS_LCD_CONTRAST
 
+#if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
+
+  void set_extrude_min_temp(float temp) { extrude_min_temp = temp; }
+
+  /**
+   * M302: Allow cold extrudes, or set the minimum extrude S<temperature>.
+   */
+  inline void gcode_M302() {
+    set_extrude_min_temp(code_seen('S') ? code_value() : 0);
+  }
+
+#endif // PREVENT_DANGEROUS_EXTRUDE
 
 /**
  * M277: Enable/disable auger extrusion (E0)
  */
 inline void gcode_M277() {
+  float min_temp = EXTRUDE_MINTEMP;
   if (code_seen('S')) {
     switch(int(code_value())) {
       case 0:
@@ -5299,28 +5312,17 @@ inline void gcode_M277() {
 
   Cartridge__SetPresentCheck(!(auger_enabled));
   if (auger_enabled) {
-    set_extrude_min_temp(0);
+    min_temp = 0;
     digipot_current(E_AXIS, AUGER_CURRENT);
     SERIAL_PROTOCOLLNPGM("Auger extrusion enabled");
   } else {
-    set_extrude_min_temp(EXTRUDE_MINTEMP);
     digipot_current(E_AXIS, DIGIPOT_MOTOR_CURRENT[E_AXIS]);
     SERIAL_PROTOCOLLNPGM("Auger extrusion disabled");
   }
+  #if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
+    set_extrude_min_temp(min_temp);
+  #endif
 }
-
-#if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
-
-  void set_extrude_min_temp(float temp) { extrude_min_temp = temp; }
-
-  /**
-   * M302: Allow cold extrudes, or set the minimum extrude S<temperature>.
-   */
-  inline void gcode_M302() {
-    set_extrude_min_temp(code_seen('S') ? code_value() : 0);
-  }
-
-#endif // PREVENT_DANGEROUS_EXTRUDE
 
 /**
  * M303: PID relay autotune
