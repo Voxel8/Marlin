@@ -5293,6 +5293,7 @@ void gcode_M241(long num_milliseconds) {
  * M277: Enable/disable auger extrusion (E0)
  */
 inline void gcode_M277() {
+  const uint8_t motor_current[] = DIGIPOT_MOTOR_CURRENT;
   float min_temp = EXTRUDE_MINTEMP;
   if (code_seen('S')) {
     switch(int(code_value())) {
@@ -5316,7 +5317,7 @@ inline void gcode_M277() {
     digipot_current(E_AXIS, AUGER_CURRENT);
     SERIAL_PROTOCOLLNPGM("Auger extrusion enabled");
   } else {
-    digipot_current(E_AXIS, DIGIPOT_MOTOR_CURRENT[E_AXIS]);
+    digipot_current(E_AXIS, motor_current[E_AXIS]);
     SERIAL_PROTOCOLLNPGM("Auger extrusion disabled");
   }
   #if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
