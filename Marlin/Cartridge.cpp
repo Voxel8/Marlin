@@ -36,7 +36,7 @@ typedef enum _CartridgeStatus { ABSENT = 0, PRESENT, REMOVED } CARTRIDGE_STATUS;
 static CARTRIDGE_STATUS cartridgeStatus[NUMBER_OF_CARTRIDGES];
 
 static bool cartridgeRemovalCheckEnabled = 1;
-static bool augerEnabled = 1;
+static bool augerEnabled = 0;
 
 //===========================================================================
 //====================== Private Functions Prototypes =======================
