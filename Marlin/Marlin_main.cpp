@@ -306,7 +306,6 @@ int feedrate_multiplier = 100; //100->1 200->2
 int saved_feedrate_multiplier;
 int extruder_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(100);
 bool pressure_multiplier = true;
-bool auger_enabled = false;
 bool volumetric_enabled = false;
 float filament_size[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(DEFAULT_NOMINAL_FILAMENT_DIA);
 float volumetric_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(1.0);
@@ -3262,7 +3261,7 @@ inline void gcode_M42() {
 
     for (uint8_t i = 0; i < COUNT(sensitive_pins); i++) {
       if (sensitive_pins[i] == pin_number) {
-        if (!(auger_enabled && pin_number == SOL0_PIN)) pin_number = -1;
+        if (!(Cartridge__GetAugerEnabled && pin_number == SOL0_PIN)) pin_number = -1;
         break;
       }
     }
@@ -5288,42 +5287,6 @@ void gcode_M241(long num_milliseconds) {
   }
 
 #endif // PREVENT_DANGEROUS_EXTRUDE
-
-/**
- * M277: Enable/disable auger extrusion (E0)
- */
-inline void gcode_M277() {
-  const uint8_t motor_current[] = DIGIPOT_MOTOR_CURRENT;
-  float min_temp = EXTRUDE_MINTEMP;
-  if (code_seen('S')) {
-    switch(int(code_value())) {
-      case 0:
-        auger_enabled = false;
-        break;
-      case 255:
-        auger_enabled = true;
-        break;
-      default:
-        SERIAL_PROTOCOLLNPGM("Invalid code given");
-        return;
-    }
-  } else {
-    auger_enabled = true;
-  }
-
-  Cartridge__SetPresentCheck(!(auger_enabled));
-  if (auger_enabled) {
-    min_temp = 0;
-    digipot_current(E_AXIS, AUGER_CURRENT);
-    SERIAL_PROTOCOLLNPGM("Auger extrusion enabled");
-  } else {
-    digipot_current(E_AXIS, motor_current[E_AXIS]);
-    SERIAL_PROTOCOLLNPGM("Auger extrusion disabled");
-  }
-  #if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
-    set_extrude_min_temp(min_temp);
-  #endif
-}
 
 /**
  * M303: PID relay autotune

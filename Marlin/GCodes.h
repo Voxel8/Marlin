@@ -143,6 +143,26 @@ inline void gcode_M272(void) {
   }
 }
 
+/**
+ * M277: Enable/disable auger extrusion (E0)
+ */
+inline void gcode_M277() {
+  if (code_seen('S')) {
+    switch(int(code_value())) {
+      case 0:
+        Cartridge__SetAugerEnabled(0);
+        break;
+      case 255:
+        Cartridge__SetAugerEnabled(1);
+        break;
+      default:
+        SERIAL_PROTOCOLLNPGM("Invalid code given");
+        return;
+    }
+  } else {
+    Cartridge__SetAugerEnabled(1);
+  }
+}
 
 /*
 * M248 - Enable / Disable Protections

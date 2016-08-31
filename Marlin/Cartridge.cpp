@@ -36,6 +36,7 @@ typedef enum _CartridgeStatus { ABSENT = 0, PRESENT, REMOVED } CARTRIDGE_STATUS;
 static CARTRIDGE_STATUS cartridgeStatus[NUMBER_OF_CARTRIDGES];
 
 static bool cartridgeRemovalCheckEnabled = 1;
+static bool augerEnabled = 1;
 
 //===========================================================================
 //====================== Private Functions Prototypes =======================
@@ -154,6 +155,38 @@ void Cartridge__SetPresentCheck(bool value) {
  * @returns   Returns true if the check is active
  */
 bool Cartridge__GetPresentCheck(void) { return cartridgeRemovalCheckEnabled; }
+
+/**
+ * Enables or disables auger extrusion
+ * @value     true = enable, false = disable
+ */
+void Cartridge__SetAugerEnabled(bool value) {
+  const uint8_t motor_current[] = DIGIPOT_MOTOR_CURRENT;
+  float min_temp = EXTRUDE_MINTEMP;
+  if (value == true) {
+    min_temp = 0;
+    digipot_current(E_AXIS, AUGER_CURRENT);
+    SERIAL_PROTOCOLLNPGM("Auger extrusion enabled");
+  } else if (value == false) {
+    digipot_current(E_AXIS, motor_current[E_AXIS]);
+    SERIAL_PROTOCOLLNPGM("Auger extrusion disabled");
+  } else {
+    SERIAL_PROTOCOLLNPGM("Invalid value for toggling auger extrusion");
+    return;
+  }
+
+  augerEnabled = value;
+  Cartridge__SetPresentCheck(!augerEnabled);
+  #if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
+    extrude_min_temp = min_temp;
+  #endif
+}
+
+/**
+ * Checks to see if auger extrusion is enabled
+ * @returns   Returns true if auger extrusion is enabled
+ */
+bool Cartridge__GetAugerEnabled(void) { return augerEnabled; }
 
 //===========================================================================
 //============================ Private Functions ============================
