@@ -1515,10 +1515,12 @@ ISR(TIMER0_COMPB_vect) {
      */
     if (pwm_count == 0) {
       soft_pwm_0 = soft_pwm[0];
-      if (soft_pwm_0 > 0) {
-        WRITE_HEATER_0(1);
+      if (!Cartridge__GetAugerEnabled) {
+        if (soft_pwm_0 > 0) {
+          WRITE_HEATER_0(1);
+        }
+        else WRITE_HEATER_0P(0); // If HEATERS_PARALLEL should apply, change to WRITE_HEATER_0
       }
-      else WRITE_HEATER_0P(0); // If HEATERS_PARALLEL should apply, change to WRITE_HEATER_0
 
       #if (EXTRUDERS > 1 && HAS_HEATER_1)
         soft_pwm_1 = soft_pwm[1];
@@ -1543,7 +1545,7 @@ ISR(TIMER0_COMPB_vect) {
       #endif
     }
 
-    if (soft_pwm_0 < pwm_count) { WRITE_HEATER_0(0); }
+    if (soft_pwm_0 < pwm_count && !Cartridge__GetAugerEnabled) { WRITE_HEATER_0(0); }
     #if EXTRUDERS > 1 && HAS_HEATER_1
       if (soft_pwm_1 < pwm_count) WRITE_HEATER_1(0);
       #if EXTRUDERS > 2
