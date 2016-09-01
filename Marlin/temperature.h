@@ -60,6 +60,7 @@ extern float current_temperature[4];
   extern int current_temperature_bed_raw;
 #endif
 extern int target_temperature_bed;
+extern int target_temperature_chamber;
 extern float current_temperature_bed;
 #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
   extern float redundant_temperature;
@@ -131,6 +132,7 @@ FORCE_INLINE void setTargetHotend(const float &celsius, uint8_t extruder) {
   #endif
 }
 FORCE_INLINE void setTargetBed(const float &celsius) { target_temperature_bed = celsius; }
+FORCE_INLINE void setChamberTemp(const float &celsius) {target_temperature_chamber = celsius;}
 
 FORCE_INLINE bool isHeatingHotend(uint8_t extruder) { return target_temperature[extruder] > current_temperature[extruder]; }
 FORCE_INLINE bool isHeatingBed() { return target_temperature_bed > current_temperature_bed; }

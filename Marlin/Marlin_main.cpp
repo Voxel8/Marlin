@@ -3586,6 +3586,12 @@ inline void gcode_M105() {
       SERIAL_PROTOCOLPGM(" /");
       SERIAL_PROTOCOL_F(degTargetHotend(e), 1);
     }
+    SERIAL_PROTOCOLPGM(" T2");
+    SERIAL_PROTOCOLCHAR(':');
+    SERIAL_PROTOCOL_F(pressureRegulator(), 1);
+    SERIAL_PROTOCOLPGM(" /");
+    SERIAL_PROTOCOL_F(regulator_setpoint, 1);
+    
   #else // !HAS_TEMP_0 && !HAS_TEMP_BED
     SERIAL_ERROR_START;
     SERIAL_ERRORLNPGM(MSG_ERR_NO_THERMISTORS);
@@ -3902,6 +3908,16 @@ inline void gcode_M112() { kill(PSTR(MSG_KILLED)); }
 inline void gcode_M140() {
   if (marlin_debug_flags & DEBUG_DRYRUN) return;
   if (code_seen('S')) setTargetBed(code_value());
+}
+
+/**
+ * M141: Set chamber temperature
+ */
+inline void gcode_M141() {
+  if (marlin_debug_flags & DEBUG_DRYRUN) return;
+  if (code_seen('S')) {
+    setChamberTemp(code_value());
+  }
 }
 
 #if ENABLED(ULTIPANEL)
@@ -6496,6 +6512,10 @@ void process_next_command() {
 
       case 140: // M140: Set bed temp
         gcode_M140();
+        break;
+       
+      case 141: // M141: Set chamber temp
+        gcode_M141();
         break;
 
       case 105: // M105: Read current temperature

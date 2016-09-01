@@ -137,7 +137,7 @@ DIGITAL POTENTIOMETER PINS
 #define E2_STEP_PIN             0
 #define E2_DIR_PIN              0
 #define E2_ENABLE_PIN           0
-#define HEATER_2_PIN            0
+#define HEATER_2_PIN            -1
 
 /**********************************************************
   Fan Pins

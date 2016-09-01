@@ -47,6 +47,7 @@
 
 int target_temperature[4] = { 0 };
 int target_temperature_bed = 0;
+int target_temperature_chamber = 0;
 int target_value_pneumatic = 0;
 int current_temperature_raw[4] = { 0 };
 float current_temperature[4] = { 0.0 };
@@ -512,24 +513,27 @@ inline void _temp_error(int e, const char *serial_msg, const char *lcd_msg) {
 
 void max_temp_error(uint8_t e) {
 // Temp error has been reset
-  if (Cartridge__GetPresentCheck()){
+  if (Cartridge__GetPresentCheck()) {
     if (time_since_last_err[e] == 0) {
       time_since_last_err[e] = millis();
     }
   // There has been a recent error, if was more than a second ago, it is probably an error
     else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
-      if(!Cartridge__FFFNotPresentHysteresis()) 
+      if(Cartridge__Present(e)) 
         _temp_error(e, PSTR(MSG_T_MAXTEMP), PSTR(MSG_ERR_MAXTEMP));
     }
   }
 }
 
 void min_temp_error(uint8_t e) {
-  if (time_since_last_err[e] == 0) {
-    time_since_last_err[e] = millis();
-  }
-  else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
-    _temp_error(e, PSTR(MSG_T_MINTEMP), PSTR(MSG_ERR_MINTEMP));
+  if (Cartridge__GetPresentCheck()) {
+    if (time_since_last_err[e] == 0) {
+      time_since_last_err[e] = millis();
+    }  
+    else if (millis() > time_since_last_err[e] + TEMP_ERROR_INTERVAL) {
+      if(Cartridge__Present(e)) 
+        _temp_error(e, PSTR(MSG_T_MINTEMP), PSTR(MSG_ERR_MINTEMP));
+    }      
   }
 }
 
@@ -839,6 +843,16 @@ void manage_heater() {
       }
     #endif
   #endif //TEMP_SENSOR_BED != 0
+  
+  // Check chamber temp
+  if (degHotend(1) > target_temperature_chamber) {
+    digitalWrite(FAN_CHASSIS_BOT_PIN, HIGH);
+    digitalWrite(FAN_CHASSIS_TOP_PIN, HIGH);
+  }
+  else {
+    digitalWrite(FAN_CHASSIS_BOT_PIN, LOW);
+    digitalWrite(FAN_CHASSIS_TOP_PIN, LOW);
+  }
 }
 
 #define PGM_RD_W(x)   (short)pgm_read_word(&x)
@@ -1321,7 +1335,7 @@ void disable_all_heaters() {
     WRITE_HEATER_0P(LOW); // Should HEATERS_PARALLEL apply here? Then change to DISABLE_HEATER(0)
   #endif
 
-  #if EXTRUDERS > 1 && HAS_TEMP_1
+  #if EXTRUDERS > 1 && HAS_HEATER_1
     DISABLE_HEATER(1);
   #endif
 
