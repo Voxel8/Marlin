@@ -73,7 +73,7 @@ inline void gcode_M250() {
         }
         break;
       default:
-        SERIAL_ECHOLNPGM("Invalid tool number!")
+        SERIAL_ECHOLNPGM("Invalid tool number!");
     } // end switch
   }
   else {
