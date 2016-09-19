@@ -148,7 +148,7 @@ inline void gcode_M272(void) {
  */
 inline void gcode_M277() {
   if (code_seen('S')) {
-    switch(int(code_value())) {
+    switch(uint8_t(code_value())) {
       case 0:
         Cartridge__SetAugerEnabled(0);
         break;
