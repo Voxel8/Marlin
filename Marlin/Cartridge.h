@@ -65,4 +65,16 @@
   * @returns   Returns true if the check is active
   */
   bool Cartridge__GetPresentCheck(void);
+
+ /**
+  * Enables or disables auger extrusion
+  * @value     true = enable, false = disable
+  */
+  void Cartridge__SetAugerEnabled(bool value);
+
+ /**
+  * Checks to see if auger extrusion is enabled
+  * @returns   Returns true if auger extrusion is enabled
+  */
+  bool Cartridge__GetAugerEnabled(void);
 #endif  // MARLIN_CARTRIDGE_H_

@@ -3261,7 +3261,8 @@ inline void gcode_M42() {
 
     for (uint8_t i = 0; i < COUNT(sensitive_pins); i++) {
       if (sensitive_pins[i] == pin_number) {
-        pin_number = -1;
+        if (!Cartridge__GetAugerEnabled() || pin_number != SOL0_PIN)
+          pin_number = -1;
         break;
       }
     }
@@ -6643,6 +6644,10 @@ void process_next_command() {
 
       case 252:
         gcode_M252();
+        break;
+
+      case 277:
+        gcode_M277(); // M277 - Enable/disable auger extrusion (E0)
         break;
 
       #if ENABLED(PREVENT_DANGEROUS_EXTRUDE)

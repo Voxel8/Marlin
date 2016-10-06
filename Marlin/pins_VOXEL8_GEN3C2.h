@@ -88,21 +88,13 @@ DIGITAL POTENTIOMETER PINS
 /*************************
 	     FFF PINS
 *************************/
-#if ENABLED(DUAL_PNEUMATICS)
-  #define HEATER_0_PIN          2
-#else
-  #define HEATER_0_PIN          CART0_SIG0_PIN
-#endif
+#define HEATER_0_PIN            CART0_SIG0_PIN
 #define HEATER_1_PIN            -1 // Set to CART1_SIG0_PIN to use FFF in CART1
 
 /*************************
   TEMPERATURE SENSE PINS
 *************************/
-#if ENABLED(DUAL_PNEUMATICS)
-  #define TEMP_0_PIN            -1
-#else
-  #define TEMP_0_PIN            6   // A6 Input Cart0 Therm
-#endif
+#define TEMP_0_PIN              6   // A6 Input Cart0 Therm
 #define TEMP_1_PIN              1   // A1 Input Cart1 Therm
 #define TEMP_2_PIN              -1
 
@@ -120,11 +112,7 @@ DIGITAL POTENTIOMETER PINS
     SOLENOID PINS
 *************************/
 #if ENABLED(PNEUMATICS)
-  #if ENABLED(DUAL_PNEUMATICS)
-    #define SOL0_PIN            5
-  #else
-    #define SOL0_PIN            -1 // Set to CART0_SIG0_PIN for pneumatics in CART0
-  #endif
+  #define SOL0_PIN              CART0_SIG0_PIN // Set to CART0_SIG0_PIN for pneumatics in CART0
   #define SOL1_PIN              CART1_SIG0_PIN
 #endif
 
