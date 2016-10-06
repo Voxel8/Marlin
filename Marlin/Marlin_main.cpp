@@ -305,7 +305,7 @@ bool axis_relative_modes[] = AXIS_RELATIVE_MODES;
 int feedrate_multiplier = 100; //100->1 200->2
 int saved_feedrate_multiplier;
 int extruder_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(100);
-bool pressure_multiplier = true;
+int pressure_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(100);
 bool volumetric_enabled = false;
 float filament_size[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(DEFAULT_NOMINAL_FILAMENT_DIA);
 float volumetric_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(1.0);
@@ -4581,26 +4581,34 @@ inline void gcode_M221() {
 }
 
 /**
- * M222: Enable/disable pressure multiplier for active tool
+ * M222: Set pressure percentage (M221 T0 S95)
  */
 inline void gcode_M222() {
+  // Set pressure multiplier
   if (code_seen('S')) {
-    switch(int(code_value())) {
-      case 0:
-        pressure_multiplier = false;
-        SERIAL_PROTOCOLLNPGM("Pressure multiplier disabled");
-        break;
-      case 255:
-        pressure_multiplier = true;
-        SERIAL_PROTOCOLLNPGM("Pressure multiplier enabled");
-        break;
-      default:
-        SERIAL_PROTOCOLLNPGM("Invalid code given");
-        return;
+    int sval = code_value();
+    if (code_seen('T')) {
+      if (setTargetedHotend(222)) return;
+      pressure_multiplier[target_extruder] = sval;
     }
-  } else {
-    pressure_multiplier = true;
-    SERIAL_PROTOCOLLNPGM("Pressure multiplier enabled");
+    else {
+      pressure_multiplier[active_extruder] = sval;
+    }
+  }
+  // Display pressure multiplier
+  else {
+    SERIAL_PROTOCOLPGM("Pressure multiplier (T");
+    if (code_seen('T')) {
+      if (setTargetedHotend(222)) return;
+      SERIAL_PROTOCOL(int(code_value()));
+      SERIAL_PROTOCOLPGM("): ");
+      SERIAL_PROTOCOLLN(pressure_multiplier[target_extruder]);
+    }
+    else {
+      SERIAL_PROTOCOL(int(active_extruder));
+      SERIAL_PROTOCOLPGM("): ");
+      SERIAL_PROTOCOLLN(pressure_multiplier[active_extruder]);
+    }
   }
 }
 
@@ -4729,12 +4737,7 @@ inline void gcode_M226() {
     }
     // Desired pressure value given
     if(code_seen('S')) {
-      float psi = code_value();
-      // Multiply pressure by the active tool's extrusion multiplier
-      // Use `M222` and `M222 S0` to toggle this behavior
-      if (pressure_multiplier) {
-          psi *= (extruder_multiplier[active_extruder] / 100.0);
-      }
+      float psi = code_value() * pressure_multiplier[active_extruder] / 100.0;
       // Desired pressure outside allowed range?
       if((psi > OUTPUT_PSI_MAX) || (psi < OUTPUT_PSI_MIN)) {
         SERIAL_PROTOCOLPGM("ERROR: Desired Pressure Outside Allowed Pressure Range (");
