@@ -157,7 +157,6 @@ inline void gcode_M277() {
         break;
       default:
         SERIAL_PROTOCOLLNPGM("Invalid code given");
-        return;
     }
   } else {
     Cartridge__SetAugerEnabled(1);

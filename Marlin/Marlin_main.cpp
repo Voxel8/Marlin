@@ -3261,7 +3261,8 @@ inline void gcode_M42() {
 
     for (uint8_t i = 0; i < COUNT(sensitive_pins); i++) {
       if (sensitive_pins[i] == pin_number) {
-        if (!(Cartridge__GetAugerEnabled() && pin_number == SOL0_PIN)) pin_number = -1;
+        if (!Cartridge__GetAugerEnabled() || pin_number != SOL0_PIN)
+          pin_number = -1;
         break;
       }
     }
