@@ -304,7 +304,7 @@ Wv, to be entered into firmware or directly over SPI.
 Wv = (VRef / 1.66) * 255
 */
 #define DIGIPOT_MOTOR_CURRENT {135,135,191,75,135} // Values 0-255 (RAMBO 90 = ~0.75A, 185 = ~1.5A)
-#define AUGER_CURRENT 60
+#define AUGER_CURRENT 75
 
 // uncomment to enable an I2C based DIGIPOT like on the Azteeg X3 Pro
 //#define DIGIPOT_I2C
