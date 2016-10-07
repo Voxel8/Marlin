@@ -5524,9 +5524,13 @@ inline void gcode_M303() {
     }
     switch(tool) {
         case 0:
-          OUT_WRITE(SYRINGE0_PIN, HIGH);
-          current_syringe_pin = SYRINGE0_PIN;
-          break;
+          if (!Cartridge__GetAugerEnabled()) {
+            OUT_WRITE(SYRINGE0_PIN, HIGH);
+            current_syringe_pin = SYRINGE0_PIN;
+            break;
+          }
+          SERIAL_PROTOCOLPGM("Auger enabled, syringe extension canceled");
+          return;
         case 1:
           OUT_WRITE(SYRINGE1_PIN, HIGH);
           current_syringe_pin = SYRINGE1_PIN;
@@ -5563,8 +5567,12 @@ inline void gcode_M303() {
     }
     switch(tool) {
         case 0:
-          OUT_WRITE(SYRINGE0_PIN, LOW);
-          break;
+          if (!Cartridge__GetAugerEnabled()) {
+            OUT_WRITE(SYRINGE0_PIN, LOW);
+            break;
+          }
+          SERIAL_PROTOCOLPGM("Auger enabled, syringe retraction canceled");
+          return;
         case 1:
           OUT_WRITE(SYRINGE1_PIN, LOW);
           break;
