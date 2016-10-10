@@ -4581,7 +4581,7 @@ inline void gcode_M221() {
 }
 
 /**
- * M222: Set pressure percentage (M221 T0 S95)
+ * M222: Set pressure percentage (M222 T0 S95)
  */
 inline void gcode_M222() {
   // Set pressure multiplier
@@ -6676,7 +6676,7 @@ void process_next_command() {
         gcode_M221();
         break;
 
-      case 222: // M222 Enable/disable pressure multiplier for active tool
+      case 222: // M222 S<factor in percent>- set pressure factor override percentage
         gcode_M222();
         break;
 
