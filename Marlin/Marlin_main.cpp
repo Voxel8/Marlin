@@ -5538,7 +5538,7 @@ inline void gcode_M303() {
       // Invalid Tool Number
       default:
         SERIAL_ECHO_START;
-        SERIAL_CHAR('T');
+        SERIAL_PROTOCOLPGM("T");
         SERIAL_PROTOCOL_F(tool, DEC);
         SERIAL_PROTOCOLPGM(" ");
         SERIAL_ECHOLNPGM(MSG_INVALID_TOOL);
@@ -5579,7 +5579,7 @@ inline void gcode_M303() {
       // Invalid Tool Number
       default:
         SERIAL_ECHO_START;
-        SERIAL_CHAR('T');
+        SERIAL_PROTOCOLPGM("T");
         SERIAL_PROTOCOL_F(tool, DEC);
         SERIAL_PROTOCOLPGM(" ");
         SERIAL_ECHOLNPGM(MSG_INVALID_TOOL);
