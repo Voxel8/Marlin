@@ -116,6 +116,11 @@ DIGITAL POTENTIOMETER PINS
   #define SOL1_PIN              CART1_SIG0_PIN
 #endif
 
+/*************************
+    SYRINGE DROP PINS
+*************************/
+#define SYRINGE0_PIN            CART0_SIG1_PIN
+#define SYRINGE1_PIN            CART1_SIG1_PIN
 
 #define E0_STEP_PIN             34
 #define E0_DIR_PIN              43
