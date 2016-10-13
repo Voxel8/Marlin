@@ -177,7 +177,6 @@ void Cartridge__SetAugerEnabled(bool value) {
 
   augerEnabled = value;
   Cartridge__SetPresentCheck(!augerEnabled);
-  pressure_multiplier = !augerEnabled;
   #if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
     extrude_min_temp = min_temp;
   #endif
