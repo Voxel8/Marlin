@@ -6737,6 +6737,10 @@ void process_next_command() {
         gcode_M248();
         break;
 
+      case 250: // M250 - Output whether cartridge is present over serial
+        gcode_M250();
+        break;
+
       case 251: // I2C Query Syringe Status:
         gcode_M251();
         break;

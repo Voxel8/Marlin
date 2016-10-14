@@ -49,6 +49,40 @@
 //===========================================================================
 
 /*
+* M250: Output whether cartridge is present over serial connection
+*   Usage: M250 T0 or M250 T1 to query presence of cartridge 0 or 1,
+*   respectively.
+*/
+inline void gcode_M250() {
+  if (code_seen('T')) {
+    switch ((uint8_t)code_value()) {
+      case 0:
+        if (Cartridge__Present(0)) {
+          SERIAL_ECHOLNPGM("true");
+        }
+        else {
+          SERIAL_ECHOLNPGM("false");
+        }
+        break;
+      case 1:
+        if (Cartridge__Present(1)) {
+          SERIAL_ECHOLNPGM("true");
+        }
+        else {
+          SERIAL_ECHOLNPGM("false");
+        }
+        break;
+      default:
+        SERIAL_ECHOLNPGM("Invalid tool number!");
+    } // end switch
+  }
+  else {
+    SERIAL_ECHOLNPGM("No tool number given");
+  }
+}
+
+
+/*
 * M251: I2C Query Syringe Status, currently only valid for Cart 1
 */
 inline void gcode_M251() { I2C__GetGpioSwitch(CART1_ADDR); }
