@@ -513,7 +513,7 @@ inline void _temp_error(int e, const char *serial_msg, const char *lcd_msg) {
 
 void max_temp_error(uint8_t e) {
 // Temp error has been reset
-  if(!Cartridge__FFFNotPresentHysteresis())  {
+  if(!Cartridge__Present(e))  {
     if (time_since_last_err[e] == 0) {
       time_since_last_err[e] = millis();
     }
