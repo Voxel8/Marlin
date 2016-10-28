@@ -83,9 +83,12 @@ Here are some standard links for getting your machine calibrated:
 // You can use an online service to generate a random UUID. (eg http://www.uuidgenerator.net/version4)
 //#define MACHINE_UUID "00000000-0000-0000-0000-000000000000"
 
-// This defines the number of extruders
+// This defines the number of stepper extruders
 // :[1,2,3,4]
-#define EXTRUDERS 3
+#define EXTRUDERS 2
+
+// This defines the number of tools on the system with or without extruders
+#define TOOLS 3
 
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
 // The offset has to be X=0, Y=0 for the extruder 0 hotend (default extruder).

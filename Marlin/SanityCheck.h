@@ -284,7 +284,7 @@
   // (Dual) Pneumatics do not require temp sensors/heaters
   #if DISABLED(PNEUMATICS)
 
-    #if EXTRUDERS > 3
+    #if TOOLS > 3
       #if !HAS_HEATER_3
         #error HEATER_3_PIN not defined for this board.
       #elif !PIN_EXISTS(TEMP_3)
@@ -294,7 +294,7 @@
       #elif TEMP_SENSOR_3 == 0
         #error TEMP_SENSOR_3 is required with 4 EXTRUDERS.
       #endif
-    #elif EXTRUDERS > 2
+    #elif TOOLS > 2
       #if !HAS_HEATER_2
         #error HEATER_2_PIN not defined for this board.
       #elif !PIN_EXISTS(TEMP_2)
@@ -304,7 +304,7 @@
       #elif TEMP_SENSOR_2 == 0
         #error TEMP_SENSOR_2 is required with 3 or more EXTRUDERS.
       #endif
-    #elif EXTRUDERS > 1
+    #elif TOOLS > 1
       #if !PIN_EXISTS(TEMP_1)
         #error TEMP_1_PIN not defined for this board.
       #elif !PIN_EXISTS(E1_STEP) || !PIN_EXISTS(E1_DIR) || !PIN_EXISTS(E1_ENABLE)

@@ -315,10 +315,10 @@ static void lcd_implementation_status_screen() {
   #endif
 
   // Extruders
-  for (int i=0; i<EXTRUDERS; i++) _draw_heater_status(6 + i * 25, i);
+  for (int i=0; i<TOOLS; i++) _draw_heater_status(6 + i * 25, i);
 
   // Heatbed
-  if (EXTRUDERS < 4) _draw_heater_status(81, -1);
+  if (TOOLS < 4) _draw_heater_status(81, -1);
 
   // Fan
   lcd_setFont(FONT_STATUSMENU);

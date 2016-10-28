@@ -206,7 +206,7 @@ void Config_StoreSettings()  {
   for (int e = 0; e < 4; e++) {
 
     #if ENABLED(PIDTEMP)
-      if (e < EXTRUDERS) {
+      if (e < TOOLS) {
         EEPROM_WRITE_VAR(i, PID_PARAM(Kp, e));
         EEPROM_WRITE_VAR(i, PID_PARAM(Ki, e));
         EEPROM_WRITE_VAR(i, PID_PARAM(Kd, e));
@@ -379,7 +379,7 @@ void Config_RetrieveSettings() {
     #if ENABLED(PIDTEMP)
       for (int e = 0; e < 4; e++) { // 4 = max extruders currently supported by Marlin
         EEPROM_READ_VAR(i, dummy); // Kp
-        if (e < EXTRUDERS && dummy != DUMMY_PID_VALUE) {
+        if (e < TOOLS && dummy != DUMMY_PID_VALUE) {
           // do not need to scale PID values as the values in EEPROM are already scaled
           PID_PARAM(Kp, e) = dummy;
           EEPROM_READ_VAR(i, PID_PARAM(Ki, e));
@@ -538,7 +538,7 @@ void Config_ResetDefault() {
 
   #if ENABLED(PIDTEMP)
     #if ENABLED(PID_PARAMS_PER_EXTRUDER)
-      for (int e = 0; e < EXTRUDERS; e++)
+      for (int e = 0; e < TOOLS; e++)
     #else
       int e = 0; // only need to write once
     #endif
@@ -748,9 +748,9 @@ void Config_PrintSettings(bool forReplay) {
       SERIAL_ECHOLNPGM("PID settings:");
     }
     #if ENABLED(PIDTEMP)
-      #if EXTRUDERS > 1
+      #if TOOLS > 1
         if (forReplay) {
-          for (uint8_t i = 0; i < EXTRUDERS; i++) {
+          for (uint8_t i = 0; i < TOOLS; i++) {
             CONFIG_ECHO_START;
             SERIAL_ECHOPAIR("  M301 E", (unsigned long)i);
             SERIAL_ECHOPAIR(" P", PID_PARAM(Kp, i));

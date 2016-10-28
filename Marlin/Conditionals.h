@@ -392,17 +392,17 @@
   /**
    * ARRAY_BY_EXTRUDERS based on EXTRUDERS
    */
-  #if EXTRUDERS > 3
-    #define ARRAY_BY_EXTRUDERS(v1, v2, v3, v4) { v1, v2, v3, v4 }
-  #elif EXTRUDERS > 2
-    #define ARRAY_BY_EXTRUDERS(v1, v2, v3, v4) { v1, v2, v3 }
-  #elif EXTRUDERS > 1
-    #define ARRAY_BY_EXTRUDERS(v1, v2, v3, v4) { v1, v2 }
+  #if TOOLS > 3
+    #define ARRAY_BY_TOOLS(v1, v2, v3, v4) { v1, v2, v3, v4 }
+  #elif TOOLS > 2
+    #define ARRAY_BY_TOOLS(v1, v2, v3, v4) { v1, v2, v3 }
+  #elif TOOLS > 1
+    #define ARRAY_BY_TOOLS(v1, v2, v3, v4) { v1, v2 }
   #else
-    #define ARRAY_BY_EXTRUDERS(v1, v2, v3, v4) { v1 }
+    #define ARRAY_BY_TOOLS(v1, v2, v3, v4) { v1 }
   #endif
 
-  #define ARRAY_BY_EXTRUDERS1(v1) ARRAY_BY_EXTRUDERS(v1, v1, v1, v1)
+  #define ARRAY_BY_TOOLS1(v1) ARRAY_BY_TOOLS(v1, v1, v1, v1)
 
   /**
    * Shorthand for pin tests, used wherever needed
@@ -490,11 +490,11 @@
    * Helper Macros for heaters and extruder fan
    */
   #define WRITE_HEATER_0P(v) WRITE(HEATER_0_PIN, v)
-  #if EXTRUDERS > 1 || ENABLED(HEATERS_PARALLEL)
+  #if TOOLS > 1 || ENABLED(HEATERS_PARALLEL)
     #define WRITE_HEATER_1(v) WRITE(HEATER_1_PIN, v)
-    #if EXTRUDERS > 2
+    #if TOOLS > 2
       #define WRITE_HEATER_2(v) WRITE(HEATER_2_PIN, v)
-      #if EXTRUDERS > 3
+      #if TOOLS > 3
         #define WRITE_HEATER_3(v) WRITE(HEATER_3_PIN, v)
       #endif
     #endif

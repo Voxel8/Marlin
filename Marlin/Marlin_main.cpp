@@ -304,11 +304,11 @@ const float homing_feedrate[] = HOMING_FEEDRATE;
 bool axis_relative_modes[] = AXIS_RELATIVE_MODES;
 int feedrate_multiplier = 100; //100->1 200->2
 int saved_feedrate_multiplier;
-int extruder_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(100);
-int pressure_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(100);
+int extruder_multiplier[TOOLS] = ARRAY_BY_TOOLS1(100);
+int pressure_multiplier[TOOLS] = ARRAY_BY_TOOLS1(100);
 bool volumetric_enabled = false;
-float filament_size[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(DEFAULT_NOMINAL_FILAMENT_DIA);
-float volumetric_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(1.0);
+float filament_size[TOOLS] = ARRAY_BY_TOOLS1(DEFAULT_NOMINAL_FILAMENT_DIA);
+float volumetric_multiplier[TOOLS] = ARRAY_BY_TOOLS1(1.0);
 float home_offset[3] = { 0 };
 float min_pos[3] = { X_MIN_POS, Y_MIN_POS, Z_MIN_POS };
 float max_pos[3] = { X_MAX_POS, Y_MAX_POS, Z_MAX_POS };
@@ -352,7 +352,7 @@ bool target_direction;
 #endif
 
 // Extruder offsets
-#if EXTRUDERS > 1
+#if TOOLS > 1
   #ifndef EXTRUDER_OFFSET_X
     #define EXTRUDER_OFFSET_X { 0 }
   #endif
@@ -362,7 +362,7 @@ bool target_direction;
   #ifndef EXTRUDER_OFFSET_Z
     #define EXTRUDER_OFFSET_Z { 0 }
   #endif
-  float extruder_offset[][EXTRUDERS] = {
+  float extruder_offset[][TOOLS] = {
     EXTRUDER_OFFSET_X,
     EXTRUDER_OFFSET_Y,
     EXTRUDER_OFFSET_Z
@@ -3578,7 +3578,7 @@ inline void gcode_M105() {
       SERIAL_PROTOCOLPGM(" /");
       SERIAL_PROTOCOL_F(degTargetBed(), 1);
     #endif
-    for (int8_t e = 0; e < EXTRUDERS; ++e) {
+    for (int8_t e = 0; e < TOOLS; ++e) {
       SERIAL_PROTOCOLPGM(" T");
       SERIAL_PROTOCOL(e);
       SERIAL_PROTOCOLCHAR(':');
@@ -3621,7 +3621,7 @@ inline void gcode_M105() {
       SERIAL_PROTOCOLPGM("C->");
       SERIAL_PROTOCOL_F(rawBedTemp()/OVERSAMPLENR,0);
     #endif
-    for (int8_t cur_extruder = 0; cur_extruder < EXTRUDERS; ++cur_extruder) {
+    for (int8_t cur_extruder = 0; cur_extruder < TOOLS; ++cur_extruder) {
       SERIAL_PROTOCOLPGM("  T");
       SERIAL_PROTOCOL(cur_extruder);
       SERIAL_PROTOCOLCHAR(':');
@@ -4506,7 +4506,7 @@ inline void gcode_M211() {
   SERIAL_PROTOCOLLN(max_software_endstops_enabled[Z_AXIS] ? "yes" : "no");
 }
 
-#if EXTRUDERS > 1
+#if TOOLS > 1
 
   /**
    * M218 - set hotend offset (in mm), T<extruder_number> X<offset_on_X> Y<offset_on_Y>
@@ -4520,7 +4520,7 @@ inline void gcode_M211() {
 
     SERIAL_ECHO_START;
     SERIAL_ECHOPGM(MSG_HOTEND_OFFSET);
-    for (int e = 0; e < EXTRUDERS; e++) {
+    for (int e = 0; e < TOOLS; e++) {
       SERIAL_CHAR(' ');
       SERIAL_ECHO(extruder_offset[X_AXIS][e]);
       SERIAL_CHAR(',');
@@ -5145,7 +5145,7 @@ inline void gcode_M247() {
     // default behaviour (omitting E parameter) is to update for extruder 0 only
     int e = code_seen('E') ? code_value() : 0; // extruder being updated
 
-    if (e < EXTRUDERS) { // catch bad input value
+    if (e < TOOLS) { // catch bad input value
       if (code_seen('P')) PID_PARAM(Kp, e) = code_value();
       if (code_seen('I')) PID_PARAM(Ki, e) = scalePID_i(code_value());
       if (code_seen('D')) PID_PARAM(Kd, e) = scalePID_d(code_value());
@@ -5507,7 +5507,7 @@ inline void gcode_M303() {
     if (code_seen('V')) {
       // Report tool status of T0 and T1
       uint8_t tool_num;
-      for (tool_num = 0; tool_num < EXTRUDERS; tool_num++) {
+      for (tool_num = 0; tool_num < TOOLS; tool_num++) {
         report_solenoid_status(tool_num);
       }
     }
@@ -6176,7 +6176,7 @@ inline void gcode_M999() {
  *   F[mm/min] Set the movement feedrate
  */
 inline void gcode_T(uint8_t tmp_extruder) {
-  if (tmp_extruder >= EXTRUDERS) {
+  if (tmp_extruder >= TOOLS) {
     SERIAL_ECHO_START;
     SERIAL_CHAR('T');
     SERIAL_PROTOCOL_F(tmp_extruder,DEC);
@@ -6185,20 +6185,20 @@ inline void gcode_T(uint8_t tmp_extruder) {
   else {
     target_extruder = tmp_extruder;
 
-    #if EXTRUDERS > 1
+    #if TOOLS > 1
       bool make_move = false;
     #endif
 
     if (code_seen('F')) {
 
-      #if EXTRUDERS > 1
+      #if TOOLS > 1
         make_move = true;
       #endif
 
       float next_feedrate = code_value();
       if (next_feedrate > 0.0) feedrate = next_feedrate;
     }
-    #if EXTRUDERS > 1
+    #if TOOLS > 1
       if (tmp_extruder != active_extruder) {
         // Save current position to return to after applying extruder offset
         set_destination_to_current();
@@ -6662,7 +6662,7 @@ void process_next_command() {
         gcode_M211();
         break;
       
-      #if EXTRUDERS > 1
+      #if TOOLS > 1
         case 218: // M218 - set hotend offset (in mm), T<extruder_number> X<offset_on_X> Y<offset_on_Y>
           gcode_M218();
           break;
@@ -7506,14 +7506,14 @@ void plan_arc(
       lastMotorCheck = ms;
       if (X_ENABLE_READ == X_ENABLE_ON || Y_ENABLE_READ == Y_ENABLE_ON || Z_ENABLE_READ == Z_ENABLE_ON || soft_pwm_bed > 0
         || E0_ENABLE_READ == E_ENABLE_ON // If any of the drivers are enabled...
-        #if EXTRUDERS > 1
+        #if TOOLS > 1
           || E1_ENABLE_READ == E_ENABLE_ON
           #if HAS_X2_ENABLE
             || X2_ENABLE_READ == X_ENABLE_ON
           #endif
-          #if EXTRUDERS > 2
+          #if TOOLS > 2
             || E2_ENABLE_READ == E_ENABLE_ON
-            #if EXTRUDERS > 3
+            #if TOOLS > 3
               || E3_ENABLE_READ == E_ENABLE_ON
             #endif
           #endif
@@ -7956,7 +7956,7 @@ bool setTargetedHotend(int code) {
   target_extruder = active_extruder;
   if (code_seen('T')) {
     target_extruder = code_value_short();
-    if (target_extruder >= EXTRUDERS) {
+    if (target_extruder >= TOOLS) {
       SERIAL_ECHO_START;
       SERIAL_CHAR('M');
       SERIAL_ECHO(code);
