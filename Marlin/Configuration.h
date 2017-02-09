@@ -4,39 +4,6 @@
 #include "boards.h"
 #include "macros.h"
 
-//===========================================================================
-//============================= Getting Started =============================
-//===========================================================================
-/*
-Here are some standard links for getting your machine calibrated:
- * http://reprap.org/wiki/Calibration
- * http://youtu.be/wAL9d7FgInk
- * http://calculator.josefprusa.cz
- * http://reprap.org/wiki/Triffid_Hunter%27s_Calibration_Guide
- * http://www.thingiverse.com/thing:5573
- * https://sites.google.com/site/repraplogphase/calibration-of-your-reprap
- * http://www.thingiverse.com/thing:298812
-*/
-
-// This configuration file contains the basic settings.
-// Advanced settings can be found in Configuration_adv.h
-// BASIC SETTINGS: select your board type, temperature sensor type, axis scaling, and endstop configuration
-
-//===========================================================================
-//============================= DELTA Printer ===============================
-//===========================================================================
-// For a Delta printer replace the configuration files with the files in the
-// example_configurations/delta directory.
-//
-
-//===========================================================================
-//============================= SCARA Printer ===============================
-//===========================================================================
-// For a Scara printer replace the configuration files with the files in the
-// example_configurations/SCARA directory.
-//
-
-// @section info
 
 #define USE_AUTOMATIC_VERSIONING 1
 
@@ -66,18 +33,11 @@ Here are some standard links for getting your machine calibrated:
 // :[2400,9600,19200,38400,57600,115200,250000]
 #define BAUDRATE 250000
 
-// Enable the Bluetooth serial interface on AT90USB devices
-//#define BLUETOOTH
-
 // The following define selects which electronics board you have.
 // Please choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
   #define MOTHERBOARD BOARD_VOXEL8_GEN3C2
 #endif
-
-// Optional custom name for your RepStrap or other custom machine
-// Displayed in the LCD "Ready" message
-//#define CUSTOM_MACHINE_NAME "3D Printer"
 
 // Define this to set a unique identifier for this printer, (Used by some programs to differentiate between machines)
 // You can use an online service to generate a random UUID. (eg http://www.uuidgenerator.net/version4)
@@ -99,324 +59,6 @@ Here are some standard links for getting your machine calibrated:
 // :{1:'ATX',2:'X-Box 360'}
 
 #define POWER_SUPPLY 1
-
-// Define this to have the electronics keep the power supply off on startup. If you don't know what this is leave it.
-//#define PS_DEFAULT_OFF
-
-// Define to enable current limit circuit on 24V downstream power
-#define CURRENT_LIMIT
-
-//===========================================================================
-//============================== External ADC ===============================
-//===========================================================================
-// This feature allows for the use of an external ADC *in addition* to the on-board 10-bit ADC
-//
-//// Select the appropriate ADC according to the number associated with the chip you are using
-// 1 = Texas Instruments ADS1115 (16-bit)
-// 2 = Texas Instruments ADS1015 (12-bit)
-//
-// Define this to allow the use of an external ADC 
-#define EXT_ADC 1
-
-// Define ADC mode of operation (Single-ended or Differential) for the TI chips
-// ** This definition ONLY affects code that refers to EXT_ADC_RAW_x.
-// ** Even if a mode is defined here, both single-ended and differential readings
-// ** can be taken by using the functions defind in ADS1x15.cpp 
-
-// 1 = Single-Ended Mode
-// 2 = Differential Mode
-#if EXT_ADC == (1 || 2)
-  #define EXT_ADC_MODE 2
-#endif
-
-// @section temperature
-
-//===========================================================================
-//============================= Thermal Settings ============================
-//===========================================================================
-//
-//--NORMAL IS 4.7kohm PULLUP!-- 1kohm pullup can be used on hotend sensor, using correct resistor and table
-//
-//// Temperature sensor settings:
-// -2 is thermocouple with MAX6675 (only for sensor 0)
-// -1 is thermocouple with AD595
-// 0 is not used
-// 1 is 100k thermistor - best choice for EPCOS 100k (4.7k pullup)
-// 2 is 200k thermistor - ATC Semitec 204GT-2 (4.7k pullup)
-// 3 is Mendel-parts thermistor (4.7k pullup)
-// 4 is 10k thermistor !! do not use it for a hotend. It gives bad resolution at high temp. !!
-// 5 is 100K thermistor - ATC Semitec 104GT-2 (Used in ParCan & J-Head) (4.7k pullup)
-// 6 is 100k EPCOS - Not as accurate as table 1 (created using a fluke thermocouple) (4.7k pullup)
-// 7 is 100k Honeywell thermistor 135-104LAG-J01 (4.7k pullup)
-// 71 is 100k Honeywell thermistor 135-104LAF-J01 (4.7k pullup)
-// 8 is 100k 0603 SMD Vishay NTCS0603E3104FXT (4.7k pullup)
-// 9 is 100k GE Sensing AL03006-58.2K-97-G1 (4.7k pullup)
-// 10 is 100k RS thermistor 198-961 (4.7k pullup)
-// 11 is 100k beta 3950 1% thermistor (4.7k pullup)
-// 12 is 100k 0603 SMD Vishay NTCS0603E3104FXT (4.7k pullup) (calibrated for Makibox hot bed)
-// 13 is 100k Hisens 3950  1% up to 300°C for hotend "Simple ONE " & "Hotend "All In ONE"
-// 14 is 100k US Sensor MM104J1F  1% up to 220°C surface mounted
-// 20 is the PT100 circuit found in the Ultimainboard V2.x
-// 60 is 100k Maker's Tool Works Kapton Bed Thermistor beta=3950
-//
-//    1k ohm pullup tables - This is not normal, you would have to have changed out your 4.7k for 1k
-//                          (but gives greater accuracy and more stable PID)
-// 51 is 100k thermistor - EPCOS (1k pullup)
-// 52 is 200k thermistor - ATC Semitec 204GT-2 (1k pullup)
-// 55 is 100k thermistor - ATC Semitec 104GT-2 (Used in ParCan & J-Head) (1k pullup)
-//
-// 1047 is Pt1000 with 4k7 pullup
-// 1010 is Pt1000 with 1k pullup (non standard)
-// 147 is Pt100 with 4k7 pullup
-// 110 is Pt100 with 1k pullup (non standard)
-// 998 and 999 are Dummy Tables. They will ALWAYS read 25°C or the temperature defined below.
-//     Use it for Testing or Development purposes. NEVER for production machine.
-//#define DUMMY_THERMISTOR_998_VALUE 25
-//#define DUMMY_THERMISTOR_999_VALUE 100
-// :{ '0': "Not used", '4': "10k !! do not use for a hotend. Bad resolution at high temp. !!", '1': "100k / 4.7k - EPCOS", '51': "100k / 1k - EPCOS", '6': "100k / 4.7k EPCOS - Not as accurate as Table 1", '5': "100K / 4.7k - ATC Semitec 104GT-2 (Used in ParCan & J-Head)", '7': "100k / 4.7k Honeywell 135-104LAG-J01", '71': "100k / 4.7k Honeywell 135-104LAF-J01", '8': "100k / 4.7k 0603 SMD Vishay NTCS0603E3104FXT", '9': "100k / 4.7k GE Sensing AL03006-58.2K-97-G1", '10': "100k / 4.7k RS 198-961", '11': "100k / 4.7k beta 3950 1%", '12': "100k / 4.7k 0603 SMD Vishay NTCS0603E3104FXT (calibrated for Makibox hot bed)", '13': "100k Hisens 3950  1% up to 300°C for hotend 'Simple ONE ' & hotend 'All In ONE'", '60': "100k Maker's Tool Works Kapton Bed Thermistor beta=3950", '55': "100k / 1k - ATC Semitec 104GT-2 (Used in ParCan & J-Head)", '2': "200k / 4.7k - ATC Semitec 204GT-2", '52': "200k / 1k - ATC Semitec 204GT-2", '-2': "Thermocouple + MAX6675 (only for sensor 0)", '-1': "Thermocouple + AD595", '3': "Mendel-parts / 4.7k", '1047': "Pt1000 / 4.7k", '1010': "Pt1000 / 1k (non standard)", '20': "PT100 (Ultimainboard V2.x)", '147': "Pt100 / 4.7k", '110': "Pt100 / 1k (non-standard)", '998': "Dummy 1", '999': "Dummy 2" }
-#define TEMP_SENSOR_0 20
-#define TEMP_SENSOR_1 0
-#define TEMP_SENSOR_2 0
-#define TEMP_SENSOR_3 0
-#define TEMP_SENSOR_BED 14
-
-// This makes temp sensor 1 a redundant sensor for sensor 0. If the temperatures difference between these sensors is to high the print will be aborted.
-//#define TEMP_SENSOR_1_AS_REDUNDANT
-#define MAX_REDUNDANT_TEMP_SENSOR_DIFF 10
-
-// Actual temperature must be close to target for this long before M109 returns success
-#define TEMP_RESIDENCY_TIME 1  // (seconds)
-#define TEMP_HYSTERESIS 3       // (degC) range of +/- temperatures considered "close" to the target one
-#define TEMP_WINDOW     1       // (degC) Window around target to start the residency timer x degC early.
-
-// The minimal temperature defines the temperature below which the heater will not be enabled It is used
-// to check that the wiring to the thermistor is not broken.
-// Otherwise this would lead to the heater being powered on all the time.
-#define HEATER_0_MINTEMP 5
-#define HEATER_1_MINTEMP 0
-#define HEATER_2_MINTEMP 5
-#define HEATER_3_MINTEMP 5
-#define BED_MINTEMP 5
-
-// When temperature exceeds max temp, your heater will be switched off.
-// This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
-// You should use MINTEMP for thermistor short/failure protection.
-#define HEATER_0_MAXTEMP 275
-#define HEATER_1_MAXTEMP 275
-#define HEATER_2_MAXTEMP 275
-#define HEATER_3_MAXTEMP 275
-#define BED_MAXTEMP 150
-
-// If your bed has low resistance e.g. .6 ohm and throws the fuse you can duty cycle it to reduce the
-// average current. The value should be an integer and the heat bed will be turned on for 1 interval of
-// HEATER_BED_DUTY_CYCLE_DIVIDER intervals.
-//#define HEATER_BED_DUTY_CYCLE_DIVIDER 4
-
-// If you want the M105 heater power reported in watts, define the BED_WATTS, and (shared for all extruders) EXTRUDER_WATTS
-//#define EXTRUDER_WATTS (12.0*12.0/6.7) //  P=I^2/R
-//#define BED_WATTS (12.0*12.0/1.1)      // P=I^2/R
-
-//===========================================================================
-//============================= PID Settings ================================
-//===========================================================================
-// PID Tuning Guide here: http://reprap.org/wiki/PID_Tuning
-
-// Comment the following line to disable PID and enable bang-bang.
-#define PIDTEMP
-#define BANG_MAX 255 // limits current to nozzle while in bang-bang mode; 255=full current
-#define PID_MAX BANG_MAX // limits current to nozzle while PID is active (see PID_FUNCTIONAL_RANGE below); 255=full current
-#if ENABLED(PIDTEMP)
-  //#define PID_DEBUG // Sends debug data to the serial port.
-  //#define PID_OPENLOOP 1 // Puts PID in open loop. M104/M140 sets the output power from 0 to PID_MAX
-  //#define SLOW_PWM_HEATERS // PWM with very low frequency (roughly 0.125Hz=8s) and minimum state time of approximately 1s useful for heaters driven by a relay
-  //#define PID_PARAMS_PER_EXTRUDER // Uses separate PID parameters for each extruder (useful for mismatched extruders)
-                                    // Set/get with gcode: M301 E[extruder number, 0-2]
-  #define PID_FUNCTIONAL_RANGE 30 // If the temperature difference between the target temperature and the actual temperature
-                                  // is more then PID_FUNCTIONAL_RANGE then the PID will be shut off and the heater will be set to min/max.
-  #define PID_INTEGRAL_DRIVE_MAX PID_MAX  //limit for the integral term
-  #define K1 0.95 //smoothing factor within the PID
-
-// If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
-// Ultimaker
-//    #define  DEFAULT_Kp 22.2
-//    #define  DEFAULT_Ki 1.08
-//    #define  DEFAULT_Kd 114
-
-// MakerGear
-//    #define  DEFAULT_Kp 7.0
-//    #define  DEFAULT_Ki 0.1
-//    #define  DEFAULT_Kd 12
-
-// Mendel Parts V9 on 12V
-//    #define  DEFAULT_Kp 63.0
-//    #define  DEFAULT_Ki 2.25
-//    #define  DEFAULT_Kd 440
-
-// E3D V6 12v
-//    #define  DEFAULT_Kp 47.31
-//    #define  DEFAULT_Ki 5.43
-//    #define  DEFAULT_Kd 103.09
-
-// E3D V6 24v
-//  #define  DEFAULT_Kp 22.66
-//  #define  DEFAULT_Ki 1.92
-//  #define  DEFAULT_Kd 66.91
-    
-// E3D V6 24V with PT100
-    #define  DEFAULT_Kp 19.96
-    #define  DEFAULT_Ki 1.24
-    #define  DEFAULT_Kd 80.47
-
-// D3D 24V New Heat Block
-//    #define  DEFAULT_Kp 9.83
-//    #define  DEFAULT_Ki 0.37
-//    #define  DEFAULT_Kd 65.41
-
-    // D3D 24V New Heat Block 210
-//    #define  DEFAULT_Kp 10.95
-  //  #define  DEFAULT_Ki 0.45
-    //#define  DEFAULT_Kd 69.97
-    
-//D3D 7/28 ada prints
-//#define  DEFAULT_Kp 12.06
-//#define  DEFAULT_Ki 0.48
-//#define  DEFAULT_Kd 75.71
-
-#endif // PIDTEMP
-
-//===========================================================================
-//============================= PID > Bed Temperature Control ===============
-//===========================================================================
-// Select PID or bang-bang with PIDTEMPBED. If bang-bang, BED_LIMIT_SWITCHING will enable hysteresis
-//
-// Uncomment this to enable PID on the bed. It uses the same frequency PWM as the extruder.
-// If your PID_dT is the default, and correct for your hardware/configuration, that means 7.689Hz,
-// which is fine for driving a square wave into a resistive load and does not significantly impact you FET heating.
-// This also works fine on a Fotek SSR-10DA Solid State Relay into a 250W heater.
-// If your configuration is significantly different than this and you don't understand the issues involved, you probably
-// shouldn't use bed PID until someone else verifies your hardware works.
-// If this is enabled, find your own PID constants below.
-#define PIDTEMPBED
-//
-#define BED_LIMIT_SWITCHING
-
-// This sets the max power delivered to the bed, and replaces the HEATER_BED_DUTY_CYCLE_DIVIDER option.
-// all forms of bed control obey this (PID, bang-bang, bang-bang with hysteresis)
-// setting this to anything other than 255 enables a form of PWM to the bed just like HEATER_BED_DUTY_CYCLE_DIVIDER did,
-// so you shouldn't use it unless you are OK with PWM on your bed.  (see the comment on enabling PIDTEMPBED)
-#define MAX_BED_POWER 255 // limits duty cycle to bed; 255=full current
-
-//#define PID_BED_DEBUG // Sends debug data to the serial port.
-
-#if ENABLED(PIDTEMPBED)
-
-  #define PID_BED_INTEGRAL_DRIVE_MAX MAX_BED_POWER //limit for the integral term
-
-  //120v 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
-  //from FOPDT model - kp=.39 Tp=405 Tdead=66, Tc set to 79.2, aggressive factor of .15 (vs .1, 1, 10)
-  //#define  DEFAULT_bedKp 10.00
-  //#define  DEFAULT_bedKi .023
-  //#define  DEFAULT_bedKd 305.4
-
-  //120v 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
-  //from pidautotune
-  //#define  DEFAULT_bedKp 97.1
-  //#define  DEFAULT_bedKi 1.41
-  //#define  DEFAULT_bedKd 1675.16
-
-  //24V PCB heater 4 ohm
-  //from PID autotune
-    #define  DEFAULT_bedKp 107.41
-    #define  DEFAULT_bedKi 21.29
-    #define  DEFAULT_bedKd 135.50
-
-  // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
-#endif // PIDTEMPBED
-
-// @section extruder
-
-//this prevents dangerous Extruder moves, i.e. if the temperature is under the limit
-//can be software-disabled for whatever purposes by
-#define PREVENT_DANGEROUS_EXTRUDE
-//if PREVENT_DANGEROUS_EXTRUDE is on, you can still disable (uncomment) very long bits of extrusion separately.
-#define PREVENT_LENGTHY_EXTRUDE
-
-#define EXTRUDE_MINTEMP 170
-#define EXTRUDE_MAXLENGTH (X_MAX_LENGTH+Y_MAX_LENGTH) //prevent extrusion of very large distances.
-
-//===========================================================================
-//======================== Thermal Runaway Protection =======================
-//===========================================================================
-
-/**
- * Thermal Runaway Protection protects your printer from damage and fire if a
- * thermistor falls out or temperature sensors fail in any way.
- *
- * The issue: If a thermistor falls out or a temperature sensor fails,
- * Marlin can no longer sense the actual temperature. Since a disconnected
- * thermistor reads as a low temperature, the firmware will keep the heater on.
- *
- * The solution: Once the temperature reaches the target, start observing.
- * If the temperature stays too far below the target (hysteresis) for too long,
- * the firmware will halt as a safety precaution.
- */
-
-#define THERMAL_PROTECTION_HOTENDS // Enable thermal protection for all extruders
-//#define THERMAL_PROTECTION_BED     // Enable thermal protection for the heated bed
-
-//===========================================================================
-//============================ Pneumatics Settings ==========================
-//===========================================================================
-
-// The pneumatics settings contain the settings for the tank pressure (i.e. when to
-// turn the pump on) as well as the settings for the output pressure (i.e. the
-// pressure that drives the material)
-
-// Define this if you are using pneumatic direct write on the RAMBo AND you are not
-// using HEAT_1 output
-#define PNEUMATICS
-// Define this if you are using the electro-pneumatic regulator
-#define E_REGULATOR
-
-// Define this if you don't want to home in  the center of the bed.
-//#define HOME_AT_BACK
-
-// Define to prevent printing without heated bed.
-#define HEATED_BED_PRESENT_CHECK
- 
-#if ENABLED(E_REGULATOR)
- // Set E-regulator Sensor Type HERE:
- // ---------------------------------
- // 0 - No Pressure Sensor Used
- // 1 - Built-in Pressure Transducer (ITV0050-2UL)
- // 2 - Built-in Pressure Transducer (Regtronics M5)
-
-  #define E_REGULATOR_SENSOR 2
-  #define DAC_I2C
- // 130 psi is max settable pressure for e-regulator
-  #define OUTPUT_PSI_MAX     130.0 
-  #define OUTPUT_PSI_MIN       0.0
-#endif
-
-#if ENABLED(PNEUMATICS)
-
-// Set Pressure Sensor Type HERE:
-// -----------------------------
-// 0 - No Pressure Sensor Used
-// 1 - Kavlico P255-50G-D1A
-// 2 - American Sensor Tech. 4100 Series (1-5V output)
-// 3 - Pressure Transmitter PT1200-1/4NPT (1-5V output)
-
-  #define PNEUMATIC_SENSOR 3
-
-  // 0 is a valid pressure reading
-  #define PNEUMATIC_MIN -1
-  
-  // If the pressure goes above this value the pump will be turned off. This prevents
-  // the tank from being overpressurized. This value has units of PSI * 10 (to eliminate
-  // floating point numbers in the lookup table).
-  #define PNEUMATIC_MAX 1000 // 100 psi
-#endif
 
 //===========================================================================
 //============================= Mechanical Settings =========================
@@ -538,26 +180,6 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
   #define FILAMENT_RUNOUT_SCRIPT "M600"
 #endif
 
-//===========================================================================
-//=========================== Manual Bed Leveling ===========================
-//===========================================================================
-
-//#define MANUAL_BED_LEVELING  // Add display menu option for bed leveling.
-//#define MESH_BED_LEVELING    // Enable mesh bed leveling.
-
-#if ENABLED(MANUAL_BED_LEVELING)
-  #define MBL_Z_STEP 0.025  // Step size while manually probing Z axis.
-#endif  // MANUAL_BED_LEVELING
-
-#if ENABLED(MESH_BED_LEVELING)
-  #define MESH_MIN_X 10
-  #define MESH_MAX_X (X_MAX_POS - MESH_MIN_X)
-  #define MESH_MIN_Y 10
-  #define MESH_MAX_Y (Y_MAX_POS - MESH_MIN_Y)
-  #define MESH_NUM_X_POINTS 3  // Don't use more than 7 points per axis, implementation limited.
-  #define MESH_NUM_Y_POINTS 3
-  #define MESH_HOME_SEARCH_Z 4  // Z after Home, bed somewhere below but above 0.0.
-#endif  // MESH_BED_LEVELING
 
 //===========================================================================
 //============================ Bed Auto Leveling ============================
@@ -629,8 +251,6 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 //#define Z_PROBE_END_SCRIPT "G1 Z10 F12000\nG1 X15 Y330\nG1 Z0.5\nG1 Z10" // These commands will be executed in the end of G29 routine.
                                                                             // Useful to retract a deployable Z probe.
 
-  //#define Z_PROBE_SLED // Turn on if you have a Z probe mounted on a sled like those designed by Charles Bell.
-  //#define SLED_DOCKING_OFFSET 5 // The extra distance the X axis must travel to pickup the sled. 0 should be fine but you can push it further if you'd like.
 
 
   //If you have enabled the Bed Auto Leveling and are using the same Z Probe for Z Homing,
@@ -758,22 +378,6 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
   #define EEPROM_CHITCHAT // Please keep turned on if you can.
 #endif
 
-//
-// M100 Free Memory Watcher
-//
-// #define M100_FREE_MEMORY_WATCHER // uncomment to add the M100 Free Memory Watcher for debug purpose
-
-// @section temperature
-
-// Preheat Constants
-#define PLA_PREHEAT_HOTEND_TEMP 180
-#define PLA_PREHEAT_HPB_TEMP 70
-#define PLA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
-
-#define ABS_PREHEAT_HOTEND_TEMP 240
-#define ABS_PREHEAT_HPB_TEMP 110
-#define ABS_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
-
 //==============================LCD and SD support=============================
 // @section lcd
 
@@ -782,138 +386,6 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 // See also language.h
 #define LANGUAGE_INCLUDE GENERATE_LANGUAGE_INCLUDE(en)
 
-// Choose ONE of these 3 charsets. This has to match your hardware. Ignored for full graphic display.
-// To find out what type you have - compile with (test) - upload - click to get the menu. You'll see two typical lines from the upper half of the charset.
-// See also documentation/LCDLanguageFont.md
-  #define DISPLAY_CHARSET_HD44780_JAPAN        // this is the most common hardware
-  //#define DISPLAY_CHARSET_HD44780_WESTERN
-  //#define DISPLAY_CHARSET_HD44780_CYRILLIC
-
-//#define ULTRA_LCD  //general LCD support, also 16x2
-//#define DOGLCD  // Support for SPI LCD 128x64 (Controller ST7565R graphic Display Family)
-//#define SDSUPPORT // Enable SD Card Support in Hardware Console
-// Changed behaviour! If you need SDSUPPORT uncomment it!
-//#define SDSLOW // Use slower SD transfer mode (not normally needed - uncomment if you're getting volume init error)
-//#define SDEXTRASLOW // Use even slower SD transfer mode (not normally needed - uncomment if you're getting volume init error)
-//#define SD_CHECK_AND_RETRY // Use CRC checks and retries on the SD communication
-//#define ENCODER_PULSES_PER_STEP 1 // Increase if you have a high resolution encoder
-//#define ENCODER_STEPS_PER_MENU_ITEM 5 // Set according to ENCODER_PULSES_PER_STEP or your liking
-//#define ULTIMAKERCONTROLLER //as available from the Ultimaker online store.
-//#define ULTIPANEL  //the UltiPanel as on Thingiverse
-//#define SPEAKER // The sound device is a speaker - not a buzzer. A buzzer resonates with his own frequency.
-//#define LCD_FEEDBACK_FREQUENCY_DURATION_MS 100 // the duration the buzzer plays the UI feedback sound. ie Screen Click
-//#define LCD_FEEDBACK_FREQUENCY_HZ 1000         // this is the tone frequency the buzzer plays when on UI feedback. ie Screen Click
-                                                 // 0 to disable buzzer feedback. Test with M300 S<frequency Hz> P<duration ms>
-// PanelOne from T3P3 (via RAMPS 1.4 AUX2/AUX3)
-// http://reprap.org/wiki/PanelOne
-//#define PANEL_ONE
-
-// The MaKr3d Makr-Panel with graphic controller and SD support
-// http://reprap.org/wiki/MaKr3d_MaKrPanel
-//#define MAKRPANEL
-
-// The Panucatt Devices Viki 2.0 and mini Viki with Graphic LCD
-// http://panucatt.com
-// ==> REMEMBER TO INSTALL U8glib to your ARDUINO library folder: http://code.google.com/p/u8glib/wiki/u8glib
-//#define VIKI2
-//#define miniVIKI
-
-// This is a new controller currently under development.  https://github.com/eboston/Adafruit-ST7565-Full-Graphic-Controller/
-//
-// ==> REMEMBER TO INSTALL U8glib to your ARDUINO library folder: http://code.google.com/p/u8glib/wiki/u8glib
-//#define ELB_FULL_GRAPHIC_CONTROLLER
-//#define SD_DETECT_INVERTED
-
-// The RepRapDiscount Smart Controller (white PCB)
-// http://reprap.org/wiki/RepRapDiscount_Smart_Controller
-//#define REPRAP_DISCOUNT_SMART_CONTROLLER
-
-// The GADGETS3D G3D LCD/SD Controller (blue PCB)
-// http://reprap.org/wiki/RAMPS_1.3/1.4_GADGETS3D_Shield_with_Panel
-//#define G3D_PANEL
-
-// The RepRapDiscount FULL GRAPHIC Smart Controller (quadratic white PCB)
-// http://reprap.org/wiki/RepRapDiscount_Full_Graphic_Smart_Controller
-//
-// ==> REMEMBER TO INSTALL U8glib to your ARDUINO library folder: http://code.google.com/p/u8glib/wiki/u8glib
-//#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
-
-// The RepRapWorld REPRAPWORLD_KEYPAD v1.1
-// http://reprapworld.com/?products_details&products_id=202&cPath=1591_1626
-//#define REPRAPWORLD_KEYPAD
-//#define REPRAPWORLD_KEYPAD_MOVE_STEP 10.0 // how much should be moved when a key is pressed, eg 10.0 means 10mm per click
-
-// The Elefu RA Board Control Panel
-// http://www.elefu.com/index.php?route=product/product&product_id=53
-// REMEMBER TO INSTALL LiquidCrystal_I2C.h in your ARDUINO library folder: https://github.com/kiyoshigawa/LiquidCrystal_I2C
-//#define RA_CONTROL_PANEL
-
-// The MakerLab Mini Panel with graphic controller and SD support
-// http://reprap.org/wiki/Mini_panel
-//#define MINIPANEL
-
-/**
- * I2C Panels
- */
-
-//#define LCD_I2C_SAINSMART_YWROBOT
-
-// PANELOLU2 LCD with status LEDs, separate encoder and click inputs
-//
-// This uses the LiquidTWI2 library v1.2.3 or later ( https://github.com/lincomatic/LiquidTWI2 )
-// Make sure the LiquidTWI2 directory is placed in the Arduino or Sketchbook libraries subdirectory.
-// (v1.2.3 no longer requires you to define PANELOLU in the LiquidTWI2.h library header file)
-// Note: The PANELOLU2 encoder click input can either be directly connected to a pin
-//       (if BTN_ENC defined to != -1) or read through I2C (when BTN_ENC == -1).
-//#define LCD_I2C_PANELOLU2
-
-// Panucatt VIKI LCD with status LEDs, integrated click & L/R/U/P buttons, separate encoder inputs
-//#define LCD_I2C_VIKI
-  
-// SSD1306 OLED generic display support
-// ==> REMEMBER TO INSTALL U8glib to your ARDUINO library folder: http://code.google.com/p/u8glib/wiki/u8glib
-//#define U8GLIB_SSD1306
-
-// Shift register panels
-// ---------------------
-// 2 wire Non-latching LCD SR from:
-// https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/schematics#!shiftregister-connection
-// LCD configuration: http://reprap.org/wiki/SAV_3D_LCD
-//#define SAV_3DLCD
-
-// @section extras
-
-// Increase the FAN pwm frequency. Removes the PWM noise but increases heating in the FET/Arduino
-//#define FAST_PWM_FAN
-
-// Use software PWM to drive the fan, as for the heaters. This uses a very low frequency
-// which is not as annoying as with the hardware PWM. On the other hand, if this frequency
-// is too low, you should also increment SOFT_PWM_SCALE.
-//#define FAN_SOFT_PWM
-
-// Incrementing this by 1 will double the software PWM frequency,
-// affecting heaters, and the fan if FAN_SOFT_PWM is enabled.
-// However, control resolution will be halved for each increment;
-// at zero value, there are 128 effective control positions.
-#define SOFT_PWM_SCALE 0
-
-// Temperature status LEDs that display the hotend and bet temperature.
-// If all hotends and bed temperature and temperature setpoint are < 54C then the BLUE led is on.
-// Otherwise the RED led is on. There is 1C hysteresis.
-//#define TEMP_STAT_LEDS
-
-// M240  Triggers a camera by emulating a Canon RC-1 Remote
-// Data from: http://www.doc-diy.net/photo/rc-1_hacked/
-//#define PHOTOGRAPH_PIN     23
-
-// SkeinForge sends the wrong arc g-codes when using Arc Point as fillet procedure
-//#define SF_ARC_FIX
-
-// Support for the BariCUDA Paste Extruder.
-//#define BARICUDA
-
-//define BlinkM/CyzRgb Support
-//#define BLINKM
 
 /*********************************************************************\
 * R/C SERVO support
@@ -962,26 +434,6 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
  * 301 - Rambo  - uses Analog input 3
  * Note may require analog pins to be defined for different motherboards
  **********************************************************************/
-// Uncomment below to enable
-//#define FILAMENT_SENSOR
-
-#define FILAMENT_SENSOR_EXTRUDER_NUM 0   //The number of the extruder that has the filament sensor (0,1,2)
-#define MEASUREMENT_DELAY_CM        14   //measurement delay in cm.  This is the distance from filament sensor to middle of barrel
-
-#define DEFAULT_NOMINAL_FILAMENT_DIA 3.00  //Enter the diameter (in mm) of the filament generally used (3.0 mm or 1.75 mm) - this is then used in the slicer software.  Used for sensor reading validation
-#define MEASURED_UPPER_LIMIT         3.30  //upper limit factor used for sensor reading validation in mm
-#define MEASURED_LOWER_LIMIT         1.90  //lower limit factor for sensor reading validation in mm
-#define MAX_MEASUREMENT_DELAY       20     //delay buffer size in bytes (1 byte = 1cm)- limits maximum measurement delay allowable (must be larger than MEASUREMENT_DELAY_CM  and lower number saves RAM)
-
-//defines used in the code
-#define DEFAULT_MEASURED_FILAMENT_DIA  DEFAULT_NOMINAL_FILAMENT_DIA  //set measured to nominal initially
-
-//When using an LCD, uncomment the line below to display the Filament sensor data on the last line instead of status.  Status will appear for 5 sec.
-//#define FILAMENT_LCD_DISPLAY
-
-
-
-
 
 
 #include "Configuration_adv.h"
