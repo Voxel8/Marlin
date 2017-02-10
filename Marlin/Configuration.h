@@ -36,7 +36,7 @@
 // The following define selects which electronics board you have.
 // Please choose the name from boards.h that matches your setup
 #ifndef MOTHERBOARD
-  #define MOTHERBOARD BOARD_VOXEL8_GEN3C2
+  #define MOTHERBOARD BOARD_VOXEL8_MIXING
 #endif
 
 // Define this to set a unique identifier for this printer, (Used by some programs to differentiate between machines)

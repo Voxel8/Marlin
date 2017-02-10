@@ -20,114 +20,16 @@
 #define HEATER_3_PIN -1
 #define TEMP_3_PIN -1
 
-#if MB(GEN7_CUSTOM)
-  #include "pins_GEN7_CUSTOM.h"
-#elif MB(GEN7_12)
-  #include "pins_GEN7_12.h"
-#elif MB(GEN7_13)
-  #include "pins_GEN7_13.h"
-#elif MB(GEN7_14)
-  #include "pins_GEN7_14.h"
-#elif MB(CHEAPTRONIC)
-  #include "pins_CHEAPTRONIC.h"
-#elif MB(SETHI)
-  #include "pins_SETHI.h"
-#elif MB(RAMPS_OLD)
-  #include "pins_RAMPS_OLD.h"
-#elif MB(RAMPS_13_EFB)
-  #include "pins_RAMPS_13_EFB.h"
-#elif MB(RAMPS_13_EEB) || MB(RAMPS_13_EFF) || MB(RAMPS_13_EEF) || MB(RAMPS_13_SF)
-  #include "pins_RAMPS_13.h"
-#elif MB(GEN6)
-  #include "pins_GEN6.h"
-#elif MB(GEN6_DELUXE)
-  #include "pins_GEN6_DELUXE.h"
-#elif MB(SANGUINOLOLU_11)
-  #include "pins_SANGUINOLOLU_11.h"
-#elif MB(SANGUINOLOLU_12)
-  #include "pins_SANGUINOLOLU_12.h"
-#elif MB(MELZI)
-  #include "pins_MELZI.h"
-#elif MB(STB_11)
-  #include "pins_STB_11.h"
-#elif MB(AZTEEG_X1)
-  #include "pins_AZTEEG_X1.h"
-#elif MB(MELZI_MAKR3D)
-  #include "pins_MELZI_MAKR3D.h"
-#elif MB(AZTEEG_X3)
-  #include "pins_AZTEEG_X3.h"
-#elif MB(AZTEEG_X3_PRO)
-  #include "pins_AZTEEG_X3_PRO.h"
-#elif MB(ULTIMAKER)
-  #include "pins_ULTIMAKER.h"
-#elif MB(ULTIMAKER_OLD)
-  #include "pins_ULTIMAKER_OLD.h"
-#elif MB(ULTIMAIN_2)
-  #include "pins_ULTIMAIN_2.h"
-#elif MB(3DRAG)
-  #include "pins_3DRAG.h"
-#elif MB(K8200)
-  #include "pins_K8200.h"
-#elif MB(TEENSYLU)
-  #include "pins_TEENSYLU.h"
-#elif MB(RUMBA)
-  #include "pins_RUMBA.h"
-#elif MB(PRINTRBOARD)
-  #include "pins_PRINTRBOARD.h"
-#elif MB(BRAINWAVE)
-  #include "pins_BRAINWAVE.h"
-#elif MB(BRAINWAVE_PRO)
-  #include "pins_BRAINWAVE_PRO.h"
-#elif MB(SAV_MKI)
-  #include "pins_SAV_MKI.h"
-#elif MB(TEENSY2)
-  #include "pins_TEENSY2.h"
-#elif MB(GEN3_PLUS)
-  #include "pins_GEN3_PLUS.h"
-#elif MB(GEN3_MONOLITHIC)
-  #include "pins_GEN3_MONOLITHIC.h"
-#elif MB(MEGATRONICS)
-  #include "pins_MEGATRONICS.h"
-#elif MB(MINITRONICS)
-  #include "pins_MINITRONICS.h"
-#elif MB(MEGATRONICS_2)
-  #include "pins_MEGATRONICS_2.h"
-#elif MB(MEGATRONICS_3)
-  #include "pins_MEGATRONICS_3.h"
-#elif MB(OMCA_A)
-  #include "pins_OMCA_A.h"
-#elif MB(OMCA)
-  #include "pins_OMCA.h"
-#elif MB(RAMBO)
+#if MB(RAMBO)
   #include "pins_RAMBO.h"
-#elif MB(MINIRAMBO)
-  #include "pins_MINIRAMBO.h"
-#elif MB(ELEFU_3)
-  #include "pins_ELEFU_3.h"
-#elif MB(5DPRINT)
-  #include "pins_5DPRINT.h"
-#elif MB(LEAPFROG)
-  #include "pins_LEAPFROG.h"
-#elif MB(BAM_DICE)
-  #include "pins_RAMPS_13.h"
-#elif MB(BAM_DICE_DUE)
-  #include "pins_BAM_DICE_DUE.h"
-#elif MB(FELIX2)
-  #include "pins_FELIX2.h"
-#elif MB(MKS_BASE)
-  #include "pins_MKS_BASE.h"
-#elif MB(RIGIDBOARD)
-  #include "pins_RIGIDBOARD.h"
-#elif MB(MEGACONTROLLER)
-  #include "pins_MEGACONTROLLER.h"
-#elif MB(99)
-  #include "pins_99.h"
 #elif MB(VOXEL8_GEN3B)
   #include "pins_VOXEL8_GEN3B.h"
 #elif MB(VOXEL8_GEN3C)
   #include "pins_VOXEL8_GEN3C.h"
 #elif MB(VOXEL8_GEN3C2)
   #include "pins_VOXEL8_GEN3C2.h"
+#elif MB(VOXEL8_MIXING)
+  #include "pins_VOXEL8_MIXING.h"
 #else
   #error Unknown MOTHERBOARD value set in Configuration.h
 #endif

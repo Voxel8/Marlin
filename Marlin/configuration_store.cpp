@@ -93,7 +93,6 @@
 #include "language.h"
 #include "planner.h"
 #include "temperature.h"
-#include "ultralcd.h"
 #include "configuration_store.h"
 
 #if ENABLED(MESH_BED_LEVELING)

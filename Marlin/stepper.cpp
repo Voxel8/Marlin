@@ -26,9 +26,7 @@
 #include "stepper.h"
 #include "planner.h"
 #include "temperature.h"
-#include "ultralcd.h"
 #include "language.h"
-#include "cardreader.h"
 #include "speed_lookuptable.h"
 #if HAS_DIGIPOTSS
   #include <SPI.h>

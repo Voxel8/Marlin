@@ -52,7 +52,6 @@
 #include "planner.h"
 #include "stepper.h"
 #include "temperature.h"
-#include "ultralcd.h"
 #include "language.h"
 
 #if ENABLED(MESH_BED_LEVELING)

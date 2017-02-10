@@ -44,27 +44,12 @@
   #endif
 
   /**
-   * Filament Change with Extruder Runout Prevention
-   */
-  #if ENABLED(FILAMENTCHANGEENABLE) && ENABLED(EXTRUDER_RUNOUT_PREVENT)
-    #error EXTRUDER_RUNOUT_PREVENT currently incompatible with FILAMENTCHANGE.
-  #endif
-
-  /**
    * Options only for EXTRUDERS > 1
    */
   #if EXTRUDERS > 1
 
     #if EXTRUDERS > 4
       #error The maximum number of EXTRUDERS in Marlin is 4.
-    #endif
-
-    #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-      #error EXTRUDERS must be 1 with TEMP_SENSOR_1_AS_REDUNDANT.
-    #endif
-
-    #if ENABLED(HEATERS_PARALLEL)
-      #error EXTRUDERS must be 1 with HEATERS_PARALLEL.
     #endif
 
     #if ENABLED(Y_DUAL_STEPPER_DRIVERS)
@@ -100,13 +85,6 @@
    */
   #if ENABLED(DEACTIVATE_SERVOS_AFTER_MOVE) && !HAS_SERVO_ENDSTOPS
     #error At least one of the ?_ENDSTOP_SERVO_NR is required for DEACTIVATE_SERVOS_AFTER_MOVE.
-  #endif
-
-  /**
-   * Required LCD language
-   */
-  #if DISABLED(DOGLCD) && ENABLED(ULTRA_LCD) && DISABLED(DISPLAY_CHARSET_HD44780_JAPAN) && DISABLED(DISPLAY_CHARSET_HD44780_WESTERN) && DISABLED(DISPLAY_CHARSET_HD44780_CYRILLIC)
-    #error You must enable either DISPLAY_CHARSET_HD44780_JAPAN or DISPLAY_CHARSET_HD44780_WESTERN  or DISPLAY_CHARSET_HD44780_CYRILLIC for your LCD controller.
   #endif
 
   /**
@@ -207,43 +185,6 @@
   #endif // AUTO_BED_LEVELING_FEATURE
 
   /**
-   * ULTIPANEL encoder
-   */
-  #if ENABLED(ULTIPANEL) && DISABLED(NEWPANEL) && DISABLED(SR_LCD_2W_NL) && !defined(SHIFT_CLK)
-    #error ULTIPANEL requires some kind of encoder.
-  #endif
-
-  /**
-   * Delta has limited bed leveling options
-   */
-  #if ENABLED(DELTA)
-
-    #if ENABLED(AUTO_BED_LEVELING_FEATURE)
-
-      #if DISABLED(AUTO_BED_LEVELING_GRID)
-        #error Only AUTO_BED_LEVELING_GRID is supported with DELTA.
-      #endif
-
-      #if ENABLED(Z_PROBE_SLED)
-        #error You cannot use Z_PROBE_SLED with DELTA.
-      #endif
-
-      #if ENABLED(Z_MIN_PROBE_REPEATABILITY_TEST)
-        #error Z_MIN_PROBE_REPEATABILITY_TEST is not supported with DELTA yet.
-      #endif
-
-    #endif
-
-  #endif
-
-  /**
-   * Allen Key Z probe requires Auto Bed Leveling grid and Delta
-   */
-  #if ENABLED(Z_PROBE_ALLEN_KEY) && !(ENABLED(AUTO_BED_LEVELING_GRID) && ENABLED(DELTA))
-    #error Invalid use of Z_PROBE_ALLEN_KEY.
-  #endif
-
-  /**
    * Dual X Carriage requirements
    */
   #if ENABLED(DUAL_X_CARRIAGE)
@@ -277,58 +218,6 @@
     #error You cannot set CONTROLLERFAN_PIN equal to FAN_PIN.
   #endif
 
-  /**
-   * Test Heater, Temp Sensor, and Extruder Pins; Sensor Type must also be set.
-   */
-
-  // (Dual) Pneumatics do not require temp sensors/heaters
-  #if DISABLED(PNEUMATICS)
-
-    #if EXTRUDERS > 3
-      #if !HAS_HEATER_3
-        #error HEATER_3_PIN not defined for this board.
-      #elif !PIN_EXISTS(TEMP_3)
-        #error TEMP_3_PIN not defined for this board.
-      #elif !PIN_EXISTS(E3_STEP) || !PIN_EXISTS(E3_DIR) || !PIN_EXISTS(E3_ENABLE)
-        #error E3_STEP_PIN, E3_DIR_PIN, or E3_ENABLE_PIN not defined for this board.
-      #elif TEMP_SENSOR_3 == 0
-        #error TEMP_SENSOR_3 is required with 4 EXTRUDERS.
-      #endif
-    #elif EXTRUDERS > 2
-      #if !HAS_HEATER_2
-        #error HEATER_2_PIN not defined for this board.
-      #elif !PIN_EXISTS(TEMP_2)
-        #error TEMP_2_PIN not defined for this board.
-      #elif !PIN_EXISTS(E2_STEP) || !PIN_EXISTS(E2_DIR) || !PIN_EXISTS(E2_ENABLE)
-        #error E2_STEP_PIN, E2_DIR_PIN, or E2_ENABLE_PIN not defined for this board.
-      #elif TEMP_SENSOR_2 == 0
-        #error TEMP_SENSOR_2 is required with 3 or more EXTRUDERS.
-      #endif
-    #elif EXTRUDERS > 1
-      #if !PIN_EXISTS(TEMP_1)
-        #error TEMP_1_PIN not defined for this board.
-      #elif !PIN_EXISTS(E1_STEP) || !PIN_EXISTS(E1_DIR) || !PIN_EXISTS(E1_ENABLE)
-        #error E1_STEP_PIN, E1_DIR_PIN, or E1_ENABLE_PIN not defined for this board.
-      #endif
-    #endif
-
-    #if TEMP_SENSOR_1 == 0
-      #if ENABLED(TEMP_SENSOR_1_AS_REDUNDANT)
-        #error TEMP_SENSOR_1 is required with TEMP_SENSOR_1_AS_REDUNDANT.
-      #endif
-    #endif
-
-    #if !HAS_HEATER_0
-      #error HEATER_0_PIN not defined for this board.
-    #elif !PIN_EXISTS(TEMP_0)
-      #error TEMP_0_PIN not defined for this board.
-    #elif !PIN_EXISTS(E0_STEP) || !PIN_EXISTS(E0_DIR) || !PIN_EXISTS(E0_ENABLE)
-      #error E0_STEP_PIN, E0_DIR_PIN, or E0_ENABLE_PIN not defined for this board.
-    #elif TEMP_SENSOR_0 == 0
-      #error TEMP_SENSOR_0 is required.
-    #endif
-
-  #endif // DISABLED(PNEUMATICS)
   /**
    * Warnings for old configurations
    */

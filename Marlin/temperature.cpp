@@ -19,15 +19,12 @@
 */
 
 #include "Marlin.h"
-#include "ultralcd.h"
 #include "temperature.h"
 #include "watchdog.h"
 #include "language.h"
 #include "Regulator.h"
 #include "MCP4725.h"
 
-#include "Sd2PinMap.h"
-#include "Cartridge.h"
 
 //===========================================================================
 //================================== macros =================================
