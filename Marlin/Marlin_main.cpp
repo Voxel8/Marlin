@@ -48,7 +48,6 @@
 #include "language.h"
 #include "pins_arduino.h"
 #include "math.h"
-#include "buzzer.h"
 #include "Wire.h"
 #include "Cartridge.h"
 #include "Voxel8_I2C_Commands.h"
@@ -4709,19 +4708,6 @@ inline void gcode_M247() {
 
 #endif // HAS_SERVOS
 
-#if HAS_BUZZER
-
-  /**
-   * M300: Play beep sound S<frequency Hz> P<duration ms>
-   */
-  inline void gcode_M300() {
-    uint16_t beepS = code_seen('S') ? code_value_short() : 110;
-    uint32_t beepP = code_seen('P') ? code_value_long() : 1000;
-    if (beepP > 5000) beepP = 5000; // limit to 5 seconds
-    buzz(beepP, beepS);
-  }
-
-#endif // HAS_BUZZER
 
 #if ENABLED(PIDTEMP)
 
@@ -5350,9 +5336,6 @@ inline void gcode_M428() {
       else {
         SERIAL_ERROR_START;
         SERIAL_ERRORLNPGM(MSG_ERR_M428_TOO_FAR);
-        #if HAS_BUZZER
-          enqueuecommands_P(PSTR("M300 S40 P200"));
-        #endif
         err = true;
         break;
       }
@@ -5363,9 +5346,6 @@ inline void gcode_M428() {
     memcpy(current_position, new_pos, sizeof(new_pos));
     memcpy(home_offset, new_offs, sizeof(new_offs));
     sync_plan_position();
-    #if HAS_BUZZER
-      enqueuecommands_P(PSTR("M300 S659 P200\nM300 S698 P200"));
-    #endif
   }
 }
 
@@ -6147,12 +6127,6 @@ void process_next_command() {
           gcode_M280();
           break;
       #endif // HAS_SERVOS
-
-      #if HAS_BUZZER
-        case 300: // M300 - Play beep tone
-          gcode_M300();
-          break;
-      #endif // HAS_BUZZER
 
       #if ENABLED(PIDTEMP)
         case 301: // M301
