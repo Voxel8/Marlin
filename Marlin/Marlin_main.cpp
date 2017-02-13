@@ -49,7 +49,6 @@
 #include "pins_arduino.h"
 #include "math.h"
 #include "Wire.h"
-#include "Cartridge.h"
 #include "Voxel8_I2C_Commands.h"
 #include "HeatedBed.h"
 
@@ -609,13 +608,6 @@ void setup_powerhold() {
   #endif
 }
 
-void setup_cartridgeidpins(void) {
-  #if HAS_CARTRIDGE_ID
-    SET_OUTPUT(CART1_SIG1_PIN);
-    SET_INPUT(CART0_SIG2_PIN);
-    SET_INPUT(CART1_SIG2_PIN);
-  #endif
-}
 
 #ifdef DEBUG
 void setup_testpins(void) {
@@ -625,7 +617,7 @@ void setup_testpins(void) {
 #endif // DEBUG
 
 /*
-  Enable 24V to fans, E-reg, Cartridge Holder, Cartridges
+  Enable 24V to fans, E-reg, 
   if no short circuit is detected on line
   ~200us, blocking time
   Requires serial to be enabled to generate error condition
@@ -736,7 +728,6 @@ void setup() {
   setup_killpin();
   setup_filrunoutpin();
   setup_powerhold();
-  setup_cartridgeidpins();
 
   #ifdef DEBUG
     setup_testpins();
@@ -2939,8 +2930,9 @@ inline void gcode_M42() {
 
     for (uint8_t i = 0; i < COUNT(sensitive_pins); i++) {
       if (sensitive_pins[i] == pin_number) {
-        if (!Cartridge__GetAugerEnabled() || pin_number != SOL0_PIN)
+        if (pin_number != SOL0_PIN) {
           pin_number = -1;
+        }
         break;
       }
     }
@@ -3213,26 +3205,16 @@ inline void gcode_M42() {
  * M104: Set hot end temperature
  */
 inline void gcode_M104() {
-  if (Cartridge__FFFNotPresent())
-  {
-    //SERIAL_ERROR_START;
-    serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
-    SERIAL_EOL;
-    SERIAL_ECHOLN("// action:cancel");
-  }
-  else
-  {
-    if (setTargetedHotend(104)) return;
-    if (marlin_debug_flags & DEBUG_DRYRUN) return;
+  if (setTargetedHotend(104)) return;
+  if (marlin_debug_flags & DEBUG_DRYRUN) return;
 
-    if (code_seen('S')) {
-      float temp = code_value();
-      setTargetHotend(temp, target_extruder);
-      #if ENABLED(DUAL_X_CARRIAGE)
-        if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
-          setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
-      #endif
-    }
+  if (code_seen('S')) {
+    float temp = code_value();
+    setTargetHotend(temp, target_extruder);
+    #if ENABLED(DUAL_X_CARRIAGE)
+      if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
+        setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
+    #endif
   }
 }
 
@@ -3310,17 +3292,6 @@ inline void gcode_M105() {
   #endif
 
 
-  //Get error codes from present cartridges
-  // if (Cartridge__Present(0)) {
-  //   SERIAL_PROTOCOLPGM(" C0: ");
-  //   I2C__GetErrorCode(CART0_ADDR);
-  // }
-
-  // if (Cartridge__Present(1)) {
-  //   SERIAL_PROTOCOLPGM(" C1: ");
-  //   I2C__GetErrorCode(CART1_ADDR);
-  // }
-
 #ifdef DEBUG
   SERIAL_PROTOCOLPGM(" FREE RAM: ");
   SERIAL_PROTOCOL(freeMemory());
@@ -3368,109 +3339,99 @@ inline void gcode_M105() {
    * M109: Wait for extruder(s) to reach temperature
    */
   inline void gcode_M109() {
-    if (Cartridge__FFFNotPresent()) {
-      // SERIAL_ERROR_START;
-      serialprintPGM(PSTR(MSG_T_CARTRIDGE_REMOVED_HEATING));
-      SERIAL_EOL;
-      SERIAL_ECHOLN("// action:cancel");
-    }
-    else {
-      if (setTargetedHotend(109)) return;
-      if (marlin_debug_flags & DEBUG_DRYRUN) return;
+    if (setTargetedHotend(109)) return;
+    if (marlin_debug_flags & DEBUG_DRYRUN) return;
 
-      no_wait_for_cooling = code_seen('S');
-      if (no_wait_for_cooling || code_seen('R')) {
-        float temp = code_value();
-        if (temp == 0) return; // Skip 10-second wait if set to 0
-        setTargetHotend(temp, target_extruder);
+    no_wait_for_cooling = code_seen('S');
+    if (no_wait_for_cooling || code_seen('R')) {
+      float temp = code_value();
+      if (temp == 0) return; // Skip 10-second wait if set to 0
+      setTargetHotend(temp, target_extruder);
 #if ENABLED(DUAL_X_CARRIAGE)
-        if (dual_x_carriage_mode == DXC_DUPLICATION_MODE &&
-            target_extruder == 0)
-          setTargetHotend1(temp == 0.0 ? 0.0
-                                       : temp + duplicate_extruder_temp_offset);
+      if (dual_x_carriage_mode == DXC_DUPLICATION_MODE &&
+          target_extruder == 0)
+        setTargetHotend1(temp == 0.0 ? 0.0
+                                     : temp + duplicate_extruder_temp_offset);
 #endif
-      }
+    }
 
 #if ENABLED(AUTOTEMP)
-      autotemp_enabled = code_seen('F');
-      if (autotemp_enabled) autotemp_factor = code_value();
-      if (code_seen('S')) autotemp_min = code_value();
-      if (code_seen('B')) autotemp_max = code_value();
+    autotemp_enabled = code_seen('F');
+    if (autotemp_enabled) autotemp_factor = code_value();
+    if (code_seen('S')) autotemp_min = code_value();
+    if (code_seen('B')) autotemp_max = code_value();
 #endif
 
-      millis_t temp_ms = millis();
+    millis_t temp_ms = millis();
 
-      /* See if we are heating up or cooling down */
-      target_direction = isHeatingHotend(
-          target_extruder);  // true if heating, false if cooling
+    /* See if we are heating up or cooling down */
+    target_direction = isHeatingHotend(
+        target_extruder);  // true if heating, false if cooling
 
-      cancel_heatup = false;
+    cancel_heatup = false;
 
 #ifdef TEMP_RESIDENCY_TIME
-      long residency_start_ms = -1;
-      /* continue to loop until we have reached the target temp
-        _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
-      while (((!cancel_heatup) &&
-              ((residency_start_ms == -1) ||
-               (residency_start_ms >= 0 &&
-                (((unsigned int)(millis() - residency_start_ms)) <
-                 (TEMP_RESIDENCY_TIME * 1000UL))))) &&
-             !Cartridge__FFFNotPresent())
+    long residency_start_ms = -1;
+    /* continue to loop until we have reached the target temp
+      _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
+    while ((!cancel_heatup) &&
+            ((residency_start_ms == -1) ||
+             (residency_start_ms >= 0 &&
+              (((unsigned int)(millis() - residency_start_ms)) <
+               (TEMP_RESIDENCY_TIME * 1000UL)))))
 #else
-      while ((target_direction ? (isHeatingHotend(target_extruder))
-                               : (isCoolingHotend(target_extruder) &&
-                                  (no_wait_for_cooling == false))) &&
-             !Cartridge__FFFNotPresent())
+    while (target_direction ? (isHeatingHotend(target_extruder))
+                             : (isCoolingHotend(target_extruder) &&
+                                (no_wait_for_cooling == false)))
 #endif  // TEMP_RESIDENCY_TIME
 
-      {  // while loop
-        if (millis() >
-            temp_ms +
-                1000UL) {  // Print temp & remaining time every 1s while waiting
-          SERIAL_PROTOCOLPGM("T:");
-          SERIAL_PROTOCOL_F(degHotend(target_extruder), 1);
-          SERIAL_PROTOCOLPGM(" E:");
-          SERIAL_PROTOCOL((int)target_extruder);
+    {  // while loop
+      if (millis() >
+          temp_ms +
+              1000UL) {  // Print temp & remaining time every 1s while waiting
+        SERIAL_PROTOCOLPGM("T:");
+        SERIAL_PROTOCOL_F(degHotend(target_extruder), 1);
+        SERIAL_PROTOCOLPGM(" E:");
+        SERIAL_PROTOCOL((int)target_extruder);
 #ifdef TEMP_RESIDENCY_TIME
-          SERIAL_PROTOCOLPGM(" W:");
-          if (residency_start_ms > -1) {
-            temp_ms = ((TEMP_RESIDENCY_TIME * 1000UL) -
-                       (millis() - residency_start_ms)) /
-                      1000UL;
-            SERIAL_PROTOCOLLN(temp_ms);
-          } else {
-            SERIAL_PROTOCOLLNPGM("?");
-          }
+        SERIAL_PROTOCOLPGM(" W:");
+        if (residency_start_ms > -1) {
+          temp_ms = ((TEMP_RESIDENCY_TIME * 1000UL) -
+                     (millis() - residency_start_ms)) /
+                    1000UL;
+          SERIAL_PROTOCOLLN(temp_ms);
+        } else {
+          SERIAL_PROTOCOLLNPGM("?");
+        }
 #else
-          SERIAL_EOL;
+        SERIAL_EOL;
 #endif
-          temp_ms = millis();
-        }
-
-        idle();
-
-#ifdef TEMP_RESIDENCY_TIME
-        // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target
-        // temp for the first time
-        // or when current temp falls outside the hysteresis after target temp
-        // was reached
-        if ((residency_start_ms == -1 && target_direction &&
-             (degHotend(target_extruder) >=
-              (degTargetHotend(target_extruder) - TEMP_WINDOW))) ||
-            (residency_start_ms == -1 && !target_direction &&
-             (degHotend(target_extruder) <=
-              (degTargetHotend(target_extruder) + TEMP_WINDOW))) ||
-            (residency_start_ms > -1 &&
-             labs(degHotend(target_extruder) -
-                  degTargetHotend(target_extruder)) > TEMP_HYSTERESIS)) {
-          residency_start_ms = millis();
-        }
-#endif  // TEMP_RESIDENCY_TIME
+        temp_ms = millis();
       }
 
-      refresh_cmd_timeout();
-      print_job_start_ms = previous_cmd_ms;
-  }
+      idle();
+
+#ifdef TEMP_RESIDENCY_TIME
+      // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target
+      // temp for the first time
+      // or when current temp falls outside the hysteresis after target temp
+      // was reached
+      if ((residency_start_ms == -1 && target_direction &&
+           (degHotend(target_extruder) >=
+            (degTargetHotend(target_extruder) - TEMP_WINDOW))) ||
+          (residency_start_ms == -1 && !target_direction &&
+           (degHotend(target_extruder) <=
+            (degTargetHotend(target_extruder) + TEMP_WINDOW))) ||
+          (residency_start_ms > -1 &&
+           labs(degHotend(target_extruder) -
+                degTargetHotend(target_extruder)) > TEMP_HYSTERESIS)) {
+        residency_start_ms = millis();
+      }
+#endif  // TEMP_RESIDENCY_TIME
+    }
+
+    refresh_cmd_timeout();
+    print_job_start_ms = previous_cmd_ms;
 }
 
 #if HAS_TEMP_BED
@@ -5095,10 +5056,6 @@ inline void gcode_M303() {
     }
     switch(tool) {
         case 0:
-          if (Cartridge__GetAugerEnabled()) {
-            SERIAL_PROTOCOLPGM("Auger enabled, syringe extension canceled");
-            return;
-          }
           OUT_WRITE(SYRINGE0_PIN, HIGH);
           current_syringe_pin = SYRINGE0_PIN;
           break;
@@ -5138,10 +5095,6 @@ inline void gcode_M303() {
     }
     switch(tool) {
         case 0:
-          if (Cartridge__GetAugerEnabled()) {
-            SERIAL_PROTOCOLPGM("Auger enabled, syringe retraction canceled");
-            return;
-          }
           OUT_WRITE(SYRINGE0_PIN, LOW);
           break;
         case 1:
