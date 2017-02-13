@@ -92,7 +92,6 @@
 #include "Marlin.h"
 #include "language.h"
 #include "planner.h"
-#include "temperature.h"
 #include "configuration_store.h"
 
 #if ENABLED(MESH_BED_LEVELING)

@@ -5,7 +5,6 @@
 ***********************************************************************************/
 #include "Regulator.h"
 #include "MCP4725.h"
-#include "./temperature.h"
 #include "./language.h"
 
 #if ENABLED(E_REGULATOR)

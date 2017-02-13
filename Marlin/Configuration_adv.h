@@ -65,10 +65,6 @@
  * Also, if the temperature is set to a value below mintemp, it will not be changed by autotemp.
  * On an Ultimaker, some initial testing worked with M109 S215 B260 F1 in the start.gcode
  */
-#define AUTOTEMP
-#if ENABLED(AUTOTEMP)
-  #define AUTOTEMP_OLDWEIGHT 0.98
-#endif
 
 //Show Temperature ADC value
 //The M105 command return, besides traditional information, the ADC value read from temperature sensors.

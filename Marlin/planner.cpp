@@ -51,7 +51,6 @@
 #include "Marlin.h"
 #include "planner.h"
 #include "stepper.h"
-#include "temperature.h"
 #include "language.h"
 
 #if ENABLED(MESH_BED_LEVELING)
@@ -361,36 +360,6 @@ void plan_init() {
   previous_nominal_speed = 0.0;
 }
 
-
-#if ENABLED(AUTOTEMP)
-  void getHighESpeed() {
-    static float oldt = 0;
-
-    if (!autotemp_enabled) return;
-    if (degTargetHotend0() + 2 < autotemp_min) return; // probably temperature set to zero.
-
-    float high = 0.0;
-    uint8_t block_index = block_buffer_tail;
-
-    while (block_index != block_buffer_head) {
-      block_t *block = &block_buffer[block_index];
-      if (block->steps[X_AXIS] || block->steps[Y_AXIS] || block->steps[Z_AXIS]) {
-        float se = (float)block->steps[E_AXIS] / block->step_event_count * block->nominal_speed; // mm/sec;
-        if (se > high) high = se;
-      }
-      block_index = next_block_index(block_index);
-    }
-
-    float t = autotemp_min + high * autotemp_factor;
-    t = constrain(t, autotemp_min, autotemp_max);
-    if (oldt > t) {
-      t *= (1 - AUTOTEMP_OLDWEIGHT);
-      t += AUTOTEMP_OLDWEIGHT * oldt;
-    }
-    oldt = t;
-    setTargetHotend0(t);
-  }
-#endif
 
 void check_axes_activity() {
   unsigned char axis_active[NUM_AXIS] = { 0 },

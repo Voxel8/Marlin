@@ -42,7 +42,6 @@
 
 #include "planner.h"
 #include "stepper.h"
-#include "temperature.h"
 #include "watchdog.h"
 #include "configuration_store.h"
 #include "language.h"
@@ -144,9 +143,6 @@
  * M105 - Read current temp
  * M106 - Fan on
  * M107 - Fan off
- * M109 - Sxxx Wait for extruder current temp to reach target temp. Waits only when heating
- *        Rxxx Wait for extruder current temp to reach target temp. Waits when heating and cooling
- *        IF AUTOTEMP is enabled, S<mintemp> B<maxtemp> F<factor>. Exit autotemp by any M109 without F
  * M110 - Set the current line number
  * M111 - Set debug flags with S<mask>. See flag bits defined in Marlin.h.
  * M112 - Emergency stop
@@ -473,8 +469,6 @@ void process_next_command();
 
 void plan_arc(float target[NUM_AXIS], float *offset, uint8_t clockwise);
 
-bool setTargetedHotend(int code);
-
 void serial_echopair_P(const char *s_P, int v)           { serialprintPGM(s_P); SERIAL_ECHO(v); }
 void serial_echopair_P(const char *s_P, long v)          { serialprintPGM(s_P); SERIAL_ECHO(v); }
 void serial_echopair_P(const char *s_P, float v)         { serialprintPGM(s_P); SERIAL_ECHO(v); }
@@ -783,7 +777,6 @@ void setup() {
   Config_RetrieveSettings();
 
 
-  tp_init();    // Initialize temperature loop
   plan_init();  // Initialize planner;
   watchdog_init();
   st_init();    // Initialize stepper, this enables interrupts!
@@ -2906,7 +2899,6 @@ inline void gcode_M31() {
   sprintf_P(time, PSTR("%i min, %i sec"), min, sec);
   SERIAL_ECHO_START;
   SERIAL_ECHOLN(time);
-  autotempShutdown();
 }
 
 /**
@@ -3191,105 +3183,6 @@ inline void gcode_M42() {
 
 #endif // AUTO_BED_LEVELING_FEATURE && Z_MIN_PROBE_REPEATABILITY_TEST
 
-/**
- * M104: Set hot end temperature
- */
-inline void gcode_M104() {
-  if (setTargetedHotend(104)) return;
-  if (marlin_debug_flags & DEBUG_DRYRUN) return;
-
-  if (code_seen('S')) {
-    float temp = code_value();
-    setTargetHotend(temp, target_extruder);
-    #if ENABLED(DUAL_X_CARRIAGE)
-      if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && target_extruder == 0)
-        setTargetHotend1(temp == 0.0 ? 0.0 : temp + duplicate_extruder_temp_offset);
-    #endif
-  }
-}
-
-/**
- * M105: Read hot end and bed temperature
- */
-inline void gcode_M105() {
-  if (setTargetedHotend(105)) return;
-
-  #if HAS_TEMP_0 || HAS_TEMP_BED || ENABLED(HEATER_0_USES_MAX6675)
-    SERIAL_PROTOCOLPGM(MSG_OK);
-    #if HAS_TEMP_0 || ENABLED(HEATER_0_USES_MAX6675)
-      SERIAL_PROTOCOLPGM(" T:");
-      SERIAL_PROTOCOL_F(degHotend(target_extruder), 1);
-      SERIAL_PROTOCOLPGM(" /");
-      SERIAL_PROTOCOL_F(degTargetHotend(target_extruder), 1);
-    #endif
-    #if HAS_TEMP_BED
-      SERIAL_PROTOCOLPGM(" B:");
-      SERIAL_PROTOCOL_F(degBed(), 1);
-      SERIAL_PROTOCOLPGM(" /");
-      SERIAL_PROTOCOL_F(degTargetBed(), 1);
-    #endif
-    for (int8_t e = 0; e < EXTRUDERS; ++e) {
-      SERIAL_PROTOCOLPGM(" T");
-      SERIAL_PROTOCOL(e);
-      SERIAL_PROTOCOLCHAR(':');
-      SERIAL_PROTOCOL_F(degHotend(e), 1);
-      SERIAL_PROTOCOLPGM(" /");
-      SERIAL_PROTOCOL_F(degTargetHotend(e), 1);
-    }
-  #else // !HAS_TEMP_0 && !HAS_TEMP_BED
-    SERIAL_ERROR_START;
-    SERIAL_ERRORLNPGM(MSG_ERR_NO_THERMISTORS);
-  #endif
-
-  #if ENABLED(PNEUMATICS)
-    SERIAL_PROTOCOLPGM(" P:");
-    SERIAL_PROTOCOL_F(pressurePneumatic(), 1);
-    SERIAL_PROTOCOLPGM(" /");
-    SERIAL_PROTOCOL_F(targetPneumatic(), 1);
-  #endif
-    
-  SERIAL_PROTOCOLPGM(" @:");
-  #ifdef EXTRUDER_WATTS
-    SERIAL_PROTOCOL((EXTRUDER_WATTS * getHeaterPower(target_extruder))/127);
-    SERIAL_PROTOCOLCHAR('W');
-  #else
-    SERIAL_PROTOCOL(getHeaterPower(target_extruder));
-  #endif
-
-  SERIAL_PROTOCOLPGM(" B@:");
-  #ifdef BED_WATTS
-    SERIAL_PROTOCOL((BED_WATTS * getHeaterPower(-1))/127);
-    SERIAL_PROTOCOLCHAR('W');
-  #else
-    SERIAL_PROTOCOL(getHeaterPower(-1));
-  #endif
-
-  #if ENABLED(SHOW_TEMP_ADC_VALUES)
-    #if HAS_TEMP_BED
-      SERIAL_PROTOCOLPGM("    ADC B:");
-      SERIAL_PROTOCOL_F(degBed(),1);
-      SERIAL_PROTOCOLPGM("C->");
-      SERIAL_PROTOCOL_F(rawBedTemp()/OVERSAMPLENR,0);
-    #endif
-    for (int8_t cur_extruder = 0; cur_extruder < EXTRUDERS; ++cur_extruder) {
-      SERIAL_PROTOCOLPGM("  T");
-      SERIAL_PROTOCOL(cur_extruder);
-      SERIAL_PROTOCOLCHAR(':');
-      SERIAL_PROTOCOL_F(degHotend(cur_extruder),1);
-      SERIAL_PROTOCOLPGM("C->");
-      SERIAL_PROTOCOL_F(rawHotendTemp(cur_extruder)/OVERSAMPLENR,0);
-    }
-  #endif
-
-
-#ifdef DEBUG
-  SERIAL_PROTOCOLPGM(" FREE RAM: ");
-  SERIAL_PROTOCOL(freeMemory());
-#endif  // DEBUG
-
-  SERIAL_EOL;
-}
-
 #if HAS_FAN // Uses dedicated FAN_PIN
   /**
    * M106: Set Fan Speed
@@ -3307,143 +3200,6 @@ inline void gcode_M105() {
 
 #endif // HAS_FAN
 
-  /**
-   * M109: Wait for extruder(s) to reach temperature
-   */
-  inline void gcode_M109() {
-    if (setTargetedHotend(109)) return;
-    if (marlin_debug_flags & DEBUG_DRYRUN) return;
-
-    no_wait_for_cooling = code_seen('S');
-    if (no_wait_for_cooling || code_seen('R')) {
-      float temp = code_value();
-      if (temp == 0) return; // Skip 10-second wait if set to 0
-      setTargetHotend(temp, target_extruder);
-#if ENABLED(DUAL_X_CARRIAGE)
-      if (dual_x_carriage_mode == DXC_DUPLICATION_MODE &&
-          target_extruder == 0)
-        setTargetHotend1(temp == 0.0 ? 0.0
-                                     : temp + duplicate_extruder_temp_offset);
-#endif
-    }
-
-#if ENABLED(AUTOTEMP)
-    autotemp_enabled = code_seen('F');
-    if (autotemp_enabled) autotemp_factor = code_value();
-    if (code_seen('S')) autotemp_min = code_value();
-    if (code_seen('B')) autotemp_max = code_value();
-#endif
-
-    millis_t temp_ms = millis();
-
-    /* See if we are heating up or cooling down */
-    target_direction = isHeatingHotend(
-        target_extruder);  // true if heating, false if cooling
-
-    cancel_heatup = false;
-
-#ifdef TEMP_RESIDENCY_TIME
-    long residency_start_ms = -1;
-    /* continue to loop until we have reached the target temp
-      _and_ until TEMP_RESIDENCY_TIME hasn't passed since we reached it */
-    while ((!cancel_heatup) &&
-            ((residency_start_ms == -1) ||
-             (residency_start_ms >= 0 &&
-              (((unsigned int)(millis() - residency_start_ms)) <
-               (TEMP_RESIDENCY_TIME * 1000UL)))))
-#else
-    while (target_direction ? (isHeatingHotend(target_extruder))
-                             : (isCoolingHotend(target_extruder) &&
-                                (no_wait_for_cooling == false)))
-#endif  // TEMP_RESIDENCY_TIME
-
-    {  // while loop
-      if (millis() >
-          temp_ms +
-              1000UL) {  // Print temp & remaining time every 1s while waiting
-        SERIAL_PROTOCOLPGM("T:");
-        SERIAL_PROTOCOL_F(degHotend(target_extruder), 1);
-        SERIAL_PROTOCOLPGM(" E:");
-        SERIAL_PROTOCOL((int)target_extruder);
-#ifdef TEMP_RESIDENCY_TIME
-        SERIAL_PROTOCOLPGM(" W:");
-        if (residency_start_ms > -1) {
-          temp_ms = ((TEMP_RESIDENCY_TIME * 1000UL) -
-                     (millis() - residency_start_ms)) /
-                    1000UL;
-          SERIAL_PROTOCOLLN(temp_ms);
-        } else {
-          SERIAL_PROTOCOLLNPGM("?");
-        }
-#else
-        SERIAL_EOL;
-#endif
-        temp_ms = millis();
-      }
-
-      idle();
-
-#ifdef TEMP_RESIDENCY_TIME
-      // start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target
-      // temp for the first time
-      // or when current temp falls outside the hysteresis after target temp
-      // was reached
-      if ((residency_start_ms == -1 && target_direction &&
-           (degHotend(target_extruder) >=
-            (degTargetHotend(target_extruder) - TEMP_WINDOW))) ||
-          (residency_start_ms == -1 && !target_direction &&
-           (degHotend(target_extruder) <=
-            (degTargetHotend(target_extruder) + TEMP_WINDOW))) ||
-          (residency_start_ms > -1 &&
-           labs(degHotend(target_extruder) -
-                degTargetHotend(target_extruder)) > TEMP_HYSTERESIS)) {
-        residency_start_ms = millis();
-      }
-#endif  // TEMP_RESIDENCY_TIME
-    }
-
-    refresh_cmd_timeout();
-    print_job_start_ms = previous_cmd_ms;
-}
-
-#if HAS_TEMP_BED
-
-  /**
-   * M190: Sxxx Wait for bed current temp to reach target temp. Waits only when heating
-   *       Rxxx Wait for bed current temp to reach target temp. Waits when heating and cooling
-   */
-  inline void gcode_M190() {
-    if (marlin_debug_flags & DEBUG_DRYRUN) return;
-
-    no_wait_for_cooling = code_seen('S');
-    if (no_wait_for_cooling || code_seen('R'))
-      setTargetBed(code_value());
-
-    millis_t temp_ms = millis();
-
-    cancel_heatup = false;
-    target_direction = isHeatingBed(); // true if heating, false if cooling
-
-    while ((target_direction && !cancel_heatup) ? isHeatingBed() : isCoolingBed() && !no_wait_for_cooling) {
-      millis_t ms = millis();
-      if (ms > temp_ms + 1000UL) { //Print Temp Reading every 1 second while heating up.
-        temp_ms = ms;
-        float tt = degHotend(active_extruder);
-        SERIAL_PROTOCOLPGM("T:");
-        SERIAL_PROTOCOL(tt);
-        SERIAL_PROTOCOLPGM(" E:");
-        SERIAL_PROTOCOL((int)active_extruder);
-        SERIAL_PROTOCOLPGM(" B:");
-        SERIAL_PROTOCOL_F(degBed(), 1);
-        SERIAL_EOL;
-      }
-      idle();
-    }
-    refresh_cmd_timeout();
-  }
-
-#endif // HAS_TEMP_BED
-
 /**
  * M111: Set the debug level
  */
@@ -3460,7 +3216,6 @@ inline void gcode_M111() {
   if (marlin_debug_flags & DEBUG_DRYRUN) {
     SERIAL_ECHO_START;
     SERIAL_ECHOLNPGM(MSG_DEBUG_DRYRUN);
-    disable_all_heaters();
   }
 
   #if ENABLED(DEBUG_LEVELING_FEATURE)
@@ -3475,40 +3230,6 @@ inline void gcode_M111() {
  * M112: Emergency Stop
  */
 inline void gcode_M112() { kill(PSTR(MSG_KILLED)); }
-
-#if ENABLED(BARICUDA)
-
-  #if HAS_HEATER_1
-    /**
-     * M126: Heater 1 valve open
-     */
-    inline void gcode_M126() { ValvePressure = code_seen('S') ? constrain(code_value(), 0, 255) : 255; }
-    /**
-     * M127: Heater 1 valve close
-     */
-    inline void gcode_M127() { ValvePressure = 0; }
-  #endif
-
-  #if HAS_HEATER_2
-    /**
-     * M128: Heater 2 valve open
-     */
-    inline void gcode_M128() { EtoPPressure = code_seen('S') ? constrain(code_value(), 0, 255) : 255; }
-    /**
-     * M129: Heater 2 valve close
-     */
-    inline void gcode_M129() { EtoPPressure = 0; }
-  #endif
-
-#endif //BARICUDA
-
-/**
- * M140: Set bed temperature
- */
-inline void gcode_M140() {
-  if (marlin_debug_flags & DEBUG_DRYRUN) return;
-  if (code_seen('S')) setTargetBed(code_value());
-}
 
 #if HAS_POWER_SWITCH
 
@@ -3533,7 +3254,6 @@ inline void gcode_M140() {
  *      This code should ALWAYS be available for EMERGENCY SHUTDOWN!
  */
 inline void gcode_M81() {
-  disable_all_heaters();
   finishAndDisableSteppers();
   fanSpeed = 0;
   delay(1000); // Wait 1 second before switching off
@@ -3749,8 +3469,6 @@ inline void gcode_M121() { enable_endstops(false); }
  *    D<mm> - Diameter of the filament. Use "D0" to set units back to millimeters.
  */
 inline void gcode_M200() {
-
-  if (setTargetedHotend(200)) return;
 
   if (code_seen('D')) {
     float diameter = code_value();
@@ -4042,8 +3760,6 @@ inline void gcode_M211() {
    * M218 - set hotend offset (in mm), T<extruder_number> X<offset_on_X> Y<offset_on_Y>
    */
   inline void gcode_M218() {
-    if (setTargetedHotend(218)) return;
-
     if (code_seen('X')) extruder_offset[X_AXIS][target_extruder] = code_value();
     if (code_seen('Y')) extruder_offset[Y_AXIS][target_extruder] = code_value();
     if (code_seen('Z')) extruder_offset[Z_AXIS][target_extruder] = code_value();
@@ -4086,7 +3802,6 @@ inline void gcode_M221() {
   if (code_seen('S')) {
     int sval = code_value();
     if (code_seen('T')) {
-      if (setTargetedHotend(221)) return;
       extruder_multiplier[target_extruder] = sval;
     }
     else {
@@ -4097,7 +3812,6 @@ inline void gcode_M221() {
   else {
     SERIAL_PROTOCOLPGM("Extrusion multiplier (T");
     if (code_seen('T')) {
-      if (setTargetedHotend(221)) return;
       SERIAL_PROTOCOL(int(code_value()));
       SERIAL_PROTOCOLPGM("): ");
       SERIAL_PROTOCOLLN(extruder_multiplier[target_extruder]);
@@ -4118,7 +3832,6 @@ inline void gcode_M222() {
   if (code_seen('S')) {
     int sval = code_value();
     if (code_seen('T')) {
-      if (setTargetedHotend(222)) return;
       pressure_multiplier[target_extruder] = sval;
     }
     else {
@@ -4129,7 +3842,6 @@ inline void gcode_M222() {
   else {
     SERIAL_PROTOCOLPGM("Pressure multiplier (T");
     if (code_seen('T')) {
-      if (setTargetedHotend(222)) return;
       SERIAL_PROTOCOL(int(code_value()));
       SERIAL_PROTOCOLPGM("): ");
       SERIAL_PROTOCOLLN(pressure_multiplier[target_extruder]);
@@ -4543,7 +4255,6 @@ void gcode_M241(long num_milliseconds) {
   codenum += previous_cmd_ms;  // keep track of when we started waiting
 
   while (millis() < codenum) {
-    manage_heater();
     manage_inactivity();
   }
 }
@@ -4561,90 +4272,6 @@ void gcode_M241(long num_milliseconds) {
   }
 
 #endif // PREVENT_DANGEROUS_EXTRUDE
-
-/**
- * M303: PID relay autotune
- *       S<temperature> sets the target temperature. (default target temperature = 150C)
- *       E<extruder> (-1 for the bed)
- *       C<cycles>
- */
-inline void gcode_M303() {
-  int e = code_seen('E') ? code_value_short() : 0;
-  int c = code_seen('C') ? code_value_short() : 5;
-  float temp = code_seen('S') ? code_value() : (e < 0 ? 70.0 : 150.0);
-  PID_autotune(temp, e, c);
-}
-
-#if ENABLED(SCARA)
-  bool SCARA_move_to_cal(uint8_t delta_x, uint8_t delta_y) {
-    //SoftEndsEnabled = false;              // Ignore soft endstops during calibration
-    //SERIAL_ECHOLN(" Soft endstops disabled ");
-    if (IsRunning()) {
-      //gcode_get_destination(); // For X Y Z E F
-      delta[X_AXIS] = delta_x;
-      delta[Y_AXIS] = delta_y;
-      calculate_SCARA_forward_Transform(delta);
-      destination[X_AXIS] = delta[X_AXIS]/axis_scaling[X_AXIS];
-      destination[Y_AXIS] = delta[Y_AXIS]/axis_scaling[Y_AXIS];
-      prepare_move();
-      //ok_to_send();
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * M360: SCARA calibration: Move to cal-position ThetaA (0 deg calibration)
-   */
-  inline bool gcode_M360() {
-    SERIAL_ECHOLN(" Cal: Theta 0 ");
-    return SCARA_move_to_cal(0, 120);
-  }
-
-  /**
-   * M361: SCARA calibration: Move to cal-position ThetaB (90 deg calibration - steps per degree)
-   */
-  inline bool gcode_M361() {
-    SERIAL_ECHOLN(" Cal: Theta 90 ");
-    return SCARA_move_to_cal(90, 130);
-  }
-
-  /**
-   * M362: SCARA calibration: Move to cal-position PsiA (0 deg calibration)
-   */
-  inline bool gcode_M362() {
-    SERIAL_ECHOLN(" Cal: Psi 0 ");
-    return SCARA_move_to_cal(60, 180);
-  }
-
-  /**
-   * M363: SCARA calibration: Move to cal-position PsiB (90 deg calibration - steps per degree)
-   */
-  inline bool gcode_M363() {
-    SERIAL_ECHOLN(" Cal: Psi 90 ");
-    return SCARA_move_to_cal(50, 90);
-  }
-
-  /**
-   * M364: SCARA calibration: Move to cal-position PSIC (90 deg to Theta calibration position)
-   */
-  inline bool gcode_M364() {
-    SERIAL_ECHOLN(" Cal: Theta-Psi 90 ");
-    return SCARA_move_to_cal(45, 135);
-  }
-
-  /**
-   * M365: SCARA calibration: Scaling factor, X, Y, Z axis
-   */
-  inline void gcode_M365() {
-    for (int8_t i = X_AXIS; i <= Z_AXIS; i++) {
-      if (code_seen(axis_codes[i])) {
-        axis_scaling[i] = code_value();
-      }
-    }
-  }
-
-#endif // SCARA
 
 #if ENABLED(PNEUMATICS)
 
@@ -4870,7 +4497,6 @@ inline void gcode_M399() {
   pinMode(RESUME_PIN, INPUT);
   digitalWrite(RESUME_PIN, HIGH);
   while (digitalRead(RESUME_PIN)) {
-    manage_heater();
     manage_inactivity();
   }
 }
@@ -5549,28 +5175,12 @@ void process_next_command() {
           break;
       #endif
 
-      case 104: // M104
-        gcode_M104();
-        break;
-
       case 111: // M111: Set debug level
         gcode_M111();
         break;
 
       case 112: // M112: Emergency Stop
         gcode_M112();
-        break;
-
-      case 140: // M140: Set bed temp
-        gcode_M140();
-        break;
-
-      case 105: // M105: Read current temperature
-        gcode_M105();
-        return; // "ok" already printed
-
-      case 109: // M109: Wait for temperature
-        gcode_M109();
         break;
 
       #if HAS_TEMP_BED
@@ -5587,28 +5197,6 @@ void process_next_command() {
         gcode_M107();
         break;
       #endif // HAS_FAN
-
-      #if ENABLED(BARICUDA)
-        // PWM for HEATER_1_PIN
-        #if HAS_HEATER_1
-          case 126: // M126: valve open
-            gcode_M126();
-            break;
-          case 127: // M127: valve closed
-            gcode_M127();
-            break;
-        #endif // HAS_HEATER_1
-
-        // PWM for HEATER_2_PIN
-        #if HAS_HEATER_2
-          case 128: // M128: valve open
-            gcode_M128();
-            break;
-          case 129: // M129: valve closed
-            gcode_M129();
-            break;
-        #endif // HAS_HEATER_2
-      #endif // BARICUDA
 
       #if HAS_POWER_SWITCH
 
@@ -5812,10 +5400,6 @@ void process_next_command() {
           gcode_M302();
           break;
       #endif // PREVENT_DANGEROUS_EXTRUDE
-
-      case 303: // M303 PID autotune
-        gcode_M303();
-        break;
 
       #if ENABLED(SCARA)
         case 360:  // M360 SCARA Theta pos1
@@ -6658,7 +6242,6 @@ void disable_all_steppers() {
  * Standard idle routine keeps the machine alive
  */
 void idle() {
-  manage_heater();
   manage_inactivity();
 }
 
@@ -6831,7 +6414,6 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) {
 void kill(const char *lcd_msg) {
 
   cli(); // Stop interrupts
-  disable_all_heaters();
   disable_all_steppers();
 
   #if HAS_POWER_SWITCH
@@ -6928,34 +6510,12 @@ void kill(const char *lcd_msg) {
 #endif // FAST_PWM_FAN
 
 void Stop() {
-  disable_all_heaters();
   if (IsRunning()) {
     Running = false;
     Stopped_gcode_LastN = gcode_LastN; // Save last g_code for restart
     SERIAL_ERROR_START;
     SERIAL_ERRORLNPGM(MSG_ERR_STOPPED);
   }
-}
-
-/**
- * Set target_extruder from the T parameter or the active_extruder
- *
- * Returns TRUE if the target is invalid
- */
-bool setTargetedHotend(int code) {
-  target_extruder = active_extruder;
-  if (code_seen('T')) {
-    target_extruder = code_value_short();
-    if (target_extruder >= EXTRUDERS) {
-      SERIAL_ECHO_START;
-      SERIAL_CHAR('M');
-      SERIAL_ECHO(code);
-      SERIAL_ECHOPGM(" " MSG_INVALID_EXTRUDER " ");
-      SERIAL_ECHOLN(target_extruder);
-      return true;
-    }
-  }
-  return false;
 }
 
 float calculate_volumetric_multiplier(float diameter) {

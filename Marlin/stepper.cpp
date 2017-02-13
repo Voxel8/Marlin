@@ -25,7 +25,6 @@
 #include "Marlin.h"
 #include "stepper.h"
 #include "planner.h"
-#include "temperature.h"
 #include "language.h"
 #include "speed_lookuptable.h"
 #if HAS_DIGIPOTSS
