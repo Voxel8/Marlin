@@ -60,6 +60,7 @@
 
 #define POWER_SUPPLY 1
 
+#define DEFAULT_NOMINAL_FILAMENT_DIA 1.75
 
 //===========================================================================
 //============================== External ADC ===============================
@@ -465,3 +466,4 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 #include "thermistortables.h"
 
 #endif //CONFIGURATION_H
+
