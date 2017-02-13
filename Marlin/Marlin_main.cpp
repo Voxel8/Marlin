@@ -2922,9 +2922,7 @@ inline void gcode_M42() {
 
     for (uint8_t i = 0; i < COUNT(sensitive_pins); i++) {
       if (sensitive_pins[i] == pin_number) {
-        if (pin_number != SOL0_PIN) {
-          pin_number = -1;
-        }
+        pin_number = -1;
         break;
       }
     }
@@ -5781,14 +5779,6 @@ void process_next_command() {
           break;
       #endif
 
-      case 248: // M248 - Enable / Disable Protections  
-        gcode_M248();
-        break;
-
-      case 272:
-        gcode_M272();
-        break;
-
       #if HAS_SERVOS
         case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
           gcode_M280();
@@ -5817,18 +5807,6 @@ void process_next_command() {
         gcode_M241();
         break;
         
-      case 247: // UV LED Enable/Disable
-        gcode_M247();
-        break;
-
-      case 252:
-        gcode_M252();
-        break;
-
-      case 277:
-        gcode_M277(); // M277 - Enable/disable auger extrusion (E0)
-        break;
-
       #if ENABLED(PREVENT_DANGEROUS_EXTRUDE)
         case 302: // allow cold extrudes, or set the minimum extrude temperature
           gcode_M302();
