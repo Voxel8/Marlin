@@ -50,10 +50,6 @@
 #include "Wire.h"
 
 
-#if ENABLED(DAC_I2C)
-  #include "MCP4725.h"
-#endif
-
 #if ENABLED(BLINKM)
   #include "blinkm.h"
 #endif
@@ -167,7 +163,6 @@
  * M226 - Wait until the specified pin reaches the state required: P<pin number> S<pin state>
  * M234 - Output raw external ADC value (or averaged value over S samples if an S parameter is given)
  * M235 - Output distance sensor data (or averaged value over S samples if an S parameter is given)
- * M236 - Set output target pressure by writing to DAC
  * M237 - Custom, more precise auto bed leveling
  * M238 - Return ADC value from laser sensor (get distance)
  * M239 - Homing and bed leveling combination
@@ -735,10 +730,6 @@ void setup() {
 
   #if HAS_STEPPER_RESET
     enableStepperDrivers();
-  #endif
-
-  #if ENABLED(DAC_I2C)
-    DAC_i2c_init();
   #endif
 
   #if ENABLED(DIGIPOT_I2C)
