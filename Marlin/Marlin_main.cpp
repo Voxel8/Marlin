@@ -54,10 +54,6 @@
   #include "MCP4725.h"
 #endif
 
-#if ENABLED(E_REGULATOR)
-  #include "Regulator.h"
-#endif
-
 #if ENABLED(BLINKM)
   #include "blinkm.h"
 #endif
@@ -319,10 +315,6 @@ bool target_direction;
 
 #if ENABLED(Z_DUAL_ENDSTOPS) && DISABLED(DELTA)
   float z_endstop_adj = 0;
-#endif
-
-#if ENABLED(E_REGULATOR)
-  float regulator_setpoint = 0;
 #endif
 
 // Extruder offsets
@@ -4638,12 +4630,6 @@ void process_next_command() {
       case 226: // M226 P<pin number> S<pin state>- Wait until the specified pin reaches the state required
         gcode_M226();
         break;
-
-      #if (ENABLED(E_REGULATOR) && ENABLED(PNEUMATICS))
-          case 236: // Send value to DAC; return current output pressure if no S parameter
-          gcode_M236();
-          break;
-      #endif // E_REGULATOR
 
       #if ENABLED(PIDTEMP)
         case 301: // M301
