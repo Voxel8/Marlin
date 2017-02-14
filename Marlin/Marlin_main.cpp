@@ -66,10 +66,6 @@
   #include "blinkm.h"
 #endif
 
-#if HAS_SERVOS
-  #include "servo.h"
-#endif
-
 #if HAS_DIGIPOTSS
   #include <SPI.h>
 #endif
@@ -186,7 +182,6 @@
  * M240 - Trigger a camera to take a photograph
  * M241 - Dwell for a given amount of time in milliseconds (500 by default)
  * M247 - UV S<value> 0/255 to enable/disable 
- * M280 - Set servo position absolute. P: servo index, S: angle or microseconds
  * M300 - Play beep sound S<frequency Hz> P<duration ms>
  * M301 - Set PID parameters P I and D
  * M302 - Allow cold extrudes, or set the minimum extrude S<temperature>.
@@ -355,11 +350,6 @@ bool target_direction;
   };
 #endif
 
-#if HAS_SERVO_ENDSTOPS
-  const int servo_endstop_id[] = SERVO_ENDSTOP_IDS;
-  const int servo_endstop_angle[][2] = SERVO_ENDSTOP_ANGLES;
-#endif
-
 #if ENABLED(BARICUDA)
   int ValvePressure = 0;
   int EtoPPressure = 0;
@@ -446,10 +436,6 @@ bool target_direction;
 
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
    static bool filrunoutEnqueued = false;
-#endif
-
-#if HAS_SERVOS
-  Servo servo[NUM_SERVOS];
 #endif
 
 #ifdef CHDK
@@ -659,32 +645,6 @@ void suicide() {
   #endif
 }
 
-void servo_init() {
-  #if NUM_SERVOS >= 1 && HAS_SERVO_0
-    servo[0].attach(SERVO0_PIN);
-    servo[0].detach(); // Just set up the pin. We don't have a position yet. Don't move to a random position.
-  #endif
-  #if NUM_SERVOS >= 2 && HAS_SERVO_1
-    servo[1].attach(SERVO1_PIN);
-    servo[1].detach();
-  #endif
-  #if NUM_SERVOS >= 3 && HAS_SERVO_2
-    servo[2].attach(SERVO2_PIN);
-    servo[2].detach();
-  #endif
-  #if NUM_SERVOS >= 4 && HAS_SERVO_3
-    servo[3].attach(SERVO3_PIN);
-    servo[3].detach();
-  #endif
-
-  // Set position of Servo Endstops that are defined
-  #if HAS_SERVO_ENDSTOPS
-    for (int i = 0; i < 3; i++)
-      if (servo_endstop_id[i] >= 0)
-        servo[servo_endstop_id[i]].move(servo_endstop_angle[i][1]);
-  #endif
-
-}
 
 /**
  * Stepper Reset (RigidBoard, et.al.)
@@ -709,7 +669,6 @@ void servo_init() {
  *    • watchdog
  *    • stepper
  *    • photo pin
- *    • servos
  *    • Digipot I2C
  *    • Z probe sled
  *    • status LEDs
@@ -781,7 +740,6 @@ void setup() {
   watchdog_init();
   st_init();    // Initialize stepper, this enables interrupts!
   setup_photpin();
-  servo_init();
   
   #if HAS_CONTROLLERFAN
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
@@ -1549,12 +1507,7 @@ static void setup_for_endstop_move() {
       }
     #endif
 
-    #if HAS_SERVO_ENDSTOPS
-
-      // Engage Z Servo endstop if enabled
-      if (servo_endstop_id[Z_AXIS] >= 0) servo[servo_endstop_id[Z_AXIS]].move(servo_endstop_angle[Z_AXIS][0]);
-
-    #elif ENABLED(Z_PROBE_ALLEN_KEY)
+      #if ENABLED(Z_PROBE_ALLEN_KEY)
       feedrate = Z_PROBE_ALLEN_KEY_DEPLOY_1_FEEDRATE;
 
       // If endstop is already false, the Z probe is deployed
@@ -1644,31 +1597,7 @@ static void setup_for_endstop_move() {
       }
     #endif
 
-    #if HAS_SERVO_ENDSTOPS
-
-      // Retract Z Servo endstop if enabled
-      if (servo_endstop_id[Z_AXIS] >= 0) {
-
-        #if Z_RAISE_AFTER_PROBING > 0
-          if (doRaise) {
-            #if ENABLED(DEBUG_LEVELING_FEATURE)
-              if (marlin_debug_flags & DEBUG_LEVELING) {
-                SERIAL_ECHOPAIR("Raise Z (after) by ", (float)Z_RAISE_AFTER_PROBING);
-                SERIAL_EOL;
-                SERIAL_ECHOPAIR("> SERVO_ENDSTOPS > raise_z_after_probing()");
-                SERIAL_EOL;
-              }
-            #endif
-            raise_z_after_probing(); // this also updates current_position
-            st_synchronize();
-          }
-        #endif
-
-        // Change the Z servo angle
-        servo[servo_endstop_id[Z_AXIS]].move(servo_endstop_angle[Z_AXIS][1]);
-      }
-
-    #elif ENABLED(Z_PROBE_ALLEN_KEY)
+    #if ENABLED(Z_PROBE_ALLEN_KEY)
 
       // Move up for safety
       feedrate = Z_PROBE_ALLEN_KEY_STOW_1_FEEDRATE;
@@ -1888,16 +1817,6 @@ static void setup_for_endstop_move() {
 
   #endif // DELTA
 
-  #if HAS_SERVO_ENDSTOPS && DISABLED(Z_PROBE_SLED)
-
-    void raise_z_for_servo() {
-      float zpos = current_position[Z_AXIS], z_dest = Z_RAISE_BEFORE_PROBING;
-      z_dest += axis_known_position[Z_AXIS] ? zprobe_zoffset : zpos;
-      if (zpos < z_dest) do_blocking_move_to_z(z_dest); // also updates current_position
-    }
-
-  #endif
-
 #endif // AUTO_BED_LEVELING_FEATURE
 
 
@@ -1982,22 +1901,6 @@ static void homeaxis(AxisEnum axis) {
       }
     #endif
 
-    #if SERVO_LEVELING && DISABLED(Z_PROBE_SLED)
-
-      // Deploy a Z probe if there is one, and homing towards the bed
-      if (axis == Z_AXIS) {
-        if (axis_home_dir < 0) deploy_z_probe();
-      }
-
-    #endif
-
-    #if HAS_SERVO_ENDSTOPS
-      // Engage Servo endstop if enabled
-      if (axis != Z_AXIS && servo_endstop_id[axis] >= 0)
-        servo[servo_endstop_id[axis]].move(servo_endstop_angle[axis][0]);
-    #endif
-
-    // Set a flag for Z motor locking
     #if ENABLED(Z_DUAL_ENDSTOPS)
       if (axis == Z_AXIS) In_Homing_Process(true);
     #endif
@@ -2127,37 +2030,6 @@ static void homeaxis(AxisEnum axis) {
         if (axis_home_dir < 0) dock_sled(true);
       }
     #endif
-
-    #if SERVO_LEVELING && DISABLED(Z_PROBE_SLED)
-
-      // Deploy a Z probe if there is one, and homing towards the bed
-      if (axis == Z_AXIS) {
-        if (axis_home_dir < 0) {
-          #if ENABLED(DEBUG_LEVELING_FEATURE)
-            if (marlin_debug_flags & DEBUG_LEVELING) {
-              SERIAL_ECHOLNPGM("> SERVO_LEVELING > stow_z_probe");
-            }
-          #endif
-          stow_z_probe();
-        }
-      }
-      else
-
-    #endif
-
-    {
-      #if HAS_SERVO_ENDSTOPS
-        // Retract Servo endstop if enabled
-        if (servo_endstop_id[axis] >= 0) {
-          #if ENABLED(DEBUG_LEVELING_FEATURE)
-            if (marlin_debug_flags & DEBUG_LEVELING) {
-              SERIAL_ECHOLNPGM("> SERVO_ENDSTOPS > Stow with servo.move()");
-            }
-          #endif
-          servo[servo_endstop_id[axis]].move(servo_endstop_angle[axis][1]);
-        }
-      #endif
-    }
 
   }
 
@@ -2822,9 +2694,6 @@ inline void gcode_G28() {
      * G30: Do a single Z probe at the current XY
      */
     inline void gcode_G30() {
-      #if HAS_SERVO_ENDSTOPS
-        raise_z_for_servo();
-      #endif
       deploy_z_probe(); // Engage Z Servo endstop if available
 
       st_synchronize();
@@ -2844,9 +2713,6 @@ inline void gcode_G28() {
 
       clean_up_after_endstop_move();
 
-      #if HAS_SERVO_ENDSTOPS
-        raise_z_for_servo();
-      #endif
       stow_z_probe(false); // Retract Z Servo endstop if available
     }
 
@@ -4091,151 +3957,6 @@ inline void gcode_M226() {
 #endif
 
 
-#if HAS_SERVOS
-
-  /**
-   * M280: Get or set servo position. P<index> S<angle>
-   */
-  inline void gcode_M280() {
-    int servo_index = code_seen('P') ? code_value_short() : -1;
-    int servo_position = 0;
-    if (code_seen('S')) {
-      servo_position = code_value_short();
-      if (servo_index >= 0 && servo_index < NUM_SERVOS)
-        servo[servo_index].move(servo_position);
-      else {
-        SERIAL_ECHO_START;
-        SERIAL_PROTOCOLPGM("Servo ");
-        SERIAL_ECHO(servo_index);
-        SERIAL_PROTOCOLLNPGM(" out of range");
-      }
-    }
-    else if (servo_index >= 0) {
-      SERIAL_PROTOCOL(MSG_OK);
-      SERIAL_PROTOCOLPGM(" Servo ");
-      SERIAL_PROTOCOL(servo_index);
-      SERIAL_PROTOCOLPGM(": ");
-      SERIAL_PROTOCOL(servo[servo_index].read());
-      SERIAL_EOL;
-    }
-  }
-
-#endif // HAS_SERVOS
-
-
-#if ENABLED(PIDTEMP)
-
-  /**
-   * M301: Set PID parameters P I D (and optionally C, L)
-   *
-   *   P[float] Kp term
-   *   I[float] Ki term (unscaled)
-   *   D[float] Kd term (unscaled)
-   *
-   * With PID_ADD_EXTRUSION_RATE:
-   *
-   *   C[float] Kc term
-   *   L[float] LPQ length
-   */
-  inline void gcode_M301() {
-
-    // multi-extruder PID patch: M301 updates or prints a single extruder's PID values
-    // default behaviour (omitting E parameter) is to update for extruder 0 only
-    int e = code_seen('E') ? code_value() : 0; // extruder being updated
-
-    if (e < EXTRUDERS) { // catch bad input value
-      if (code_seen('P')) PID_PARAM(Kp, e) = code_value();
-      if (code_seen('I')) PID_PARAM(Ki, e) = scalePID_i(code_value());
-      if (code_seen('D')) PID_PARAM(Kd, e) = scalePID_d(code_value());
-      #if ENABLED(PID_ADD_EXTRUSION_RATE)
-        if (code_seen('C')) PID_PARAM(Kc, e) = code_value();
-        if (code_seen('L')) lpq_len = code_value();
-        NOMORE(lpq_len, LPQ_MAX_LEN);
-      #endif
-
-      updatePID();
-      SERIAL_PROTOCOL(MSG_OK);
-      #if ENABLED(PID_PARAMS_PER_EXTRUDER)
-        SERIAL_PROTOCOLPGM(" e:"); // specify extruder in serial output
-        SERIAL_PROTOCOL(e);
-      #endif // PID_PARAMS_PER_EXTRUDER
-      SERIAL_PROTOCOLPGM(" p:");
-      SERIAL_PROTOCOL(PID_PARAM(Kp, e));
-      SERIAL_PROTOCOLPGM(" i:");
-      SERIAL_PROTOCOL(unscalePID_i(PID_PARAM(Ki, e)));
-      SERIAL_PROTOCOLPGM(" d:");
-      SERIAL_PROTOCOL(unscalePID_d(PID_PARAM(Kd, e)));
-      #if ENABLED(PID_ADD_EXTRUSION_RATE)
-        SERIAL_PROTOCOLPGM(" c:");
-        //Kc does not have scaling applied above, or in resetting defaults
-        SERIAL_PROTOCOL(PID_PARAM(Kc, e));
-      #endif
-      SERIAL_EOL;
-    }
-    else {
-      SERIAL_ECHO_START;
-      SERIAL_ECHOLN(MSG_INVALID_EXTRUDER);
-    }
-  }
-
-#endif // PIDTEMP
-
-#if ENABLED(PIDTEMPBED)
-
-  inline void gcode_M304() {
-    if (code_seen('P')) bedKp = code_value();
-    if (code_seen('I')) bedKi = scalePID_i(code_value());
-    if (code_seen('D')) bedKd = scalePID_d(code_value());
-
-    updatePID();
-    SERIAL_PROTOCOL(MSG_OK);
-    SERIAL_PROTOCOLPGM(" p:");
-    SERIAL_PROTOCOL(bedKp);
-    SERIAL_PROTOCOLPGM(" i:");
-    SERIAL_PROTOCOL(unscalePID_i(bedKi));
-    SERIAL_PROTOCOLPGM(" d:");
-    SERIAL_PROTOCOL(unscalePID_d(bedKd));
-    SERIAL_EOL;
-  }
-
-#endif // PIDTEMPBED
-
-#if defined(CHDK) || HAS_PHOTOGRAPH
-
-  /**
-   * M240: Trigger a camera by emulating a Canon RC-1
-   *       See http://www.doc-diy.net/photo/rc-1_hacked/
-   */
-  inline void gcode_M240() {
-    #ifdef CHDK
-
-       OUT_WRITE(CHDK, HIGH);
-       chdkHigh = millis();
-       chdkActive = true;
-
-    #elif HAS_PHOTOGRAPH
-
-      const uint8_t NUM_PULSES = 16;
-      const float PULSE_LENGTH = 0.01524;
-      for (int i = 0; i < NUM_PULSES; i++) {
-        WRITE(PHOTOGRAPH_PIN, HIGH);
-        _delay_ms(PULSE_LENGTH);
-        WRITE(PHOTOGRAPH_PIN, LOW);
-        _delay_ms(PULSE_LENGTH);
-      }
-      delay(7.33);
-      for (int i = 0; i < NUM_PULSES; i++) {
-        WRITE(PHOTOGRAPH_PIN, HIGH);
-        _delay_ms(PULSE_LENGTH);
-        WRITE(PHOTOGRAPH_PIN, LOW);
-        _delay_ms(PULSE_LENGTH);
-      }
-
-    #endif // !CHDK && HAS_PHOTOGRAPH
-  }
-
-#endif // CHDK || PHOTOGRAPH_PIN
-
 /*
 * M241 - Dwell for a given amount of time in milliseconds (500 by default)
 * Note: Different from G4 in that this can be called within other gcodes directly
@@ -4505,30 +4226,6 @@ inline void gcode_M399() {
  * M400: Finish all moves
  */
 inline void gcode_M400() { st_synchronize(); }
-
-#if ENABLED(AUTO_BED_LEVELING_FEATURE) && DISABLED(Z_PROBE_SLED) && (HAS_SERVO_ENDSTOPS || ENABLED(Z_PROBE_ALLEN_KEY))
-
-  /**
-   * M401: Engage Z Servo endstop if available
-   */
-  inline void gcode_M401() {
-    #if HAS_SERVO_ENDSTOPS
-      raise_z_for_servo();
-    #endif
-    deploy_z_probe();
-  }
-
-  /**
-   * M402: Retract Z Servo endstop if enabled
-   */
-  inline void gcode_M402() {
-    #if HAS_SERVO_ENDSTOPS
-      raise_z_for_servo();
-    #endif
-    stow_z_probe(false);
-  }
-
-#endif // AUTO_BED_LEVELING_FEATURE && (HAS_SERVO_ENDSTOPS || Z_PROBE_ALLEN_KEY) && !Z_PROBE_SLED
 
 #if ENABLED(FILAMENT_SENSOR)
 
@@ -5367,12 +5064,6 @@ void process_next_command() {
           break;
       #endif
 
-      #if HAS_SERVOS
-        case 280: // M280 - set servo position absolute. P: servo index, S: angle or microseconds
-          gcode_M280();
-          break;
-      #endif // HAS_SERVOS
-
       #if ENABLED(PIDTEMP)
         case 301: // M301
           gcode_M301();
@@ -5446,15 +5137,6 @@ void process_next_command() {
       case 400: // M400 finish all moves
         gcode_M400();
         break;
-
-      #if ENABLED(AUTO_BED_LEVELING_FEATURE) && (HAS_SERVO_ENDSTOPS || ENABLED(Z_PROBE_ALLEN_KEY)) && DISABLED(Z_PROBE_SLED)
-        case 401:
-          gcode_M401();
-          break;
-        case 402:
-          gcode_M402();
-          break;
-      #endif // AUTO_BED_LEVELING_FEATURE && (HAS_SERVO_ENDSTOPS || Z_PROBE_ALLEN_KEY) && !Z_PROBE_SLED
 
       #if ENABLED(FILAMENT_SENSOR)
         case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or display nominal filament width
