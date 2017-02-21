@@ -7378,6 +7378,34 @@ inline void gcode_M503() {
 
 #endif // M605
 
+/*
+ *  M950: Enable E1 Stepper
+ */
+inline void gcode_M950() {
+    //TODO
+}
+
+/*
+ *  M951: Disable E1 Stepper
+ */
+inline void gcode_M951() {
+    //TODO
+}
+
+/*
+ *  M952: Set E1 Stepper Speed (rpm)
+ */
+inline void gcode_M952() {
+    //TODO
+}
+
+/*
+ *  M953: Solenoid Swap
+ */
+inline void gcode_M953() {
+    //TODO
+}
+
 #if ENABLED(LIN_ADVANCE)
   /**
    * M905: Set advance factor
@@ -8635,6 +8663,20 @@ void process_next_command() {
         #endif
 
       #endif // HAS_DIGIPOTSS || DAC_STEPPER_CURRENT
+
+      case 950: // Enable E1 Stepper
+        gcode_M950();
+        break;
+
+      case 951: // Disable E1 Stepper
+        gcode_M951();
+        break;
+
+      case 952: // Set E1 Stepper Speed (RPM)
+        gcode_M952();
+
+      case 953: // Solenoid Swap
+        gcode_M953();
 
       #if HAS_MICROSTEPS
 
