@@ -7382,14 +7382,14 @@ inline void gcode_M503() {
  *  M950: Enable E1 Stepper
  */
 inline void gcode_M950() {
-    //TODO
+    EN_PORT &= ~(E1_EN);
 }
 
 /*
  *  M951: Disable E1 Stepper
  */
 inline void gcode_M951() {
-    //TODO
+    EN_PORT |= E1_EN;
 }
 
 /*
