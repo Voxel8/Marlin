@@ -232,6 +232,9 @@
 #include "nozzle.h"
 #include "duration_t.h"
 #include "types.h"
+#include "E1_Defs.h"
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
 #if HAS_ABL
   #include "vector_3.h"
@@ -10332,6 +10335,38 @@ void setup() {
   #if ENABLED(ENDSTOP_INTERRUPTS_FEATURE)
     setup_endstop_interrupts();
   #endif
+
+
+  //=====================================================
+  // Impeller Setup
+  // ====================================================
+  // E1 Stepper pin Setup
+  STEP_DDR |= E1_STEP;     // E1 step as output
+  DIR_DDR |= E1_DIR;     // E1 dir as output
+  EN_DDR |= E1_EN;     // E1 en as output
+
+  STEP_PORT &= ~(E1_STEP); // Clear E1 step pin
+  DIR_PORT |= E1_DIR;    // Set E1 dir pin
+  EN_PORT |= E1_EN; // Set E1 en pin (disabled)
+
+  // E1 Microstep Setup
+  E1_MS_DDR |= (E1_MS1 | E1_MS2);   // E1 MS1 and MS2 as output
+  E1_MS_PORT &= ~(E1_MS1 | E1_MS2); // Clear E1 MS1, MS2 (full step)
+  
+  // Timer Setup
+  TCCR4A = 0;
+  // Initialize OCR to max count
+  OCR4A = 0xFFFF;
+  // CTC mode
+  TCCR4B |= (_BV(WGM42));
+  // f = clk/8 = 2MHz
+  TCCR4B |= (_BV(CS41));
+  // Enable OCR4A Interrupts
+  TIMSK4 |= (_BV(OCIE4A));
+  // DEBUG LED setup
+  DDRB |= (_BV(7));
+  PORTB &= ~(_BV(7));
+  
 }
 
 /**
@@ -10390,3 +10425,12 @@ void loop() {
   endstops.report_state();
   idle();
 }
+
+// Timer 4 CTC ISR
+ISR(TIMER4_COMPA_vect) {
+    // Debug LED toggle
+    PORTB ^= _BV(7);
+    // Toggle E1_STEP pin
+    STEP_PORT ^= E1_STEP;
+}
+
