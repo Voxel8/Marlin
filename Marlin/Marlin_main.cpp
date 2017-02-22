@@ -7396,10 +7396,12 @@ inline void gcode_M951() {
  *  M952: Set E1 Stepper Speed (rpm)
  */
 inline void gcode_M952() {
-    uint16_t rpm = 0;
+    uint16_t rpm = 1;
+    uint16_t count = 0xFFFF;
     if (code_seen('S')) {
         rpm = code_value_ushort();
-        OCR4A = rpm;
+        count = (9000 / rpm);
+        OCR4A = count;
     }
     else {
         SERIAL_PROTOCOLLNPGM("Please give valid S parameter");
