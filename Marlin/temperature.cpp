@@ -1533,10 +1533,8 @@ void Temperature::isr() {
      */
     if (pwm_count == 0) {
       soft_pwm_0 = soft_pwm[0];
-      WRITE_HEATER_0(soft_pwm_0 > 0 ? 1 : 0);
       #if HOTENDS > 1
         soft_pwm_1 = soft_pwm[1];
-        WRITE_HEATER_1(soft_pwm_1 > 0 ? 1 : 0);
         #if HOTENDS > 2
           soft_pwm_2 = soft_pwm[2];
           WRITE_HEATER_2(soft_pwm_2 > 0 ? 1 : 0);
@@ -1568,9 +1566,7 @@ void Temperature::isr() {
       #endif
     }
 
-    if (soft_pwm_0 < pwm_count) WRITE_HEATER_0(0);
     #if HOTENDS > 1
-      if (soft_pwm_1 < pwm_count) WRITE_HEATER_1(0);
       #if HOTENDS > 2
         if (soft_pwm_2 < pwm_count) WRITE_HEATER_2(0);
         #if HOTENDS > 3

@@ -299,6 +299,13 @@
        G38_endstop_hit = false;
 #endif
 
+// Solenoid Defines
+
+#define SOL_PORT    (PORTH)
+#define SOL_DDR     (DDRH)
+#define SOL_0       (_BV(6)) // PORT H PIN 6
+#define SOL_1       (_BV(4)) // PORT H PIN 4
+
 bool Running = true;
 
 uint8_t marlin_debug_flags = DEBUG_NONE;
@@ -7411,16 +7418,12 @@ inline void gcode_M952() {
 }
 
 /*
- *  M953: Solenoid Swap
+ *  M953: Set E_1 Stepper Direction
+ *
+ *  S >= 1 --> Turn SOL_0 on
+ *  S = 0  --> Turn SOL_0 off
  */
 inline void gcode_M953() {
-    //TODO
-}
-
-/*
- *
- */
-inline void gcode_M954() {
     if (code_seen('S')) {
         if (code_value_byte()) {
             // S >= 1
@@ -7429,6 +7432,44 @@ inline void gcode_M954() {
         else {
             // S = 0
             DIR_PORT &= ~E1_DIR;
+        }
+    }
+}
+
+/*
+ *  M954: Solenoid 0 Control
+ *
+ *  S >= 1 --> Turn SOL_0 on
+ *  S = 0  --> Turn SOL_0 off
+ */
+inline void gcode_M954() {
+    if (code_seen('S')) {
+        if (code_value_byte()) {
+            // S >= 1
+            SOL_PORT |= SOL_0;
+        }
+        else {
+            // S = 0
+            SOL_PORT &= ~SOL_0;
+        }
+    }
+}
+
+/*
+ *  M955: Solenoid 1 Control
+ *
+ *  S >= 1 --> Turn SOL_0 on
+ *  S = 0  --> Turn SOL_0 off
+ */
+inline void gcode_M955() {
+    if (code_seen('S')) {
+        if (code_value_byte()) {
+            // S >= 1
+            SOL_PORT |= SOL_1;
+        }
+        else {
+            // S = 0
+            SOL_PORT &= ~SOL_1;
         }
     }
 }
@@ -8703,12 +8744,16 @@ void process_next_command() {
         gcode_M952();
         break;
 
-      case 953: // Solenoid Swap
+      case 953: // Set E1 Stepper Direction
         gcode_M953();
         break;
 
-      case 954: // Set E1 Stepper Direction
+      case 954: // Solenoid 0 control
         gcode_M954();
+        break;
+
+      case 955: // Solenoid 1 control
+        gcode_M955();
         break;
 
       #if HAS_MICROSTEPS
@@ -10442,6 +10487,14 @@ void setup() {
   DDRB |= (_BV(7));
   PORTB &= ~(_BV(7));
   
+  //======================================================
+  // Solenoid Valve Setup
+  //======================================================
+
+  // Set SOL_0 and SOL_1 pins as outputs (PH6 and PH4)
+  SOL_DDR |= (SOL_0 | SOL_1);
+  // Initialize pin low (off)
+  SOL_PORT &= ~(SOL_0 | SOL_1);
 }
 
 /**
@@ -10504,7 +10557,7 @@ void loop() {
 // Timer 4 CTC ISR
 ISR(TIMER4_COMPA_vect) {
     // Debug LED toggle
-    PORTB ^= _BV(7);
+//    PORTB ^= _BV(7);
     // Toggle E1_STEP pin
     STEP_PORT ^= E1_STEP;
 }
