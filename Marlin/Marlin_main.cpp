@@ -7396,7 +7396,16 @@ inline void gcode_M951() {
  *  M952: Set E1 Stepper Speed (rpm)
  */
 inline void gcode_M952() {
-    //TODO
+    uint16_t rpm = 0;
+    if (code_seen('S')) {
+        rpm = code_value_ushort();
+        OCR4A = rpm;
+    }
+    else {
+        SERIAL_PROTOCOLLNPGM("Please give valid S parameter");
+        SERIAL_EOL;
+    }
+
 }
 
 /*
@@ -8674,9 +8683,11 @@ void process_next_command() {
 
       case 952: // Set E1 Stepper Speed (RPM)
         gcode_M952();
+        break;
 
       case 953: // Solenoid Swap
         gcode_M953();
+        break;
 
       #if HAS_MICROSTEPS
 
