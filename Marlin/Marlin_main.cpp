@@ -7417,6 +7417,22 @@ inline void gcode_M953() {
     //TODO
 }
 
+/*
+ *
+ */
+inline void gcode_M954() {
+    if (code_seen('S')) {
+        if (code_value_byte()) {
+            // S >= 1
+            DIR_PORT |= E1_DIR;
+        }
+        else {
+            // S = 0
+            DIR_PORT &= ~E1_DIR;
+        }
+    }
+}
+
 #if ENABLED(LIN_ADVANCE)
   /**
    * M905: Set advance factor
@@ -8689,6 +8705,10 @@ void process_next_command() {
 
       case 953: // Solenoid Swap
         gcode_M953();
+        break;
+
+      case 954: // Set E1 Stepper Direction
+        gcode_M954();
         break;
 
       #if HAS_MICROSTEPS
