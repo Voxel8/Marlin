@@ -7384,6 +7384,19 @@ inline void gcode_M503() {
   }
 
 #endif // M605
+/*
+ *  M900: List Capabilities
+ */
+inline void gcode_M900() {
+    SERIAL_PROTOCOLLNPGM("M-Code Syntax");
+    SERIAL_PROTOCOLLNPGM("M950: Enable E1 Impeller");
+    SERIAL_PROTOCOLLNPGM("M951: Disable E1 Impeller");
+    SERIAL_PROTOCOLLNPGM("M952 S<RPM>: Set E1 Impeller RPM");
+    SERIAL_PROTOCOLLNPGM("M953 S<0 or 1>: Set E1 Impeller Direction");
+    SERIAL_PROTOCOLLNPGM("M954 S<0 or 1>: Enable/Disable Solenoid 0");
+    SERIAL_PROTOCOLLNPGM("M955 S<0 or 1>: Enable/Disable Solenoid 1");
+}
+
 
 /*
  *  M950: Enable E1 Stepper
@@ -8731,6 +8744,10 @@ void process_next_command() {
         #endif
 
       #endif // HAS_DIGIPOTSS || DAC_STEPPER_CURRENT
+
+      case 900: // List Help/Capabilites
+        gcode_M900();
+        break;
 
       case 950: // Enable E1 Stepper
         gcode_M950();
