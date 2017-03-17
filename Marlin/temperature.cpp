@@ -781,7 +781,7 @@ void Temperature::manage_heater() {
       }
       else {
         soft_pwm_bed = 0;
-        WRITE_HEATER_BED(LOW);
+//        WRITE_HEATER_BED(LOW);
       }
     #else // !PIDTEMPBED && !BED_LIMIT_SWITCHING
       // Check if temperature is within the correct range
@@ -790,7 +790,7 @@ void Temperature::manage_heater() {
       }
       else {
         soft_pwm_bed = 0;
-        WRITE_HEATER_BED(LOW);
+      //  WRITE_HEATER_BED(LOW);
       }
     #endif
   #endif //TEMP_SENSOR_BED != 0
@@ -1284,7 +1284,7 @@ void Temperature::disable_all_heaters() {
     target_temperature_bed = 0;
     soft_pwm_bed = 0;
     #if HAS_HEATER_BED
-      WRITE_HEATER_BED(LOW);
+      //WRITE_HEATER_BED(LOW);
     #endif
   #endif
 }
@@ -1547,7 +1547,7 @@ void Temperature::isr() {
 
       #if HAS_HEATER_BED
         soft_pwm_BED = soft_pwm_bed;
-        WRITE_HEATER_BED(soft_pwm_BED > 0 ? 1 : 0);
+        //WRITE_HEATER_BED(soft_pwm_BED > 0 ? 1 : 0);
       #endif
 
       #if ENABLED(FAN_SOFT_PWM)
@@ -1576,7 +1576,7 @@ void Temperature::isr() {
     #endif
 
     #if HAS_HEATER_BED
-      if (soft_pwm_BED < pwm_count) WRITE_HEATER_BED(0);
+      //if (soft_pwm_BED < pwm_count) WRITE_HEATER_BED(0);
     #endif
 
     #if ENABLED(FAN_SOFT_PWM)
