@@ -301,10 +301,15 @@
 
 // Solenoid Defines
 
-#define SOL_PORT    (PORTH)
-#define SOL_DDR     (DDRH)
+#define SOL_PORT_A      (PORTH)     // PORT for SOL_0 - SOL_2
+#define SOL_DDR_A       (DDRH)      // DDR for SOL_0 - SOL_2
+#define SOL_PORT_B      (PORTE)     // SOL_3 connector uses PORTE
+#define SOL_DDR_B       (DDRE)      // ^ uses DDRE
+
 #define SOL_0       (_BV(6)) // PORT H PIN 6
-#define SOL_1       (_BV(4)) // PORT H PIN 4
+#define SOL_1       (_BV(5)) // PORT H PIN 5
+#define SOL_2       (_BV(4)) // PORT H PIN 4
+#define SOL_3       (_BV(3)) // PORT E PIN 5
 
 bool Running = true;
 
@@ -7393,8 +7398,8 @@ inline void gcode_M900() {
     SERIAL_PROTOCOLLNPGM("M951: Disable E1 Impeller");
     SERIAL_PROTOCOLLNPGM("M952 S<RPM>: Set E1 Impeller RPM");
     SERIAL_PROTOCOLLNPGM("M953 S<0 or 1>: Set E1 Impeller Direction");
-    SERIAL_PROTOCOLLNPGM("M954 S<0 or 1>: Enable/Disable Solenoid 0");
-    SERIAL_PROTOCOLLNPGM("M955 S<0 or 1>: Enable/Disable Solenoid 1");
+    SERIAL_PROTOCOLLNPGM("M954 S<n>: Enable Solenoid <n>");
+    SERIAL_PROTOCOLLNPGM("M955 S<n>: Disable Solenoid <n>");
 }
 
 
@@ -7450,42 +7455,66 @@ inline void gcode_M953() {
 }
 
 /*
- *  M954: Solenoid 0 Control
- *
- *  S >= 1 --> Turn SOL_0 on
- *  S = 0  --> Turn SOL_0 off
+ *  M954: Solenoid ON Command
+ *  Syntax: M954 S<n>, where <n> = 0, 1, 2, or 3
  */
 inline void gcode_M954() {
     if (code_seen('S')) {
-        if (code_value_byte()) {
-            // S >= 1
-            SOL_PORT |= SOL_0;
-        }
-        else {
-            // S = 0
-            SOL_PORT &= ~SOL_0;
+        uint8_t solenoid = 255;     // Init to unlikely value
+        switch (solenoid = code_value_byte()) {
+            case 0:
+                SOL_PORT_A |= SOL_0;
+                break;
+            case 1:
+                SOL_PORT_A |= SOL_1;
+                break;
+            case 2:
+                SOL_PORT_A |= SOL_2;
+                break;
+            case 3:
+                SOL_PORT_A |= SOL_3;
+                break;
+            default:
+                SERIAL_PROTOCOLLNPGM("ERROR: Invalid Solenoid Number");
+                break;
         }
     }
-}
+    else {
+        SERIAL_PROTOCOLLNPGM("Please use an S parameter!");
+        SERIAL_PROTOCOLLNPGM("M954 S<Solenoid>");
+    }
+} // end gcode_M954
 
 /*
- *  M955: Solenoid 1 Control
- *
- *  S >= 1 --> Turn SOL_0 on
- *  S = 0  --> Turn SOL_0 off
+ *  M955: Solenoid OFF Command
+ *  Syntax: M955 S<n>, where <n> = 0, 1, 2, or 3
  */
 inline void gcode_M955() {
     if (code_seen('S')) {
-        if (code_value_byte()) {
-            // S >= 1
-            SOL_PORT |= SOL_1;
-        }
-        else {
-            // S = 0
-            SOL_PORT &= ~SOL_1;
+        uint8_t solenoid = 255;     // Init to unlikely value
+        switch (solenoid = code_value_byte()) {
+            case 0:
+                SOL_PORT_A &= ~SOL_0;
+                break;
+            case 1:
+                SOL_PORT_A &= ~SOL_1;
+                break;
+            case 2:
+                SOL_PORT_A &= ~SOL_2;
+                break;
+            case 3:
+                SOL_PORT_A &= ~SOL_3;
+                break;
+            default:
+                SERIAL_PROTOCOLLNPGM("ERROR: Invalid Solenoid Number");
+                break;
         }
     }
-}
+    else {
+        SERIAL_PROTOCOLLNPGM("Please use an S parameter!");
+        SERIAL_PROTOCOLLNPGM("M955 S<Solenoid>");
+    }
+} // end gcode_955
 
 #if ENABLED(LIN_ADVANCE)
   /**
@@ -10482,7 +10511,7 @@ void setup() {
   DIR_DDR |= E1_DIR;     // E1 dir as output
   EN_DDR |= E1_EN;     // E1 en as output
 
-  STEP_PORT &= ~(E1_STEP); // Clear E1 step pin
+  STEP_PORT &= ~(E1_STEP);// Clear E1 step pin
   DIR_PORT |= E1_DIR;    // Set E1 dir pin
   EN_PORT |= E1_EN; // Set E1 en pin (disabled)
 
@@ -10508,11 +10537,16 @@ void setup() {
   // Solenoid Valve Setup
   //======================================================
 
-  // Set SOL_0 and SOL_1 pins as outputs (PH6 and PH4)
-  SOL_DDR |= (SOL_0 | SOL_1);
+  // Set SOL_0, SOL_1, SOL_2 pins as outputs (PH6, PH5, PH4)
+  SOL_DDR_A |= (SOL_0 | SOL_1 | SOL_2 | SOL_3);
+  // Initialize pins low (off)
+  SOL_PORT_A &= ~(SOL_0 | SOL_1 | SOL_2 | SOL_3);
+
+  // Set SOL_3 pin as output (PE5)
+  //SOL_DDR_B |= SOL_3;
   // Initialize pin low (off)
-  SOL_PORT &= ~(SOL_0 | SOL_1);
-}
+  //SOL_PORT_B |= (SOL_3);
+} // end setup()
 
 /**
  * The main Marlin program loop
