@@ -299,17 +299,23 @@
        G38_endstop_hit = false;
 #endif
 
+//-------------------------------------------------------------------
 // Solenoid Defines
+//-------------------------------------------------------------------
 
 #define SOL_PORT_A      (PORTH)     // PORT for SOL_0 - SOL_2
 #define SOL_DDR_A       (DDRH)      // DDR for SOL_0 - SOL_2
-#define SOL_PORT_B      (PORTE)     // SOL_3 connector uses PORTE
+
+#define SOL_0           (_BV(6))    // PORT H PIN 6
+#define SOL_1           (_BV(5))    // PORT H PIN 5
+#define SOL_2           (_BV(4))    // PORT H PIN 4
+#define SOL_3           (_BV(3))    // PORT H PIN 3
+
+#define SOL_PORT_B      (PORTE)     // SOL 4 and 5 connectors uses PORTE
 #define SOL_DDR_B       (DDRE)      // ^ uses DDRE
 
-#define SOL_0       (_BV(6)) // PORT H PIN 6
-#define SOL_1       (_BV(5)) // PORT H PIN 5
-#define SOL_2       (_BV(4)) // PORT H PIN 4
-#define SOL_3       (_BV(3)) // PORT E PIN 5
+#define SOL_4           (_BV(5))    // PORT E PIN 5
+#define SOL_5           (_BV(4))    // PORT E PIN 4
 
 bool Running = true;
 
@@ -686,6 +692,10 @@ XYZ_CONSTS_FROM_CONFIG(signed char, home_dir, HOME_DIR)
  * ***************************************************************************
  */
 
+//===========================================================================
+// Function Prototypes
+//===========================================================================
+
 void stop();
 
 void get_available_commands();
@@ -702,6 +712,13 @@ void set_current_from_steppers_for_axis(const AxisEnum axis);
 #if ENABLED(BEZIER_CURVE_SUPPORT)
   void plan_cubic_move(const float offset[4]);
 #endif
+
+void solenoid_on(uint8_t sol_num);
+void solenoid_off(uint8_t sol_num);
+
+//===========================================================================
+// Function Definitions
+//===========================================================================
 
 void serial_echopair_P(const char* s_P, const char *v)   { serialprintPGM(s_P); SERIAL_ECHO(v); }
 void serial_echopair_P(const char* s_P, char v)          { serialprintPGM(s_P); SERIAL_CHAR(v); }
@@ -5261,7 +5278,7 @@ inline void gcode_M104() {
 
     if (code_value_temp_abs() > thermalManager.degHotend(target_extruder)) LCD_MESSAGEPGM(MSG_HEATING);
   }
-  
+
   #if ENABLED(AUTOTEMP)
     planner.autotemp_M104_M109();
   #endif
@@ -7460,24 +7477,8 @@ inline void gcode_M953() {
  */
 inline void gcode_M954() {
     if (code_seen('S')) {
-        uint8_t solenoid = 255;     // Init to unlikely value
-        switch (solenoid = code_value_byte()) {
-            case 0:
-                SOL_PORT_A |= SOL_0;
-                break;
-            case 1:
-                SOL_PORT_A |= SOL_1;
-                break;
-            case 2:
-                SOL_PORT_A |= SOL_2;
-                break;
-            case 3:
-                SOL_PORT_A |= SOL_3;
-                break;
-            default:
-                SERIAL_PROTOCOLLNPGM("ERROR: Invalid Solenoid Number");
-                break;
-        }
+        uint8_t solenoid = code_value_byte();
+        solenoid_on(solenoid);
     }
     else {
         SERIAL_PROTOCOLLNPGM("Please use an S parameter!");
@@ -7491,30 +7492,70 @@ inline void gcode_M954() {
  */
 inline void gcode_M955() {
     if (code_seen('S')) {
-        uint8_t solenoid = 255;     // Init to unlikely value
-        switch (solenoid = code_value_byte()) {
-            case 0:
-                SOL_PORT_A &= ~SOL_0;
-                break;
-            case 1:
-                SOL_PORT_A &= ~SOL_1;
-                break;
-            case 2:
-                SOL_PORT_A &= ~SOL_2;
-                break;
-            case 3:
-                SOL_PORT_A &= ~SOL_3;
-                break;
-            default:
-                SERIAL_PROTOCOLLNPGM("ERROR: Invalid Solenoid Number");
-                break;
-        }
+        uint8_t solenoid = code_value_byte();
+        solenoid_off(solenoid);
     }
     else {
         SERIAL_PROTOCOLLNPGM("Please use an S parameter!");
         SERIAL_PROTOCOLLNPGM("M955 S<Solenoid>");
     }
 } // end gcode_955
+
+//===================
+// SOLENOID FUNCTIONS
+//===================
+void solenoid_on(uint8_t sol_num) {
+    switch (sol_num) {
+        case 0:
+            SOL_PORT_A |= SOL_0;
+            break;
+        case 1:
+            SOL_PORT_A |= SOL_1;
+            break;
+        case 2:
+            SOL_PORT_A |= SOL_2;
+            break;
+        case 3:
+            SOL_PORT_A |= SOL_3;
+            break;
+        case 4:
+            SOL_PORT_B |= SOL_4;
+            break;
+        case 5:
+            SOL_PORT_B |= SOL_5;
+            break;
+        default:
+            SERIAL_PROTOCOLLNPGM("ERROR: Invalid Solenoid Number");
+            break;
+    }
+}
+
+void solenoid_off(uint8_t sol_num) {
+    switch (sol_num) {
+        case 0:
+            SOL_PORT_A &= ~SOL_0;
+            break;
+        case 1:
+            SOL_PORT_A &= ~SOL_1;
+            break;
+        case 2:
+            SOL_PORT_A &= ~SOL_2;
+            break;
+        case 3:
+            SOL_PORT_A &= ~SOL_3;
+            break;
+        case 4:
+            SOL_PORT_B &= ~SOL_4;
+            break;
+        case 5:
+            SOL_PORT_B &= ~SOL_5;
+            break;
+        default:
+            SERIAL_PROTOCOLLNPGM("ERROR: Invalid Solenoid Number");
+            break;
+    }
+}
+
 
 #if ENABLED(LIN_ADVANCE)
   /**
@@ -8794,11 +8835,11 @@ void process_next_command() {
         gcode_M953();
         break;
 
-      case 954: // Solenoid 0 control
+      case 954: // Solenoid "OPEN" command
         gcode_M954();
         break;
 
-      case 955: // Solenoid 1 control
+      case 955: // Solenoid "CLOSE" command
         gcode_M955();
         break;
 
@@ -10518,7 +10559,7 @@ void setup() {
   // E1 Microstep Setup
   E1_MS_DDR |= (E1_MS1 | E1_MS2);   // E1 MS1 and MS2 as output
   E1_MS_PORT &= ~(E1_MS1 | E1_MS2); // Clear E1 MS1, MS2 (full step)
-  
+
   // Timer Setup
   TCCR4A = 0;
   // Initialize OCR to max count
@@ -10532,20 +10573,26 @@ void setup() {
   // DEBUG LED setup
   DDRB |= (_BV(7));
   PORTB &= ~(_BV(7));
-  
+
   //======================================================
   // Solenoid Valve Setup
   //======================================================
 
+  //------------------------------------------------------
+  // FIRST SOLENOID VALVE PORT
+  //------------------------------------------------------
   // Set SOL_0, SOL_1, SOL_2 pins as outputs (PH6, PH5, PH4)
   SOL_DDR_A |= (SOL_0 | SOL_1 | SOL_2 | SOL_3);
   // Initialize pins low (off)
   SOL_PORT_A &= ~(SOL_0 | SOL_1 | SOL_2 | SOL_3);
 
-  // Set SOL_3 pin as output (PE5)
-  //SOL_DDR_B |= SOL_3;
-  // Initialize pin low (off)
-  //SOL_PORT_B |= (SOL_3);
+  //------------------------------------------------------
+  // SECOND SOLENOID VALVE PORT
+  //------------------------------------------------------
+  // Set SOL_4 and SOL_5 pins as outputs (PE5, PE4)
+  SOL_DDR_B |= (SOL_4 | SOL_5);
+  // Initialize pins low (off)
+  SOL_PORT_B &= ~(SOL_4 | SOL_5);
 } // end setup()
 
 /**
