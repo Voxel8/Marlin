@@ -7410,6 +7410,10 @@ inline void gcode_M503() {
  *  M900: List Capabilities
  */
 inline void gcode_M900() {
+    SERIAL_PROTOCOLLNPGM(" ");
+    SERIAL_PROTOCOLLNPGM("Welcome to the HELP display! Below is a list of ");
+    SERIAL_PROTOCOLLNPGM("commands and how to use them:");
+    SERIAL_PROTOCOLLNPGM(" ");
     SERIAL_PROTOCOLLNPGM("M-Code Syntax");
     SERIAL_PROTOCOLLNPGM("M950: Enable E1 Impeller");
     SERIAL_PROTOCOLLNPGM("M951: Disable E1 Impeller");
@@ -7417,6 +7421,8 @@ inline void gcode_M900() {
     SERIAL_PROTOCOLLNPGM("M953 S<0 or 1>: Set E1 Impeller Direction");
     SERIAL_PROTOCOLLNPGM("M954 S<n>: Enable Solenoid <n>");
     SERIAL_PROTOCOLLNPGM("M955 S<n>: Disable Solenoid <n>");
+    SERIAL_PROTOCOLLNPGM("M956 P<n> S<state>, where <n> = valve number (0, 1, 2) and state = 0 or 1");
+    SERIAL_PROTOCOLLNPGM("M960: Turn all solenoids off");
 }
 
 
@@ -7500,6 +7506,76 @@ inline void gcode_M955() {
         SERIAL_PROTOCOLLNPGM("M955 S<Solenoid>");
     }
 } // end gcode_955
+
+/*
+ *  M956: Valve Control
+ *  Syntax: M956 P<n> S<state>, where <n> = valve number (0, 1, 2)
+ *          and state = 0 or 1
+ */
+
+inline void gcode_M956() {
+    uint8_t valve = 255;  // initialize to 255, unlikely value
+    uint8_t state = 0;
+    if (code_seen('P') && code_value_byte() < 3) {
+        valve = code_value_byte();
+    }
+    else {
+        SERIAL_PROTOCOLLNPGM("ERROR: Provide a valve number!");
+        return;
+    }
+    if (code_seen('S')) {
+        state = code_value_byte();
+    }
+    else {
+        SERIAL_PROTOCOLLNPGM("ERROR: Provide a valve state!");
+        return;
+    }
+    switch (valve) {
+        // Valve 0 uses solenoids SOL_0 and SOL_1
+        case 0:
+            if (state == 0) {
+                solenoid_on(0);
+                solenoid_off(1);
+            }
+            else {
+                solenoid_on(1);
+                solenoid_off(0);
+            }
+            break;
+        // Valve 1 uses solenoids SOL_2 and SOL_3
+        case 1:
+            if (state == 0) {
+                solenoid_on(2);
+                solenoid_off(3);
+            }
+            else {
+                solenoid_on(3);
+                solenoid_off(2);
+            }
+            break;
+        // Valve 2 uses solenoids SOL_4 and SOL5
+        case 2:
+            if (state == 0) {
+                solenoid_on(4);
+                solenoid_off(5);
+            }
+            else {
+                solenoid_on(5);
+                solenoid_off(4);
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+inline void gcode_M960() {
+    uint8_t i;
+    // So ashamed of magic numbers
+    for (i = 0; i < 6; i++) {
+        solenoid_off(i);
+    }
+}
 
 //===================
 // SOLENOID FUNCTIONS
@@ -8841,6 +8917,14 @@ void process_next_command() {
 
       case 955: // Solenoid "CLOSE" command
         gcode_M955();
+        break;
+
+      case 956: // Valve control (multiple solenoids)
+        gcode_M956();
+        break;
+
+      case 960:
+        gcode_M960();
         break;
 
       #if HAS_MICROSTEPS
