@@ -7415,10 +7415,10 @@ inline void gcode_M900() {
     SERIAL_PROTOCOLLNPGM("commands and how to use them:");
     SERIAL_PROTOCOLLNPGM(" ");
     SERIAL_PROTOCOLLNPGM("M-Code Syntax");
-    SERIAL_PROTOCOLLNPGM("M950: Enable E1 Impeller");
-    SERIAL_PROTOCOLLNPGM("M951: Disable E1 Impeller");
-    SERIAL_PROTOCOLLNPGM("M952 S<RPM>: Set E1 Impeller RPM");
-    SERIAL_PROTOCOLLNPGM("M953 S<0 or 1>: Set E1 Impeller Direction");
+    SERIAL_PROTOCOLLNPGM("M950: Enable E0 and E1 Impeller");
+    SERIAL_PROTOCOLLNPGM("M951: Disable E0 and E1 Impeller");
+    SERIAL_PROTOCOLLNPGM("M952 S<RPM>: Set E0 and E1 Impeller RPM");
+    SERIAL_PROTOCOLLNPGM("M953 S<0 or 1>: Set E0 and E1 Impeller Direction");
     SERIAL_PROTOCOLLNPGM("M954 S<n>: Enable Solenoid <n>");
     SERIAL_PROTOCOLLNPGM("M955 S<n>: Disable Solenoid <n>");
     SERIAL_PROTOCOLLNPGM("M956 P<n> S<state>, where <n> = valve number (0, 1, 2) and state = 0 or 1");
@@ -7430,14 +7430,14 @@ inline void gcode_M900() {
  *  M950: Enable E1 Stepper
  */
 inline void gcode_M950() {
-    E_EN_PORT &= ~(E1_EN);
+    E_EN_PORT &= ~(E0_EN | E1_EN);
 }
 
 /*
  *  M951: Disable E1 Stepper
  */
 inline void gcode_M951() {
-    E_EN_PORT |= E1_EN;
+    E_EN_PORT |= (E0_EN | E1_EN);
 }
 
 /*
@@ -10643,6 +10643,9 @@ void setup() {
   // E Microstep Setup
   E_MS_DDR |= (E1_MS1 | E1_MS2 | E0_MS1 | E0_MS2);   // E0 and E1 MS1 and MS2 as output
   E_MS_PORT &= ~(E1_MS1 | E1_MS2 | E0_MS1 | E0_MS2); // Clear E MS1, MS2 (full step)
+
+  // Set to 1/4 microstepping
+  E_MS_PORT |= (E1_MS2 | E0_MS2);
 
   // Timer Setup
   TCCR4A = 0;
