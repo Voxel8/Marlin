@@ -232,7 +232,7 @@
 #include "nozzle.h"
 #include "duration_t.h"
 #include "types.h"
-#include "E1_Defs.h"
+#include "E_defs.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -7430,14 +7430,14 @@ inline void gcode_M900() {
  *  M950: Enable E1 Stepper
  */
 inline void gcode_M950() {
-    EN_PORT &= ~(E1_EN);
+    E_EN_PORT &= ~(E1_EN);
 }
 
 /*
  *  M951: Disable E1 Stepper
  */
 inline void gcode_M951() {
-    EN_PORT |= E1_EN;
+    E_EN_PORT |= E1_EN;
 }
 
 /*
@@ -7468,11 +7468,11 @@ inline void gcode_M953() {
     if (code_seen('S')) {
         if (code_value_byte()) {
             // S >= 1
-            DIR_PORT |= E1_DIR;
+            E_DIR_PORT |= E1_DIR;
         }
         else {
             // S = 0
-            DIR_PORT &= ~E1_DIR;
+            E_DIR_PORT &= ~E1_DIR;
         }
     }
 }
@@ -10631,18 +10631,18 @@ void setup() {
   //=====================================================
   // Impeller Setup
   // ====================================================
-  // E1 Stepper pin Setup
-  STEP_DDR |= E1_STEP;     // E1 step as output
-  DIR_DDR |= E1_DIR;     // E1 dir as output
-  EN_DDR |= E1_EN;     // E1 en as output
+  // E Stepper pin Setup
+  E_STEP_DDR |= (E0_STEP | E1_STEP);     // E0 and E1 step as output
+  E_DIR_DDR |= (E0_DIR | E1_DIR);     // E0 and E1 dir as output
+  E_EN_DDR |= (E0_EN | E1_EN);     // E0 and E1 en as output
 
-  STEP_PORT &= ~(E1_STEP);// Clear E1 step pin
-  DIR_PORT |= E1_DIR;    // Set E1 dir pin
-  EN_PORT |= E1_EN; // Set E1 en pin (disabled)
+  E_STEP_PORT &= ~(E0_STEP | E1_STEP);// Clear E0 and E1 step pin
+  E_DIR_PORT |= (E0_DIR | E1_DIR);    // Set E0 and E1 dir pin
+  E_EN_PORT |= (E0_EN | E1_EN); // Set E0 and E1 en pin (disabled)
 
-  // E1 Microstep Setup
-  E1_MS_DDR |= (E1_MS1 | E1_MS2);   // E1 MS1 and MS2 as output
-  E1_MS_PORT &= ~(E1_MS1 | E1_MS2); // Clear E1 MS1, MS2 (full step)
+  // E Microstep Setup
+  E_MS_DDR |= (E1_MS1 | E1_MS2 | E0_MS1 | E0_MS2);   // E0 and E1 MS1 and MS2 as output
+  E_MS_PORT &= ~(E1_MS1 | E1_MS2 | E0_MS1 | E0_MS2); // Clear E MS1, MS2 (full step)
 
   // Timer Setup
   TCCR4A = 0;
@@ -10740,7 +10740,7 @@ void loop() {
 ISR(TIMER4_COMPA_vect) {
     // Debug LED toggle
 //    PORTB ^= _BV(7);
-    // Toggle E1_STEP pin
-    STEP_PORT ^= E1_STEP;
+    // Toggle E0_STEP and E1_STEP pin
+    E_STEP_PORT ^= (E0_STEP | E1_STEP);
 }
 
